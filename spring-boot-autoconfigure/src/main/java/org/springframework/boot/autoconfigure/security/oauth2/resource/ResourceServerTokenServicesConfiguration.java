@@ -18,6 +18,7 @@ package org.springframework.boot.autoconfigure.security.oauth2.resource;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.NoneNestedConditions;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
-import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
@@ -46,7 +46,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
@@ -223,13 +222,14 @@ public class ResourceServerTokenServicesConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean(ResourceServerTokenServices.class)
-		public DefaultTokenServices jwkTokenServices() {
+		public DefaultTokenServices jwkTokenServices(TokenStore jwkTokenStore) {
 			DefaultTokenServices services = new DefaultTokenServices();
-			services.setTokenStore(jwkTokenStore());
+			services.setTokenStore(jwkTokenStore);
 			return services;
 		}
 
 		@Bean
+		@ConditionalOnMissingBean(TokenStore.class)
 		public TokenStore jwkTokenStore() {
 			return new JwkTokenStore(this.resource.getJwk().getKeySetUri());
 		}
@@ -255,13 +255,14 @@ public class ResourceServerTokenServicesConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean(ResourceServerTokenServices.class)
-		public DefaultTokenServices jwtTokenServices() {
+		public DefaultTokenServices jwtTokenServices(TokenStore jwtTokenStore) {
 			DefaultTokenServices services = new DefaultTokenServices();
-			services.setTokenStore(jwtTokenStore());
+			services.setTokenStore(jwtTokenStore);
 			return services;
 		}
 
 		@Bean
+		@ConditionalOnMissingBean(TokenStore.class)
 		public TokenStore jwtTokenStore() {
 			return new JwtTokenStore(jwtTokenEnhancer());
 		}
@@ -299,7 +300,8 @@ public class ResourceServerTokenServicesConfiguration {
 			String username = this.resource.getClientId();
 			String password = this.resource.getClientSecret();
 			if (username != null && password != null) {
-				byte[] token = Base64.encode((username + ":" + password).getBytes());
+				byte[] token = Base64.getEncoder()
+						.encode((username + ":" + password).getBytes());
 				headers.add("Authorization", "Basic " + new String(token));
 			}
 			HttpEntity<Void> request = new HttpEntity<>(headers);
@@ -319,17 +321,17 @@ public class ResourceServerTokenServicesConfiguration {
 			ConditionMessage.Builder message = ConditionMessage
 					.forCondition("OAuth TokenInfo Condition");
 			Environment environment = context.getEnvironment();
-			RelaxedPropertyResolver resolver = new RelaxedPropertyResolver(environment,
-					"security.oauth2.resource.");
-			Boolean preferTokenInfo = resolver.getProperty("prefer-token-info",
-					Boolean.class);
+			Boolean preferTokenInfo = environment.getProperty(
+					"security.oauth2.resource.prefer-token-info", Boolean.class);
 			if (preferTokenInfo == null) {
 				preferTokenInfo = environment
 						.resolvePlaceholders("${OAUTH2_RESOURCE_PREFERTOKENINFO:true}")
 						.equals("true");
 			}
-			String tokenInfoUri = resolver.getProperty("token-info-uri");
-			String userInfoUri = resolver.getProperty("user-info-uri");
+			String tokenInfoUri = environment
+					.getProperty("security.oauth2.resource.token-info-uri");
+			String userInfoUri = environment
+					.getProperty("security.oauth2.resource.user-info-uri");
 			if (!StringUtils.hasLength(userInfoUri)
 					&& !StringUtils.hasLength(tokenInfoUri)) {
 				return ConditionOutcome
@@ -351,10 +353,11 @@ public class ResourceServerTokenServicesConfiguration {
 				AnnotatedTypeMetadata metadata) {
 			ConditionMessage.Builder message = ConditionMessage
 					.forCondition("OAuth JWT Condition");
-			RelaxedPropertyResolver resolver = new RelaxedPropertyResolver(
-					context.getEnvironment(), "security.oauth2.resource.jwt.");
-			String keyValue = resolver.getProperty("key-value");
-			String keyUri = resolver.getProperty("key-uri");
+			Environment environment = context.getEnvironment();
+			String keyValue = environment
+					.getProperty("security.oauth2.resource.jwt.key-value");
+			String keyUri = environment
+					.getProperty("security.oauth2.resource.jwt.key-uri");
 			if (StringUtils.hasText(keyValue) || StringUtils.hasText(keyUri)) {
 				return ConditionOutcome
 						.match(message.foundExactly("provided public key"));
@@ -372,9 +375,9 @@ public class ResourceServerTokenServicesConfiguration {
 				AnnotatedTypeMetadata metadata) {
 			ConditionMessage.Builder message = ConditionMessage
 					.forCondition("OAuth JWK Condition");
-			RelaxedPropertyResolver resolver = new RelaxedPropertyResolver(
-					context.getEnvironment(), "security.oauth2.resource.jwk.");
-			String keyUri = resolver.getProperty("key-set-uri");
+			Environment environment = context.getEnvironment();
+			String keyUri = environment
+					.getProperty("security.oauth2.resource.jwk.key-set-uri");
 			if (StringUtils.hasText(keyUri)) {
 				return ConditionOutcome
 						.match(message.foundExactly("provided jwk key set URI"));

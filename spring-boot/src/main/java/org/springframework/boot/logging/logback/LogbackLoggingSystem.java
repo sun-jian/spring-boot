@@ -20,7 +20,6 @@ import java.net.URL;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -101,7 +100,6 @@ public class LogbackLoggingSystem extends Slf4JLoggingSystem {
 		}
 		super.beforeInitialize();
 		loggerContext.getTurboFilterList().add(FILTER);
-		configureJBossLoggingToUseSlf4j();
 	}
 
 	@Override
@@ -208,17 +206,13 @@ public class LogbackLoggingSystem extends Slf4JLoggingSystem {
 		loadConfiguration(initializationContext, getSelfInitializationConfig(), null);
 	}
 
-	private void configureJBossLoggingToUseSlf4j() {
-		System.setProperty("org.jboss.logging.provider", "slf4j");
-	}
-
 	@Override
 	public List<LoggerConfiguration> getLoggerConfigurations() {
 		List<LoggerConfiguration> result = new ArrayList<>();
 		for (ch.qos.logback.classic.Logger logger : getLoggerContext().getLoggerList()) {
 			result.add(getLoggerConfiguration(logger));
 		}
-		Collections.sort(result, CONFIGURATION_COMPARATOR);
+		result.sort(CONFIGURATION_COMPARATOR);
 		return result;
 	}
 

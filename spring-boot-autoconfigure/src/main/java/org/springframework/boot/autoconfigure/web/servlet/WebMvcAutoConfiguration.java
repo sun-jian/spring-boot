@@ -16,6 +16,8 @@
 
 package org.springframework.boot.autoconfigure.web.servlet;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletRequest;
@@ -30,18 +33,11 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -52,8 +48,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
-import org.springframework.boot.autoconfigure.validation.DelegatingValidator;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
+import org.springframework.boot.autoconfigure.validation.ValidatorAdapter;
 import org.springframework.boot.autoconfigure.web.ConditionalOnEnabledResourceChain;
 import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.boot.autoconfigure.web.ResourceProperties.Strategy;
@@ -61,31 +57,25 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.filter.OrderedHiddenHttpMethodFilter;
 import org.springframework.boot.web.servlet.filter.OrderedHttpPutFormContentFilter;
 import org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ConfigurationCondition;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.type.AnnotatedTypeMetadata;
-import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.datetime.DateFormatter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DefaultMessageCodesResolver;
 import org.springframework.validation.MessageCodesResolver;
@@ -145,8 +135,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  */
 @Configuration
 @ConditionalOnWebApplication(type = Type.SERVLET)
-@ConditionalOnClass({ Servlet.class, DispatcherServlet.class,
-		WebMvcConfigurer.class })
+@ConditionalOnClass({ Servlet.class, DispatcherServlet.class, WebMvcConfigurer.class })
 @ConditionalOnMissingBean(WebMvcConfigurationSupport.class)
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE + 10)
 @AutoConfigureAfter({ DispatcherServletAutoConfiguration.class,
@@ -156,6 +145,8 @@ public class WebMvcAutoConfiguration {
 	public static final String DEFAULT_PREFIX = "";
 
 	public static final String DEFAULT_SUFFIX = "";
+
+	private static final String[] SERVLET_LOCATIONS = { "/" };
 
 	@Bean
 	@ConditionalOnMissingBean(HiddenHttpMethodFilter.class)
@@ -173,12 +164,12 @@ public class WebMvcAutoConfiguration {
 	// Defined as a nested config to ensure WebMvcConfigurer is not read when not
 	// on the classpath
 	@Configuration
-	@Import({ EnableWebMvcConfiguration.class, MvcValidatorRegistrar.class })
+	@Import(EnableWebMvcConfiguration.class)
 	@EnableConfigurationProperties({ WebMvcProperties.class, ResourceProperties.class })
-	public static class WebMvcAutoConfigurationAdapter implements WebMvcConfigurer {
+	public static class WebMvcAutoConfigurationAdapter
+			implements WebMvcConfigurer, ResourceLoaderAware {
 
-		private static final Log logger = LogFactory
-				.getLog(WebMvcConfigurer.class);
+		private static final Log logger = LogFactory.getLog(WebMvcConfigurer.class);
 
 		private final ResourceProperties resourceProperties;
 
@@ -190,9 +181,11 @@ public class WebMvcAutoConfiguration {
 
 		final ResourceHandlerRegistrationCustomizer resourceHandlerRegistrationCustomizer;
 
+		private ResourceLoader resourceLoader;
+
 		public WebMvcAutoConfigurationAdapter(ResourceProperties resourceProperties,
 				WebMvcProperties mvcProperties, ListableBeanFactory beanFactory,
-				HttpMessageConverters messageConverters,
+				@Lazy HttpMessageConverters messageConverters,
 				ObjectProvider<ResourceHandlerRegistrationCustomizer> resourceHandlerRegistrationCustomizerProvider) {
 			this.resourceProperties = resourceProperties;
 			this.mvcProperties = mvcProperties;
@@ -200,6 +193,11 @@ public class WebMvcAutoConfiguration {
 			this.messageConverters = messageConverters;
 			this.resourceHandlerRegistrationCustomizer = resourceHandlerRegistrationCustomizerProvider
 					.getIfAvailable();
+		}
+
+		@Override
+		public void setResourceLoader(ResourceLoader resourceLoader) {
+			this.resourceLoader = resourceLoader;
 		}
 
 		@Override
@@ -319,17 +317,45 @@ public class WebMvcAutoConfiguration {
 			if (!registry.hasMappingForPattern(staticPathPattern)) {
 				customizeResourceHandlerRegistration(
 						registry.addResourceHandler(staticPathPattern)
-								.addResourceLocations(
-										this.resourceProperties.getStaticLocations())
+								.addResourceLocations(getResourceLocations(
+										this.resourceProperties.getStaticLocations()))
 						.setCachePeriod(cachePeriod));
 			}
 		}
 
 		@Bean
-		public WelcomePageHandlerMapping welcomePageHandlerMapping(
-				ResourceProperties resourceProperties) {
-			return new WelcomePageHandlerMapping(resourceProperties.getWelcomePage(),
+		public WelcomePageHandlerMapping welcomePageHandlerMapping() {
+			return new WelcomePageHandlerMapping(getWelcomePage(),
 					this.mvcProperties.getStaticPathPattern());
+		}
+
+		static String[] getResourceLocations(String[] staticLocations) {
+			String[] locations = new String[staticLocations.length
+					+ SERVLET_LOCATIONS.length];
+			System.arraycopy(staticLocations, 0, locations, 0, staticLocations.length);
+			System.arraycopy(SERVLET_LOCATIONS, 0, locations, staticLocations.length,
+					SERVLET_LOCATIONS.length);
+			return locations;
+		}
+
+		private Optional<Resource> getWelcomePage() {
+			String[] locations = getResourceLocations(
+					this.resourceProperties.getStaticLocations());
+			return Arrays.stream(locations).map(this::getIndexHtml)
+					.filter(this::isReadable).findFirst();
+		}
+
+		private Resource getIndexHtml(String location) {
+			return this.resourceLoader.getResource(location + "index.html");
+		}
+
+		private boolean isReadable(Resource resource) {
+			try {
+				return resource.exists() && (resource.getURL() != null);
+			}
+			catch (Exception ex) {
+				return false;
+			}
 		}
 
 		private void customizeResourceHandlerRegistration(
@@ -337,7 +363,6 @@ public class WebMvcAutoConfiguration {
 			if (this.resourceHandlerRegistrationCustomizer != null) {
 				this.resourceHandlerRegistrationCustomizer.customize(registration);
 			}
-
 		}
 
 		@Bean
@@ -349,12 +374,19 @@ public class WebMvcAutoConfiguration {
 
 		@Configuration
 		@ConditionalOnProperty(value = "spring.mvc.favicon.enabled", matchIfMissing = true)
-		public static class FaviconConfiguration {
+		public static class FaviconConfiguration implements ResourceLoaderAware {
 
 			private final ResourceProperties resourceProperties;
 
+			private ResourceLoader resourceLoader;
+
 			public FaviconConfiguration(ResourceProperties resourceProperties) {
 				this.resourceProperties = resourceProperties;
+			}
+
+			@Override
+			public void setResourceLoader(ResourceLoader resourceLoader) {
+				this.resourceLoader = resourceLoader;
 			}
 
 			@Bean
@@ -369,9 +401,18 @@ public class WebMvcAutoConfiguration {
 			@Bean
 			public ResourceHttpRequestHandler faviconRequestHandler() {
 				ResourceHttpRequestHandler requestHandler = new ResourceHttpRequestHandler();
-				requestHandler
-						.setLocations(this.resourceProperties.getFaviconLocations());
+				requestHandler.setLocations(resolveFaviconLocations());
 				return requestHandler;
+			}
+
+			private List<Resource> resolveFaviconLocations() {
+				String[] staticLocations = getResourceLocations(
+						this.resourceProperties.getStaticLocations());
+				List<Resource> locations = new ArrayList<>(staticLocations.length + 1);
+				Arrays.stream(staticLocations).map(this.resourceLoader::getResource)
+						.forEach(locations::add);
+				locations.add(new ClassPathResource("/"));
+				return Collections.unmodifiableList(locations);
 			}
 
 		}
@@ -382,22 +423,21 @@ public class WebMvcAutoConfiguration {
 	 * Configuration equivalent to {@code @EnableWebMvc}.
 	 */
 	@Configuration
-	public static class EnableWebMvcConfiguration extends DelegatingWebMvcConfiguration
-			implements InitializingBean {
+	public static class EnableWebMvcConfiguration extends DelegatingWebMvcConfiguration {
 
 		private final WebMvcProperties mvcProperties;
 
-		private final ApplicationContext context;
+		private final ListableBeanFactory beanFactory;
 
 		private final WebMvcRegistrations mvcRegistrations;
 
 		public EnableWebMvcConfiguration(
 				ObjectProvider<WebMvcProperties> mvcPropertiesProvider,
 				ObjectProvider<WebMvcRegistrations> mvcRegistrationsProvider,
-				ApplicationContext context) {
+				ListableBeanFactory beanFactory) {
 			this.mvcProperties = mvcPropertiesProvider.getIfAvailable();
 			this.mvcRegistrations = mvcRegistrationsProvider.getIfUnique();
-			this.context = context;
+			this.beanFactory = beanFactory;
 		}
 
 		@Bean
@@ -428,9 +468,12 @@ public class WebMvcAutoConfiguration {
 
 		@Bean
 		@Override
-		@Conditional(DisableMvcValidatorCondition.class)
 		public Validator mvcValidator() {
-			return this.context.getBean("mvcValidator", Validator.class);
+			if (!ClassUtils.isPresent("javax.validation.Validator",
+					getClass().getClassLoader())) {
+				return super.mvcValidator();
+			}
+			return ValidatorAdapter.get(getApplicationContext(), getValidator());
 		}
 
 		@Override
@@ -445,7 +488,7 @@ public class WebMvcAutoConfiguration {
 		@Override
 		protected ConfigurableWebBindingInitializer getConfigurableWebBindingInitializer() {
 			try {
-				return this.context.getBean(ConfigurableWebBindingInitializer.class);
+				return this.beanFactory.getBean(ConfigurableWebBindingInitializer.class);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				return super.getConfigurableWebBindingInitializer();
@@ -492,15 +535,6 @@ public class WebMvcAutoConfiguration {
 				}
 			}
 			return manager;
-		}
-
-		@Override
-		public void afterPropertiesSet() throws Exception {
-			Assert.state(getValidator() == null,
-					"Found unexpected validator configuration. A Spring Boot MVC "
-							+ "validator should be registered as bean named "
-							+ "'mvcValidator' and not returned from "
-							+ "WebMvcConfigurer.getValidator()");
 		}
 
 	}
@@ -571,9 +605,9 @@ public class WebMvcAutoConfiguration {
 		private static final Log logger = LogFactory
 				.getLog(WelcomePageHandlerMapping.class);
 
-		private WelcomePageHandlerMapping(Resource welcomePage,
+		private WelcomePageHandlerMapping(Optional<Resource> welcomePage,
 				String staticPathPattern) {
-			if (welcomePage != null && "/**".equals(staticPathPattern)) {
+			if (welcomePage.isPresent() && "/**".equals(staticPathPattern)) {
 				logger.info("Adding welcome page: " + welcomePage);
 				ParameterizableViewController controller = new ParameterizableViewController();
 				controller.setViewName("forward:index.html");
@@ -626,132 +660,6 @@ public class WebMvcAutoConfiguration {
 				return Collections.emptyList();
 			}
 			return this.delegate.resolveMediaTypes(webRequest);
-		}
-
-	}
-
-	/**
-	 * Condition used to disable the default MVC validator registration. The
-	 * {@link MvcValidatorRegistrar} is actually used to register the {@code mvcValidator}
-	 * bean.
-	 */
-	static class DisableMvcValidatorCondition implements ConfigurationCondition {
-
-		@Override
-		public ConfigurationPhase getConfigurationPhase() {
-			return ConfigurationPhase.REGISTER_BEAN;
-		}
-
-		@Override
-		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-			return false;
-		}
-
-	}
-
-	/**
-	 * {@link ImportBeanDefinitionRegistrar} to deal with the MVC validator bean
-	 * registration. Applies the following rules:
-	 * <ul>
-	 * <li>With no validators - Uses standard
-	 * {@link WebMvcConfigurationSupport#mvcValidator()} logic.</li>
-	 * <li>With a single validator - Uses an alias.</li>
-	 * <li>With multiple validators - Registers a mvcValidator bean if not already
-	 * defined.</li>
-	 * </ul>
-	 */
-	static class MvcValidatorRegistrar
-			implements ImportBeanDefinitionRegistrar, BeanFactoryAware {
-
-		private static final String JSR303_VALIDATOR_CLASS = "javax.validation.Validator";
-
-		private BeanFactory beanFactory;
-
-		@Override
-		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-			this.beanFactory = beanFactory;
-		}
-
-		@Override
-		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
-				BeanDefinitionRegistry registry) {
-			if (this.beanFactory instanceof ListableBeanFactory) {
-				registerOrAliasMvcValidator(registry,
-						(ListableBeanFactory) this.beanFactory);
-			}
-		}
-
-		private void registerOrAliasMvcValidator(BeanDefinitionRegistry registry,
-				ListableBeanFactory beanFactory) {
-			String[] validatorBeans = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
-					beanFactory, Validator.class, false, false);
-			if (validatorBeans.length == 0) {
-				registerNewMvcValidator(registry, beanFactory);
-			}
-			else if (validatorBeans.length == 1) {
-				registry.registerAlias(validatorBeans[0], "mvcValidator");
-			}
-			else {
-				if (!ObjectUtils.containsElement(validatorBeans, "mvcValidator")) {
-					registerNewMvcValidator(registry, beanFactory);
-				}
-			}
-		}
-
-		private void registerNewMvcValidator(BeanDefinitionRegistry registry,
-				ListableBeanFactory beanFactory) {
-			RootBeanDefinition definition = new RootBeanDefinition();
-			definition.setBeanClass(getClass());
-			definition.setFactoryMethodName("mvcValidator");
-			registry.registerBeanDefinition("mvcValidator", definition);
-		}
-
-		static Validator mvcValidator() {
-			Validator validator = new WebMvcConfigurationSupport().mvcValidator();
-			try {
-				if (ClassUtils.forName(JSR303_VALIDATOR_CLASS, null)
-						.isInstance(validator)) {
-					return new DelegatingWebMvcValidator(validator);
-				}
-			}
-			catch (Exception ex) {
-			}
-			return validator;
-		}
-
-	}
-
-	/**
-	 * {@link DelegatingValidator} for the MVC validator.
-	 */
-	static class DelegatingWebMvcValidator extends DelegatingValidator
-			implements ApplicationContextAware, InitializingBean, DisposableBean {
-
-		DelegatingWebMvcValidator(Validator targetValidator) {
-			super(targetValidator);
-		}
-
-		@Override
-		public void setApplicationContext(ApplicationContext applicationContext)
-				throws BeansException {
-			if (getDelegate() instanceof ApplicationContextAware) {
-				((ApplicationContextAware) getDelegate())
-						.setApplicationContext(applicationContext);
-			}
-		}
-
-		@Override
-		public void afterPropertiesSet() throws Exception {
-			if (getDelegate() instanceof InitializingBean) {
-				((InitializingBean) getDelegate()).afterPropertiesSet();
-			}
-		}
-
-		@Override
-		public void destroy() throws Exception {
-			if (getDelegate() instanceof DisposableBean) {
-				((DisposableBean) getDelegate()).destroy();
-			}
 		}
 
 	}

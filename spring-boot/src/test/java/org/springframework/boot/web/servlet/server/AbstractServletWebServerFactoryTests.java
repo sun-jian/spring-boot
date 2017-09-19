@@ -19,7 +19,6 @@ package org.springframework.boot.web.servlet.server;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -44,22 +43,25 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.InputStreamFactory;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -73,9 +75,7 @@ import org.apache.http.ssl.TrustStrategy;
 import org.apache.jasper.EmbeddedServletOptions;
 import org.apache.jasper.servlet.JspServlet;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assume;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -84,7 +84,9 @@ import org.mockito.InOrder;
 
 import org.springframework.boot.ApplicationHome;
 import org.springframework.boot.ApplicationTemp;
-import org.springframework.boot.testutil.InternalOutputCapture;
+import org.springframework.boot.testsupport.rule.OutputCapture;
+import org.springframework.boot.testsupport.web.servlet.ExampleFilter;
+import org.springframework.boot.testsupport.web.servlet.ExampleServlet;
 import org.springframework.boot.web.server.Compression;
 import org.springframework.boot.web.server.ErrorPage;
 import org.springframework.boot.web.server.MimeMappings;
@@ -92,6 +94,7 @@ import org.springframework.boot.web.server.Ssl;
 import org.springframework.boot.web.server.Ssl.ClientAuth;
 import org.springframework.boot.web.server.SslStoreProvider;
 import org.springframework.boot.web.server.WebServer;
+import org.springframework.boot.web.server.WebServerException;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -101,13 +104,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SocketUtils;
 import org.springframework.util.StreamUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -124,6 +125,7 @@ import static org.mockito.Mockito.verify;
  * @author Phillip Webb
  * @author Greg Turnquist
  * @author Andy Wilkinson
+ * @author Raja Kolli
  */
 public abstract class AbstractServletWebServerFactoryTests {
 
@@ -134,19 +136,11 @@ public abstract class AbstractServletWebServerFactoryTests {
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Rule
-	public InternalOutputCapture output = new InternalOutputCapture();
+	public OutputCapture output = new OutputCapture();
 
 	protected WebServer webServer;
 
 	private final HttpClientContext httpClientContext = HttpClientContext.create();
-
-	@BeforeClass
-	@AfterClass
-	public static void uninstallUrlStreamHandlerFactory() {
-		ReflectionTestUtils.setField(TomcatURLStreamHandlerFactory.class, "instance",
-				null);
-		ReflectionTestUtils.setField(URL.class, "factory", null);
-	}
 
 	@After
 	public void tearDown() {
@@ -212,28 +206,6 @@ public abstract class AbstractServletWebServerFactoryTests {
 	}
 
 	@Test
-	public void restartWithKeepAlive() throws Exception {
-		AbstractServletWebServerFactory factory = getFactory();
-		this.webServer = factory.getWebServer(exampleServletRegistration());
-		this.webServer.start();
-		HttpComponentsAsyncClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsAsyncClientHttpRequestFactory();
-		ListenableFuture<ClientHttpResponse> response1 = clientHttpRequestFactory
-				.createAsyncRequest(new URI(getLocalUrl("/hello")), HttpMethod.GET)
-				.executeAsync();
-		assertThat(response1.get(10, TimeUnit.SECONDS).getRawStatusCode()).isEqualTo(200);
-
-		this.webServer.stop();
-		this.webServer = factory.getWebServer(exampleServletRegistration());
-		this.webServer.start();
-
-		ListenableFuture<ClientHttpResponse> response2 = clientHttpRequestFactory
-				.createAsyncRequest(new URI(getLocalUrl("/hello")), HttpMethod.GET)
-				.executeAsync();
-		assertThat(response2.get(10, TimeUnit.SECONDS).getRawStatusCode()).isEqualTo(200);
-		clientHttpRequestFactory.destroy();
-	}
-
-	@Test
 	public void startServletAndFilter() throws Exception {
 		AbstractServletWebServerFactory factory = getFactory();
 		this.webServer = factory.getWebServer(exampleServletRegistration(),
@@ -246,16 +218,13 @@ public abstract class AbstractServletWebServerFactoryTests {
 	public void startBlocksUntilReadyToServe() throws Exception {
 		AbstractServletWebServerFactory factory = getFactory();
 		final Date[] date = new Date[1];
-		this.webServer = factory.getWebServer(new ServletContextInitializer() {
-			@Override
-			public void onStartup(ServletContext servletContext) throws ServletException {
-				try {
-					Thread.sleep(500);
-					date[0] = new Date();
-				}
-				catch (InterruptedException ex) {
-					throw new ServletException(ex);
-				}
+		this.webServer = factory.getWebServer((servletContext) -> {
+			try {
+				Thread.sleep(500);
+				date[0] = new Date();
+			}
+			catch (InterruptedException ex) {
+				throw new ServletException(ex);
 			}
 		});
 		this.webServer.start();
@@ -266,12 +235,8 @@ public abstract class AbstractServletWebServerFactoryTests {
 	public void loadOnStartAfterContextIsInitialized() throws Exception {
 		AbstractServletWebServerFactory factory = getFactory();
 		final InitCountingServlet servlet = new InitCountingServlet();
-		this.webServer = factory.getWebServer(new ServletContextInitializer() {
-			@Override
-			public void onStartup(ServletContext servletContext) throws ServletException {
-				servletContext.addServlet("test", servlet).setLoadOnStartup(1);
-			}
-		});
+		this.webServer = factory.getWebServer((servletContext) -> servletContext
+				.addServlet("test", servlet).setLoadOnStartup(1));
 		assertThat(servlet.getInitCount()).isEqualTo(0);
 		this.webServer.start();
 		assertThat(servlet.getInitCount()).isEqualTo(1);
@@ -766,14 +731,8 @@ public abstract class AbstractServletWebServerFactoryTests {
 		this.webServer.start();
 		getResponse(getLocalUrl("/session"));
 		this.webServer.stop();
-		File[] dirContents = sessionStoreDir.listFiles(new FilenameFilter() {
-
-			@Override
-			public boolean accept(File dir, String name) {
-				return !(".".equals(name) || "..".equals(name));
-			}
-
-		});
+		File[] dirContents = sessionStoreDir
+				.listFiles((dir, name) -> !(".".equals(name) || "..".equals(name)));
 		assertThat(dirContents.length).isGreaterThan(0);
 	}
 
@@ -804,8 +763,13 @@ public abstract class AbstractServletWebServerFactoryTests {
 	}
 
 	@Test
-	public void compression() throws Exception {
+	public void compressionOfResponseToGetRequest() throws Exception {
 		assertThat(doTestCompression(10000, null, null)).isTrue();
+	}
+
+	@Test
+	public void compressionOfResponseToPostRequest() throws Exception {
+		assertThat(doTestCompression(10000, null, null, HttpMethod.POST)).isTrue();
 	}
 
 	@Test
@@ -865,15 +829,12 @@ public abstract class AbstractServletWebServerFactoryTests {
 	public void rootServletContextResource() throws Exception {
 		AbstractServletWebServerFactory factory = getFactory();
 		final AtomicReference<URL> rootResource = new AtomicReference<>();
-		this.webServer = factory.getWebServer(new ServletContextInitializer() {
-			@Override
-			public void onStartup(ServletContext servletContext) throws ServletException {
-				try {
-					rootResource.set(servletContext.getResource("/"));
-				}
-				catch (MalformedURLException ex) {
-					throw new ServletException(ex);
-				}
+		this.webServer = factory.getWebServer((servletContext) -> {
+			try {
+				rootResource.set(servletContext.getResource("/"));
+			}
+			catch (MalformedURLException ex) {
+				throw new ServletException(ex);
 			}
 		});
 		this.webServer.start();
@@ -902,47 +863,37 @@ public abstract class AbstractServletWebServerFactoryTests {
 	@Test
 	public void portClashOfPrimaryConnectorResultsInPortInUseException()
 			throws IOException {
-		doWithBlockedPort(new BlockedPortAction() {
-
-			@Override
-			public void run(int port) {
-				try {
-					AbstractServletWebServerFactory factory = getFactory();
-					factory.setPort(port);
-					AbstractServletWebServerFactoryTests.this.webServer = factory
-							.getWebServer();
-					AbstractServletWebServerFactoryTests.this.webServer.start();
-					fail();
-				}
-				catch (RuntimeException ex) {
-					handleExceptionCausedByBlockedPort(ex, port);
-				}
+		doWithBlockedPort((port) -> {
+			try {
+				AbstractServletWebServerFactory factory = getFactory();
+				factory.setPort(port);
+				AbstractServletWebServerFactoryTests.this.webServer = factory
+						.getWebServer();
+				AbstractServletWebServerFactoryTests.this.webServer.start();
+				fail();
 			}
-
+			catch (RuntimeException ex) {
+				handleExceptionCausedByBlockedPort(ex, port);
+			}
 		});
 	}
 
 	@Test
 	public void portClashOfSecondaryConnectorResultsInPortInUseException()
 			throws IOException {
-		doWithBlockedPort(new BlockedPortAction() {
-
-			@Override
-			public void run(int port) {
-				try {
-					AbstractServletWebServerFactory factory = getFactory();
-					factory.setPort(SocketUtils.findAvailableTcpPort(40000));
-					addConnector(port, factory);
-					AbstractServletWebServerFactoryTests.this.webServer = factory
-							.getWebServer();
-					AbstractServletWebServerFactoryTests.this.webServer.start();
-					fail();
-				}
-				catch (RuntimeException ex) {
-					handleExceptionCausedByBlockedPort(ex, port);
-				}
+		doWithBlockedPort((port) -> {
+			try {
+				AbstractServletWebServerFactory factory = getFactory();
+				factory.setPort(SocketUtils.findAvailableTcpPort(40000));
+				addConnector(port, factory);
+				AbstractServletWebServerFactoryTests.this.webServer = factory
+						.getWebServer();
+				AbstractServletWebServerFactoryTests.this.webServer.start();
+				fail();
 			}
-
+			catch (RuntimeException ex) {
+				handleExceptionCausedByBlockedPort(ex, port);
+			}
 		});
 	}
 
@@ -980,6 +931,32 @@ public abstract class AbstractServletWebServerFactoryTests {
 		assertThat(options.getDevelopment()).isEqualTo(false);
 	}
 
+	@Test
+	public void faultyFilterCausesStartFailure() throws Exception {
+		AbstractServletWebServerFactory factory = getFactory();
+		factory.addInitializers(
+				(servletContext) -> servletContext.addFilter("faulty", new Filter() {
+
+					@Override
+					public void init(FilterConfig filterConfig) throws ServletException {
+						throw new ServletException("Faulty filter");
+					}
+
+					@Override
+					public void doFilter(ServletRequest request, ServletResponse response,
+							FilterChain chain) throws IOException, ServletException {
+						chain.doFilter(request, response);
+					}
+
+					@Override
+					public void destroy() {
+					}
+
+				}));
+		this.thrown.expect(WebServerException.class);
+		factory.getWebServer().start();
+	}
+
 	protected abstract void addConnector(int port,
 			AbstractServletWebServerFactory factory);
 
@@ -988,12 +965,18 @@ public abstract class AbstractServletWebServerFactoryTests {
 
 	private boolean doTestCompression(int contentSize, String[] mimeTypes,
 			String[] excludedUserAgents) throws Exception {
+		return doTestCompression(contentSize, mimeTypes, excludedUserAgents,
+				HttpMethod.GET);
+	}
+
+	private boolean doTestCompression(int contentSize, String[] mimeTypes,
+			String[] excludedUserAgents, HttpMethod method) throws Exception {
 		String testContent = setUpFactoryForCompression(contentSize, mimeTypes,
 				excludedUserAgents);
 		TestGzipInputStreamFactory inputStreamFactory = new TestGzipInputStreamFactory();
 		Map<String, InputStreamFactory> contentDecoderMap = Collections
 				.singletonMap("gzip", (InputStreamFactory) inputStreamFactory);
-		String response = getResponse(getLocalUrl("/test.txt"),
+		String response = getResponse(getLocalUrl("/test.txt"), method,
 				new HttpComponentsClientHttpRequestFactory(
 						HttpClientBuilder.create().setUserAgent("testUserAgent")
 								.setContentDecoderRegistry(contentDecoderMap).build()));
@@ -1001,15 +984,12 @@ public abstract class AbstractServletWebServerFactoryTests {
 		return inputStreamFactory.wasCompressionUsed();
 	}
 
-	protected String setUpFactoryForCompression(int contentSize, String[] mimeTypes,
+	private String setUpFactoryForCompression(int contentSize, String[] mimeTypes,
 			String[] excludedUserAgents) throws Exception {
 		char[] chars = new char[contentSize];
 		Arrays.fill(chars, 'F');
 		String testContent = new String(chars);
 		AbstractServletWebServerFactory factory = getFactory();
-		FileCopyUtils.copy(testContent,
-				new FileWriter(this.temporaryFolder.newFile("test.txt")));
-		factory.setDocumentRoot(this.temporaryFolder.getRoot());
 		Compression compression = new Compression();
 		compression.setEnabled(true);
 		if (mimeTypes != null) {
@@ -1019,6 +999,20 @@ public abstract class AbstractServletWebServerFactoryTests {
 			compression.setExcludedUserAgents(excludedUserAgents);
 		}
 		factory.setCompression(compression);
+		factory.addInitializers(
+				new ServletRegistrationBean<HttpServlet>(new HttpServlet() {
+
+					@Override
+					protected void service(HttpServletRequest req,
+							HttpServletResponse resp)
+									throws ServletException, IOException {
+						resp.setContentType("text/plain");
+						resp.setContentLength(testContent.length());
+						resp.getWriter().write(testContent);
+						resp.getWriter().flush();
+					}
+
+				}, "/test.txt"));
 		this.webServer = factory.getWebServer();
 		this.webServer.start();
 		return testContent;
@@ -1058,12 +1052,8 @@ public abstract class AbstractServletWebServerFactoryTests {
 
 	protected String getResponse(String url, HttpMethod method, String... headers)
 			throws IOException, URISyntaxException {
-		ClientHttpResponse response = getClientResponse(url, method, headers);
-		try {
+		try (ClientHttpResponse response = getClientResponse(url, method, headers)) {
 			return StreamUtils.copyToString(response.getBody(), Charset.forName("UTF-8"));
-		}
-		finally {
-			response.close();
 		}
 	}
 
@@ -1076,13 +1066,9 @@ public abstract class AbstractServletWebServerFactoryTests {
 	protected String getResponse(String url, HttpMethod method,
 			HttpComponentsClientHttpRequestFactory requestFactory, String... headers)
 					throws IOException, URISyntaxException {
-		ClientHttpResponse response = getClientResponse(url, method, requestFactory,
-				headers);
-		try {
+		try (ClientHttpResponse response = getClientResponse(url, method, requestFactory,
+				headers)) {
 			return StreamUtils.copyToString(response.getBody(), Charset.forName("UTF-8"));
-		}
-		finally {
-			response.close();
 		}
 	}
 
@@ -1196,13 +1182,9 @@ public abstract class AbstractServletWebServerFactoryTests {
 			NoSuchAlgorithmException, CertificateException {
 		KeyStore keyStore = KeyStore.getInstance("JKS");
 		Resource resource = new ClassPathResource("test.jks");
-		InputStream inputStream = resource.getInputStream();
-		try {
+		try (InputStream inputStream = resource.getInputStream()) {
 			keyStore.load(inputStream, "secret".toCharArray());
 			return keyStore;
-		}
-		finally {
-			inputStream.close();
 		}
 	}
 

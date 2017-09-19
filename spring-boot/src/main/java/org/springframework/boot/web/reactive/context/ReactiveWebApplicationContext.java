@@ -26,4 +26,10 @@ import org.springframework.context.ApplicationContext;
  */
 public interface ReactiveWebApplicationContext extends ApplicationContext {
 
+	/**
+	 * Return the namespace for this reactive web application context, if any.
+	 * @return the namespace or {@code null}
+	 */
+	String getNamespace();
+
 }

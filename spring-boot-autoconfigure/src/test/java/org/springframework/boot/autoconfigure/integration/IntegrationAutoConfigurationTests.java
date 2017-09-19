@@ -26,12 +26,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.boot.autoconfigure.DatabaseInitializationMode;
 import org.springframework.boot.autoconfigure.integration.IntegrationAutoConfiguration.IntegrationComponentScanAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration;
-import org.springframework.boot.test.util.EnvironmentTestUtils;
+import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -99,11 +101,12 @@ public class IntegrationAutoConfigurationTests {
 		load();
 		AnnotationConfigApplicationContext parent = this.context;
 		this.context = new AnnotationConfigApplicationContext();
+		ConfigurationPropertySources.attach(this.context.getEnvironment());
 		this.context.setParent(parent);
 		this.context.register(JmxAutoConfiguration.class,
 				IntegrationAutoConfiguration.class);
 		TestPropertySourceUtils.addInlinedPropertiesToEnvironment(this.context,
-				"SPRING_JMX_DEFAULT_DOMAIN=org.foo");
+				"spring.jmx.default_domain=org.foo");
 		this.context.refresh();
 		assertThat(this.context.getBean(HeaderChannelRegistry.class)).isNotNull();
 	}
@@ -129,7 +132,7 @@ public class IntegrationAutoConfigurationTests {
 
 	@Test
 	public void customizeJmxDomain() {
-		load("SPRING_JMX_DEFAULT_DOMAIN=org.foo");
+		load("spring.jmx.default_domain=org.foo");
 		MBeanServer mBeanServer = this.context.getBean(MBeanServer.class);
 		assertDomains(mBeanServer, true, "org.foo");
 		assertDomains(mBeanServer, false, "org.springframework.integration",
@@ -150,9 +153,9 @@ public class IntegrationAutoConfigurationTests {
 				DataSourceTransactionManagerAutoConfiguration.class,
 				JdbcTemplateAutoConfiguration.class, IntegrationAutoConfiguration.class },
 				"spring.datasource.generate-unique-name=true",
-				"spring.integration.jdbc.initializer.enabled=true");
+				"spring.integration.jdbc.initialize-schema=always");
 		assertThat(this.context.getBean(IntegrationProperties.class).getJdbc()
-				.getInitializer().isEnabled()).isTrue();
+				.getInitializeSchema()).isEqualTo(DatabaseInitializationMode.ALWAYS);
 		JdbcOperations jdbcOperations = this.context.getBean(JdbcOperations.class);
 		assertThat(jdbcOperations.queryForList("select * from INT_MESSAGE")).isEmpty();
 		assertThat(jdbcOperations.queryForList("select * from INT_GROUP_TO_MESSAGE"))
@@ -170,25 +173,24 @@ public class IntegrationAutoConfigurationTests {
 				DataSourceTransactionManagerAutoConfiguration.class,
 				JdbcTemplateAutoConfiguration.class, IntegrationAutoConfiguration.class },
 				"spring.datasource.generate-unique-name=true",
-				"spring.integration.jdbc.initializer.enabled=false");
+				"spring.integration.jdbc.initialize-schema=never");
 		assertThat(this.context.getBean(IntegrationProperties.class).getJdbc()
-				.getInitializer().isEnabled()).isFalse();
+				.getInitializeSchema()).isEqualTo(DatabaseInitializationMode.NEVER);
 		JdbcOperations jdbcOperations = this.context.getBean(JdbcOperations.class);
 		this.thrown.expect(BadSqlGrammarException.class);
 		jdbcOperations.queryForList("select * from INT_MESSAGE");
 	}
 
 	@Test
-	public void integrationJdbcDatabaseInitializerDisabledByDefault() {
+	public void integrationJdbcDatabaseInitializerEnabledByDefaultWithEmbeddedDb() {
 		load(new Class[] { EmbeddedDataSourceConfiguration.class,
 				DataSourceTransactionManagerAutoConfiguration.class,
 				JdbcTemplateAutoConfiguration.class, IntegrationAutoConfiguration.class },
 				"spring.datasource.generate-unique-name=true");
 		assertThat(this.context.getBean(IntegrationProperties.class).getJdbc()
-				.getInitializer().isEnabled()).isFalse();
+				.getInitializeSchema()).isEqualTo(DatabaseInitializationMode.EMBEDDED);
 		JdbcOperations jdbcOperations = this.context.getBean(JdbcOperations.class);
-		this.thrown.expect(BadSqlGrammarException.class);
-		jdbcOperations.queryForList("select * from INT_MESSAGE");
+		jdbcOperations.queryForList("select * from INT_MESSAGE").isEmpty();
 	}
 
 	private static void assertDomains(MBeanServer mBeanServer, boolean expected,
@@ -205,10 +207,12 @@ public class IntegrationAutoConfigurationTests {
 
 	private void load(Class<?>[] configs, String... environment) {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		EnvironmentTestUtils.addEnvironment(ctx, environment);
+		TestPropertyValues.of(environment).applyTo(ctx);
 		if (configs != null) {
 			ctx.register(configs);
 		}
+		TestPropertySourceUtils.addInlinedPropertiesToEnvironment(ctx, environment);
+		ConfigurationPropertySources.attach(ctx.getEnvironment());
 		ctx.register(JmxAutoConfiguration.class, IntegrationAutoConfiguration.class);
 		ctx.refresh();
 		this.context = ctx;

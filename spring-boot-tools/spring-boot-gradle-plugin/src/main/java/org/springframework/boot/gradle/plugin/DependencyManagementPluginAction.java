@@ -39,7 +39,7 @@ final class DependencyManagementPluginAction implements PluginApplicationAction 
 	@Override
 	public void execute(Project project) {
 		project.getExtensions().findByType(DependencyManagementExtension.class)
-				.imports(importsHandler -> importsHandler.mavenBom(SPRING_BOOT_BOM));
+				.imports((importsHandler) -> importsHandler.mavenBom(SPRING_BOOT_BOM));
 	}
 
 	@Override

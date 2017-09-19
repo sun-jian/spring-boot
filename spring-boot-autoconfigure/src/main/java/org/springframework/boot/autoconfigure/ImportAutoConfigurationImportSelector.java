@@ -39,8 +39,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Variant of {@link EnableAutoConfigurationImportSelector} for
- * {@link ImportAutoConfiguration}.
+ * Variant of {@link AutoConfigurationImportSelector} for {@link ImportAutoConfiguration}.
  *
  * @author Phillip Webb
  * @author Andy Wilkinson
@@ -135,7 +134,7 @@ class ImportAutoConfigurationImportSelector extends AutoConfigurationImportSelec
 			AnnotationMetadata metadata) {
 		MultiValueMap<Class<?>, Annotation> annotations = new LinkedMultiValueMap<>();
 		Class<?> source = ClassUtils.resolveClassName(metadata.getClassName(), null);
-		collectAnnotations(source, annotations, new HashSet<Class<?>>());
+		collectAnnotations(source, annotations, new HashSet<>());
 		return Collections.unmodifiableMap(annotations);
 	}
 

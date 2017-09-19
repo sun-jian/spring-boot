@@ -19,16 +19,19 @@ package org.springframework.boot.autoconfigure.validation;
 import javax.validation.Validator;
 import javax.validation.executable.ExecutableValidator;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnResource;
-import org.springframework.boot.bind.RelaxedPropertyResolver;
+import org.springframework.boot.validation.MessageInterpolatorFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Role;
 import org.springframework.core.env.Environment;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 /**
@@ -36,31 +39,35 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
  * infrastructure.
  *
  * @author Stephane Nicoll
+ * @author Madhura Bhave
  * @since 1.5.0
  */
 @Configuration
 @ConditionalOnClass(ExecutableValidator.class)
 @ConditionalOnResource(resources = "classpath:META-INF/services/javax.validation.spi.ValidationProvider")
-@Import({ DefaultValidatorConfiguration.class,
-		Jsr303ValidatorAdapterConfiguration.class })
+@Import(PrimaryDefaultValidatorPostProcessor.class)
 public class ValidationAutoConfiguration {
 
 	@Bean
-	@ConditionalOnBean(Validator.class)
-	@ConditionalOnMissingBean
-	public static MethodValidationPostProcessor methodValidationPostProcessor(
-			Environment environment, Validator validator) {
-		MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
-		processor.setProxyTargetClass(determineProxyTargetClass(environment));
-		processor.setValidator(validator);
-		return processor;
+	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+	@ConditionalOnMissingBean(Validator.class)
+	public static LocalValidatorFactoryBean defaultValidator() {
+		LocalValidatorFactoryBean factoryBean = new LocalValidatorFactoryBean();
+		MessageInterpolatorFactory interpolatorFactory = new MessageInterpolatorFactory();
+		factoryBean.setMessageInterpolator(interpolatorFactory.getObject());
+		return factoryBean;
 	}
 
-	private static boolean determineProxyTargetClass(Environment environment) {
-		RelaxedPropertyResolver resolver = new RelaxedPropertyResolver(environment,
-				"spring.aop.");
-		Boolean value = resolver.getProperty("proxyTargetClass", Boolean.class);
-		return (value != null ? value : true);
+	@Bean
+	@ConditionalOnMissingBean
+	public static MethodValidationPostProcessor methodValidationPostProcessor(
+			Environment environment, @Lazy Validator validator) {
+		MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
+		boolean proxyTargetClass = environment
+				.getProperty("spring.aop.proxy-target-class", Boolean.class, true);
+		processor.setProxyTargetClass(proxyTargetClass);
+		processor.setValidator(validator);
+		return processor;
 	}
 
 }

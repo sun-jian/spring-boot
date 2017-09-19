@@ -21,10 +21,11 @@ import java.util.concurrent.Callable;
 
 import org.gradle.api.Action;
 import org.gradle.api.Project;
+import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.bundling.Jar;
+import org.gradle.jvm.tasks.Jar;
 
 import org.springframework.boot.gradle.tasks.buildinfo.BuildInfo;
 import org.springframework.boot.gradle.tasks.buildinfo.BuildInfoProperties;
@@ -75,10 +76,12 @@ public class SpringBootExtension {
 	public void buildInfo(Action<BuildInfo> configurer) {
 		BuildInfo bootBuildInfo = this.project.getTasks().create("bootBuildInfo",
 				BuildInfo.class);
-		this.project.getPlugins().withType(JavaPlugin.class, plugin -> {
+		bootBuildInfo.setGroup(BasePlugin.BUILD_GROUP);
+		bootBuildInfo.setDescription("Generates a META-INF/build-info.properties file.");
+		this.project.getPlugins().withType(JavaPlugin.class, (plugin) -> {
 			this.project.getTasks().getByName(JavaPlugin.CLASSES_TASK_NAME)
 					.dependsOn(bootBuildInfo);
-			this.project.afterEvaluate(evaluated -> {
+			this.project.afterEvaluate((evaluated) -> {
 				BuildInfoProperties properties = bootBuildInfo.getProperties();
 				if (properties.getArtifact() == null) {
 					properties.setArtifact(determineArtifactBaseName());
@@ -103,7 +106,7 @@ public class SpringBootExtension {
 
 	private String determineArtifactBaseName() {
 		Jar artifactTask = findArtifactTask();
-		return artifactTask == null ? null : artifactTask.getBaseName();
+		return (artifactTask == null ? null : artifactTask.getBaseName());
 	}
 
 	private Jar findArtifactTask() {

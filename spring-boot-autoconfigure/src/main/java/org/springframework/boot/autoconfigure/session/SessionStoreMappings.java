@@ -35,10 +35,8 @@ final class SessionStoreMappings {
 	static {
 		Map<StoreType, Class<?>> mappings = new HashMap<>();
 		mappings.put(StoreType.REDIS, RedisSessionConfiguration.class);
-		mappings.put(StoreType.MONGO, MongoSessionConfiguration.class);
 		mappings.put(StoreType.JDBC, JdbcSessionConfiguration.class);
 		mappings.put(StoreType.HAZELCAST, HazelcastSessionConfiguration.class);
-		mappings.put(StoreType.HASH_MAP, HashMapSessionConfiguration.class);
 		mappings.put(StoreType.NONE, NoOpSessionConfiguration.class);
 		MAPPINGS = Collections.unmodifiableMap(mappings);
 	}

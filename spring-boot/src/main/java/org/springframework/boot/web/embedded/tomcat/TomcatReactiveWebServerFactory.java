@@ -17,7 +17,12 @@
 package org.springframework.boot.web.embedded.tomcat;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
+import org.apache.catalina.Context;
 import org.apache.catalina.Host;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.loader.WebappLoader;
@@ -47,6 +52,10 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 	public static final String DEFAULT_PROTOCOL = "org.apache.coyote.http11.Http11NioProtocol";
 
 	private String protocol = DEFAULT_PROTOCOL;
+
+	private List<TomcatContextCustomizer> tomcatContextCustomizers = new ArrayList<>();
+
+	private List<TomcatConnectorCustomizer> tomcatConnectorCustomizers = new ArrayList<>();
 
 	/**
 	 * Create a new {@link TomcatServletWebServerFactory} instance.
@@ -97,7 +106,18 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 		context.setLoader(loader);
 		Tomcat.addServlet(context, "httpHandlerServlet", servlet);
 		context.addServletMappingDecoded("/", "httpHandlerServlet");
+		configureContext(context);
 		host.addChild(context);
+	}
+
+	/**
+	 * Configure the Tomcat {@link Context}.
+	 * @param context the Tomcat context
+	 */
+	protected void configureContext(Context context) {
+		for (TomcatContextCustomizer customizer : this.tomcatContextCustomizers) {
+			customizer.customize(context);
+		}
 	}
 
 	// Needs to be protected so it can be used by subclasses
@@ -114,12 +134,81 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 		// If ApplicationContext is slow to start we want Tomcat not to bind to the socket
 		// prematurely...
 		connector.setProperty("bindOnInit", "false");
+		for (TomcatConnectorCustomizer customizer : this.tomcatConnectorCustomizers) {
+			customizer.customize(connector);
+		}
 	}
 
 	private void customizeProtocol(AbstractProtocol<?> protocol) {
 		if (getAddress() != null) {
 			protocol.setAddress(getAddress());
 		}
+	}
+
+	/**
+	 * Set {@link TomcatContextCustomizer}s that should be applied to the Tomcat
+	 * {@link Context} . Calling this method will replace any existing customizers.
+	 * @param tomcatContextCustomizers the customizers to set
+	 */
+	public void setTomcatContextCustomizers(
+			Collection<? extends TomcatContextCustomizer> tomcatContextCustomizers) {
+		Assert.notNull(tomcatContextCustomizers,
+				"TomcatContextCustomizers must not be null");
+		this.tomcatContextCustomizers = new ArrayList<>(tomcatContextCustomizers);
+	}
+
+	/**
+	 * Returns a mutable collection of the {@link TomcatContextCustomizer}s that will be
+	 * applied to the Tomcat {@link Context} .
+	 * @return the listeners that will be applied
+	 */
+	public Collection<TomcatContextCustomizer> getTomcatContextCustomizers() {
+		return this.tomcatContextCustomizers;
+	}
+
+	/**
+	 * Add {@link TomcatContextCustomizer}s that should be added to the Tomcat
+	 * {@link Context}.
+	 * @param tomcatContextCustomizers the customizers to add
+	 */
+	public void addContextCustomizers(
+			TomcatContextCustomizer... tomcatContextCustomizers) {
+		Assert.notNull(tomcatContextCustomizers,
+				"TomcatContextCustomizers must not be null");
+		this.tomcatContextCustomizers.addAll(Arrays.asList(tomcatContextCustomizers));
+	}
+
+	/**
+	 * Set {@link TomcatConnectorCustomizer}s that should be applied to the Tomcat
+	 * {@link Connector} . Calling this method will replace any existing customizers.
+	 * @param tomcatConnectorCustomizers the customizers to set
+	 */
+	public void setTomcatConnectorCustomizers(
+			Collection<? extends TomcatConnectorCustomizer> tomcatConnectorCustomizers) {
+		Assert.notNull(tomcatConnectorCustomizers,
+				"TomcatConnectorCustomizers must not be null");
+		this.tomcatConnectorCustomizers = new ArrayList<>(tomcatConnectorCustomizers);
+	}
+
+	/**
+	 * Add {@link TomcatConnectorCustomizer}s that should be added to the Tomcat
+	 * {@link Connector}.
+	 * @param tomcatConnectorCustomizers the customizers to add
+	 */
+	public void addConnectorCustomizers(
+			TomcatConnectorCustomizer... tomcatConnectorCustomizers) {
+		Assert.notNull(tomcatConnectorCustomizers,
+				"TomcatConnectorCustomizers must not be null");
+		this.tomcatConnectorCustomizers.addAll(Arrays.asList(tomcatConnectorCustomizers));
+	}
+
+	/**
+	 * Returns a mutable collection of the {@link TomcatConnectorCustomizer}s that will be
+	 * applied to the Tomcat {@link Connector} .
+	 * @return the customizers that will be applied
+	 */
+	public Collection<TomcatConnectorCustomizer> getTomcatConnectorCustomizers() {
+		return this.tomcatConnectorCustomizers;
 	}
 
 	/**

@@ -55,7 +55,7 @@ public class BootJar extends Jar implements BootArchive {
 	}
 
 	private Action<CopySpec> classpathFiles(Spec<File> filter) {
-		return copySpec -> copySpec
+		return (copySpec) -> copySpec
 				.from((Callable<Iterable<File>>) () -> this.classpath == null
 						? Collections.emptyList() : this.classpath.filter(filter));
 

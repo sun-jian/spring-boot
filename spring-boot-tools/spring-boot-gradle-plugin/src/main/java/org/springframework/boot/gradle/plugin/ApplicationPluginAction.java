@@ -51,13 +51,15 @@ final class ApplicationPluginAction implements PluginApplicationAction {
 		Distribution distribution = distributions.create("boot");
 		CreateBootStartScripts bootStartScripts = project.getTasks()
 				.create("bootStartScripts", CreateBootStartScripts.class);
+		bootStartScripts.setDescription("Generates OS-specific start scripts to run the"
+				+ " project as a Spring Boot application.");
 		((TemplateBasedScriptGenerator) bootStartScripts.getUnixStartScriptGenerator())
 				.setTemplate(project.getResources().getText()
 						.fromString(loadResource("/unixStartScript.txt")));
 		((TemplateBasedScriptGenerator) bootStartScripts.getWindowsStartScriptGenerator())
 				.setTemplate(project.getResources().getText()
 						.fromString(loadResource("/windowsStartScript.txt")));
-		project.getConfigurations().all(configuration -> {
+		project.getConfigurations().all((configuration) -> {
 			if ("bootArchives".equals(configuration.getName())) {
 				distribution.getContents()
 						.with(project.copySpec().into("lib")
@@ -81,12 +83,11 @@ final class ApplicationPluginAction implements PluginApplicationAction {
 	}
 
 	private String loadResource(String name) {
-		InputStreamReader reader = new InputStreamReader(
-				getClass().getResourceAsStream(name));
-		char[] buffer = new char[4096];
-		int read = 0;
-		StringWriter writer = new StringWriter();
-		try {
+		try (InputStreamReader reader = new InputStreamReader(
+				getClass().getResourceAsStream(name));) {
+			char[] buffer = new char[4096];
+			int read = 0;
+			StringWriter writer = new StringWriter();
 			while ((read = reader.read(buffer)) > 0) {
 				writer.write(buffer, 0, read);
 			}
@@ -94,14 +95,6 @@ final class ApplicationPluginAction implements PluginApplicationAction {
 		}
 		catch (IOException ex) {
 			throw new GradleException("Failed to read '" + name + "'", ex);
-		}
-		finally {
-			try {
-				reader.close();
-			}
-			catch (IOException ex) {
-				// Continue
-			}
 		}
 	}
 

@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -294,14 +293,20 @@ public class SpringApplicationBuilderTests {
 	public void initializersIncludeDefaults() throws Exception {
 		SpringApplicationBuilder application = new SpringApplicationBuilder(
 				ExampleConfig.class).web(WebApplicationType.NONE).initializers(
-						new ApplicationContextInitializer<ConfigurableApplicationContext>() {
-							@Override
-							public void initialize(
-									ConfigurableApplicationContext applicationContext) {
-							}
+						(ConfigurableApplicationContext applicationContext) -> {
 						});
 		this.context = application.run();
 		assertThat(application.application().getInitializers()).hasSize(5);
+	}
+
+	@Test
+	public void sourcesWithBoundSources() throws Exception {
+		SpringApplicationBuilder application = new SpringApplicationBuilder()
+				.web(WebApplicationType.NONE).sources(ExampleConfig.class)
+				.properties("spring.main.sources=" + ChildConfig.class.getName());
+		this.context = application.run();
+		this.context.getBean(ExampleConfig.class);
+		this.context.getBean(ChildConfig.class);
 	}
 
 	@Configuration

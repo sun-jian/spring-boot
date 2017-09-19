@@ -52,7 +52,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @since 1.4.0
  */
 @Configuration
-@ConditionalOnClass({ SessionFactory.class, PlatformTransactionManager.class })
+@ConditionalOnClass({ SessionFactory.class, Neo4jTransactionManager.class,
+		PlatformTransactionManager.class })
 @ConditionalOnMissingBean(SessionFactory.class)
 @EnableConfigurationProperties(Neo4jProperties.class)
 public class Neo4jDataAutoConfiguration {
@@ -108,8 +109,7 @@ public class Neo4jDataAutoConfiguration {
 
 	@Configuration
 	@ConditionalOnWebApplication(type = Type.SERVLET)
-	@ConditionalOnClass({ WebMvcConfigurer.class,
-			OpenSessionInViewInterceptor.class })
+	@ConditionalOnClass({ WebMvcConfigurer.class, OpenSessionInViewInterceptor.class })
 	@ConditionalOnMissingBean(OpenSessionInViewInterceptor.class)
 	@ConditionalOnProperty(prefix = "spring.data.neo4j", name = "open-in-view", havingValue = "true", matchIfMissing = true)
 	protected static class Neo4jWebConfiguration {

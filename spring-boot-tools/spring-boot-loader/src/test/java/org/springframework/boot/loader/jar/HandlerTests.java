@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,12 +128,42 @@ public class HandlerTests {
 	}
 
 	@Test
-	public void hashcodesAreEqualForUrlsThatReferenceSameFileViaNestedArchiveAndFromRootOfJar()
+	public void hashCodesAreEqualForUrlsThatReferenceSameFileViaNestedArchiveAndFromRootOfJar()
 			throws MalformedURLException {
 		assertThat(this.handler
 				.hashCode(new URL("jar:file:/test.jar!/BOOT-INF/classes!/foo.txt")))
 						.isEqualTo(this.handler.hashCode(
 								new URL("jar:file:/test.jar!/BOOT-INF/classes/foo.txt")));
+	}
+
+	@Test
+	public void urlWithSpecReferencingParentDirectory() throws MalformedURLException {
+		assertStandardAndCustomHandlerUrlsAreEqual(
+				"file:/test.jar!/BOOT-INF/classes!/xsd/folderA/a.xsd",
+				"../folderB/b.xsd");
+	}
+
+	@Test
+	public void urlWithSpecReferencingAncestorDirectoryOutsideJarStopsAtJarRoot()
+			throws MalformedURLException {
+		assertStandardAndCustomHandlerUrlsAreEqual(
+				"file:/test.jar!/BOOT-INF/classes!/xsd/folderA/a.xsd",
+				"../../../../../../folderB/b.xsd");
+	}
+
+	@Test
+	public void urlWithSpecReferencingCurrentDirectory() throws MalformedURLException {
+		assertStandardAndCustomHandlerUrlsAreEqual(
+				"file:/test.jar!/BOOT-INF/classes!/xsd/folderA/a.xsd",
+				"./folderB/./b.xsd");
+	}
+
+	private void assertStandardAndCustomHandlerUrlsAreEqual(String context, String spec)
+			throws MalformedURLException {
+		URL standardUrl = new URL(new URL("jar:" + context), spec);
+		URL customHandlerUrl = new URL(new URL("jar", null, -1, context, this.handler),
+				spec);
+		assertThat(customHandlerUrl.toString()).isEqualTo(standardUrl.toString());
 	}
 
 	private URL createUrl(String file) throws MalformedURLException {

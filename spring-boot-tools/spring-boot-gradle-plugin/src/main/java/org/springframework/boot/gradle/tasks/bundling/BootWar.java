@@ -50,7 +50,7 @@ public class BootWar extends War implements BootArchive {
 	 */
 	public BootWar() {
 		getWebInf().into("lib-provided",
-				copySpec -> copySpec
+				(copySpec) -> copySpec
 						.from((Callable<Iterable<File>>) () -> this.providedClasspath == null
 								? Collections.emptyList() : this.providedClasspath));
 	}
