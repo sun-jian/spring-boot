@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,8 +34,7 @@ public class PropertiesPropertySourceLoaderTests {
 
 	@Test
 	public void getFileExtensions() throws Exception {
-		assertThat(this.loader.getFileExtensions())
-				.isEqualTo(new String[] { "properties", "xml" });
+		assertThat(this.loader.getFileExtensions()).isEqualTo(new String[] { "properties", "xml" });
 	}
 
 	@Test
@@ -47,8 +46,8 @@ public class PropertiesPropertySourceLoaderTests {
 
 	@Test
 	public void loadXml() throws Exception {
-		PropertySource<?> source = this.loader.load("test.xml",
-				new ClassPathResource("test-xml.xml", getClass()), null);
+		PropertySource<?> source = this.loader.load("test.xml", new ClassPathResource("test-xml.xml", getClass()),
+				null);
 		assertThat(source.getProperty("test")).isEqualTo("xml");
 	}
 

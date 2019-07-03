@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,8 +39,7 @@ public class GitInfoContributorTests {
 		Properties properties = new Properties();
 		properties.put("branch", "master");
 		properties.put("commit.time", "2016-03-04T14:36:33+0100");
-		GitInfoContributor contributor = new GitInfoContributor(
-				new GitProperties(properties));
+		GitInfoContributor contributor = new GitInfoContributor(new GitProperties(properties));
 		Map<String, Object> content = contributor.generateContent();
 		assertThat(content.get("commit")).isInstanceOf(Map.class);
 		Map<String, Object> commit = (Map<String, Object>) content.get("commit");
@@ -55,8 +54,7 @@ public class GitInfoContributorTests {
 		Properties properties = new Properties();
 		properties.put("branch", "master");
 		properties.put("commit.id", "8e29a0b0d423d2665c6ee5171947c101a5c15681");
-		GitInfoContributor contributor = new GitInfoContributor(
-				new GitProperties(properties));
+		GitInfoContributor contributor = new GitInfoContributor(new GitProperties(properties));
 		Map<String, Object> content = contributor.generateContent();
 		assertThat(content.get("commit")).isInstanceOf(Map.class);
 		Map<String, Object> commit = (Map<String, Object>) content.get("commit");

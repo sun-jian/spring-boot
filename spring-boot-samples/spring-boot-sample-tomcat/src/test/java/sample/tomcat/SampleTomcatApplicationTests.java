@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -72,14 +72,11 @@ public class SampleTomcatApplicationTests {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("Accept-Encoding", "gzip");
 		HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
-		ResponseEntity<byte[]> entity = this.restTemplate.exchange("/", HttpMethod.GET,
-				requestEntity, byte[].class);
+		ResponseEntity<byte[]> entity = this.restTemplate.exchange("/", HttpMethod.GET, requestEntity, byte[].class);
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		GZIPInputStream inflater = new GZIPInputStream(
-				new ByteArrayInputStream(entity.getBody()));
+		GZIPInputStream inflater = new GZIPInputStream(new ByteArrayInputStream(entity.getBody()));
 		try {
-			assertThat(StreamUtils.copyToString(inflater, Charset.forName("UTF-8")))
-					.isEqualTo("Hello World");
+			assertThat(StreamUtils.copyToString(inflater, Charset.forName("UTF-8"))).isEqualTo("Hello World");
 		}
 		finally {
 			inflater.close();
@@ -91,8 +88,7 @@ public class SampleTomcatApplicationTests {
 		EmbeddedWebApplicationContext context = (EmbeddedWebApplicationContext) this.applicationContext;
 		TomcatEmbeddedServletContainer embeddedServletContainer = (TomcatEmbeddedServletContainer) context
 				.getEmbeddedServletContainer();
-		ProtocolHandler protocolHandler = embeddedServletContainer.getTomcat()
-				.getConnector().getProtocolHandler();
+		ProtocolHandler protocolHandler = embeddedServletContainer.getTomcat().getConnector().getProtocolHandler();
 		int timeout = ((AbstractProtocol<?>) protocolHandler).getConnectionTimeout();
 		assertThat(timeout).isEqualTo(5000);
 	}

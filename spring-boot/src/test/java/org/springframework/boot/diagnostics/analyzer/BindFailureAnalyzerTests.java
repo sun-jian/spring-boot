@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -58,27 +58,20 @@ public class BindFailureAnalyzerTests {
 
 	@Test
 	public void bindExceptionWithFieldErrorsDueToValidationFailure() {
-		FailureAnalysis analysis = performAnalysis(
-				FieldValidationFailureConfiguration.class);
-		assertThat(analysis.getDescription())
-				.contains(failure("test.foo.foo", "null", "may not be null"));
-		assertThat(analysis.getDescription())
-				.contains(failure("test.foo.value", "0", "at least five"));
-		assertThat(analysis.getDescription())
-				.contains(failure("test.foo.nested.bar", "null", "may not be null"));
+		FailureAnalysis analysis = performAnalysis(FieldValidationFailureConfiguration.class);
+		assertThat(analysis.getDescription()).contains(failure("test.foo.foo", "null", "may not be null"));
+		assertThat(analysis.getDescription()).contains(failure("test.foo.value", "0", "at least five"));
+		assertThat(analysis.getDescription()).contains(failure("test.foo.nested.bar", "null", "may not be null"));
 	}
 
 	@Test
 	public void bindExceptionWithObjectErrorsDueToValidationFailure() throws Exception {
-		FailureAnalysis analysis = performAnalysis(
-				ObjectValidationFailureConfiguration.class);
-		assertThat(analysis.getDescription())
-				.contains("Reason: This object could not be bound.");
+		FailureAnalysis analysis = performAnalysis(ObjectValidationFailureConfiguration.class);
+		assertThat(analysis.getDescription()).contains("Reason: This object could not be bound.");
 	}
 
 	private static String failure(String property, String value, String reason) {
-		return String.format("Property: %s%n    Value: %s%n    Reason: %s", property,
-				value, reason);
+		return String.format("Property: %s%n    Value: %s%n    Reason: %s", property, value, reason);
 	}
 
 	private FailureAnalysis performAnalysis(Class<?> configuration) {

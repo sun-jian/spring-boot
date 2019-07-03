@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,6 @@ import java.net.UnknownHostException;
 import java.util.Collections;
 
 import com.mongodb.DB;
-import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 
 import org.springframework.beans.BeanUtils;
@@ -72,7 +71,7 @@ import org.springframework.util.StringUtils;
  * @since 1.1.0
  */
 @Configuration
-@ConditionalOnClass({ Mongo.class, MongoTemplate.class })
+@ConditionalOnClass({ MongoClient.class, MongoTemplate.class })
 @EnableConfigurationProperties(MongoProperties.class)
 @AutoConfigureAfter(MongoAutoConfiguration.class)
 public class MongoDataAutoConfiguration {
@@ -81,8 +80,7 @@ public class MongoDataAutoConfiguration {
 
 	private final MongoProperties properties;
 
-	public MongoDataAutoConfiguration(ApplicationContext applicationContext,
-			MongoProperties properties) {
+	public MongoDataAutoConfiguration(ApplicationContext applicationContext, MongoProperties properties) {
 		this.applicationContext = applicationContext;
 		this.properties = properties;
 	}
@@ -96,34 +94,30 @@ public class MongoDataAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public MongoTemplate mongoTemplate(MongoDbFactory mongoDbFactory,
-			MongoConverter converter) throws UnknownHostException {
+	public MongoTemplate mongoTemplate(MongoDbFactory mongoDbFactory, MongoConverter converter)
+			throws UnknownHostException {
 		return new MongoTemplate(mongoDbFactory, converter);
 	}
 
 	@Bean
 	@ConditionalOnMissingBean(MongoConverter.class)
-	public MappingMongoConverter mappingMongoConverter(MongoDbFactory factory,
-			MongoMappingContext context, BeanFactory beanFactory,
-			CustomConversions conversions) {
+	public MappingMongoConverter mappingMongoConverter(MongoDbFactory factory, MongoMappingContext context,
+			BeanFactory beanFactory, CustomConversions conversions) {
 		DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
-		MappingMongoConverter mappingConverter = new MappingMongoConverter(dbRefResolver,
-				context);
+		MappingMongoConverter mappingConverter = new MappingMongoConverter(dbRefResolver, context);
 		mappingConverter.setCustomConversions(conversions);
 		return mappingConverter;
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
-	public MongoMappingContext mongoMappingContext(BeanFactory beanFactory,
-			CustomConversions conversions) throws ClassNotFoundException {
+	public MongoMappingContext mongoMappingContext(BeanFactory beanFactory, CustomConversions conversions)
+			throws ClassNotFoundException {
 		MongoMappingContext context = new MongoMappingContext();
-		context.setInitialEntitySet(new EntityScanner(this.applicationContext)
-				.scan(Document.class, Persistent.class));
+		context.setInitialEntitySet(new EntityScanner(this.applicationContext).scan(Document.class, Persistent.class));
 		Class<?> strategyClass = this.properties.getFieldNamingStrategy();
 		if (strategyClass != null) {
-			context.setFieldNamingStrategy(
-					(FieldNamingStrategy) BeanUtils.instantiate(strategyClass));
+			context.setFieldNamingStrategy((FieldNamingStrategy) BeanUtils.instantiate(strategyClass));
 		}
 		context.setSimpleTypeHolder(conversions.getSimpleTypeHolder());
 		return context;
@@ -131,10 +125,8 @@ public class MongoDataAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public GridFsTemplate gridFsTemplate(MongoDbFactory mongoDbFactory,
-			MongoTemplate mongoTemplate) {
-		return new GridFsTemplate(
-				new GridFsMongoDbFactory(mongoDbFactory, this.properties),
+	public GridFsTemplate gridFsTemplate(MongoDbFactory mongoDbFactory, MongoTemplate mongoTemplate) {
+		return new GridFsTemplate(new GridFsMongoDbFactory(mongoDbFactory, this.properties),
 				mongoTemplate.getConverter());
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.boot.actuate.endpoint;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -55,15 +56,13 @@ public class DataSourcePublicMetrics implements PublicMetrics {
 	@PostConstruct
 	public void initialize() {
 		DataSource primaryDataSource = getPrimaryDataSource();
-		DataSourcePoolMetadataProvider provider = new DataSourcePoolMetadataProviders(
-				this.providers);
-		for (Map.Entry<String, DataSource> entry : this.applicationContext
-				.getBeansOfType(DataSource.class).entrySet()) {
+		DataSourcePoolMetadataProvider provider = new DataSourcePoolMetadataProviders(this.providers);
+		for (Map.Entry<String, DataSource> entry : this.applicationContext.getBeansOfType(DataSource.class)
+				.entrySet()) {
 			String beanName = entry.getKey();
 			DataSource bean = entry.getValue();
 			String prefix = createPrefix(beanName, bean, bean.equals(primaryDataSource));
-			DataSourcePoolMetadata poolMetadata = provider
-					.getDataSourcePoolMetadata(bean);
+			DataSourcePoolMetadata poolMetadata = provider.getDataSourcePoolMetadata(bean);
 			if (poolMetadata != null) {
 				this.metadataByPrefix.put(prefix, poolMetadata);
 			}
@@ -73,8 +72,7 @@ public class DataSourcePublicMetrics implements PublicMetrics {
 	@Override
 	public Collection<Metric<?>> metrics() {
 		Set<Metric<?>> metrics = new LinkedHashSet<Metric<?>>();
-		for (Map.Entry<String, DataSourcePoolMetadata> entry : this.metadataByPrefix
-				.entrySet()) {
+		for (Map.Entry<String, DataSourcePoolMetadata> entry : this.metadataByPrefix.entrySet()) {
 			String prefix = entry.getKey();
 			prefix = (prefix.endsWith(".") ? prefix : prefix + ".");
 			DataSourcePoolMetadata metadata = entry.getValue();
@@ -84,8 +82,7 @@ public class DataSourcePublicMetrics implements PublicMetrics {
 		return metrics;
 	}
 
-	private <T extends Number> void addMetric(Set<Metric<?>> metrics, String name,
-			T value) {
+	private <T extends Number> void addMetric(Set<Metric<?>> metrics, String name, T value) {
 		if (value != null) {
 			metrics.add(new Metric<T>(name, value));
 		}
@@ -104,7 +101,7 @@ public class DataSourcePublicMetrics implements PublicMetrics {
 			return "datasource.primary";
 		}
 		if (name.length() > DATASOURCE_SUFFIX.length()
-				&& name.toLowerCase().endsWith(DATASOURCE_SUFFIX.toLowerCase())) {
+				&& name.toLowerCase(Locale.ENGLISH).endsWith(DATASOURCE_SUFFIX.toLowerCase())) {
 			name = name.substring(0, name.length() - DATASOURCE_SUFFIX.length());
 		}
 		return "datasource." + name;

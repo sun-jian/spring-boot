@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -58,6 +58,7 @@ import org.springframework.util.StringUtils;
  * @author Eddú Meléndez
  * @author Stephane Nicoll
  * @author Marco Aust
+ * @since 1.0.0
  */
 @Configuration
 @ConditionalOnClass({ JedisConnection.class, RedisOperations.class, Jedis.class })
@@ -87,13 +88,11 @@ public class RedisAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean(RedisConnectionFactory.class)
-		public JedisConnectionFactory redisConnectionFactory()
-				throws UnknownHostException {
+		public JedisConnectionFactory redisConnectionFactory() throws UnknownHostException {
 			return applyProperties(createJedisConnectionFactory());
 		}
 
-		protected final JedisConnectionFactory applyProperties(
-				JedisConnectionFactory factory) {
+		protected final JedisConnectionFactory applyProperties(JedisConnectionFactory factory) {
 			configureConnection(factory);
 			if (this.properties.isSsl()) {
 				factory.setUseSsl(true);
@@ -129,7 +128,7 @@ public class RedisAutoConfiguration {
 				factory.setPort(uri.getPort());
 				if (uri.getUserInfo() != null) {
 					String password = uri.getUserInfo();
-					int index = password.lastIndexOf(":");
+					int index = password.indexOf(":");
 					if (index >= 0) {
 						password = password.substring(index + 1);
 					}
@@ -137,8 +136,7 @@ public class RedisAutoConfiguration {
 				}
 			}
 			catch (URISyntaxException ex) {
-				throw new IllegalArgumentException("Malformed 'spring.redis.url' " + url,
-						ex);
+				throw new IllegalArgumentException("Malformed 'spring.redis.url' " + url, ex);
 			}
 		}
 
@@ -168,8 +166,7 @@ public class RedisAutoConfiguration {
 				return null;
 			}
 			Cluster clusterProperties = this.properties.getCluster();
-			RedisClusterConfiguration config = new RedisClusterConfiguration(
-					clusterProperties.getNodes());
+			RedisClusterConfiguration config = new RedisClusterConfiguration(clusterProperties.getNodes());
 
 			if (clusterProperties.getMaxRedirects() != null) {
 				config.setMaxRedirects(clusterProperties.getMaxRedirects());
@@ -179,25 +176,22 @@ public class RedisAutoConfiguration {
 
 		private List<RedisNode> createSentinels(Sentinel sentinel) {
 			List<RedisNode> nodes = new ArrayList<RedisNode>();
-			for (String node : StringUtils
-					.commaDelimitedListToStringArray(sentinel.getNodes())) {
+			for (String node : StringUtils.commaDelimitedListToStringArray(sentinel.getNodes())) {
 				try {
 					String[] parts = StringUtils.split(node, ":");
 					Assert.state(parts.length == 2, "Must be defined as 'host:port'");
 					nodes.add(new RedisNode(parts[0], Integer.valueOf(parts[1])));
 				}
 				catch (RuntimeException ex) {
-					throw new IllegalStateException(
-							"Invalid redis sentinel " + "property '" + node + "'", ex);
+					throw new IllegalStateException("Invalid redis sentinel " + "property '" + node + "'", ex);
 				}
 			}
 			return nodes;
 		}
 
 		private JedisConnectionFactory createJedisConnectionFactory() {
-			JedisPoolConfig poolConfig = this.properties.getPool() != null
-					? jedisPoolConfig() : new JedisPoolConfig();
-
+			JedisPoolConfig poolConfig = (this.properties.getPool() != null) ? jedisPoolConfig()
+					: new JedisPoolConfig();
 			if (getSentinelConfig() != null) {
 				return new JedisConnectionFactory(getSentinelConfig(), poolConfig);
 			}
@@ -227,9 +221,8 @@ public class RedisAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean(name = "redisTemplate")
-		public RedisTemplate<Object, Object> redisTemplate(
-				RedisConnectionFactory redisConnectionFactory)
-						throws UnknownHostException {
+		public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory)
+				throws UnknownHostException {
 			RedisTemplate<Object, Object> template = new RedisTemplate<Object, Object>();
 			template.setConnectionFactory(redisConnectionFactory);
 			return template;
@@ -237,9 +230,8 @@ public class RedisAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean(StringRedisTemplate.class)
-		public StringRedisTemplate stringRedisTemplate(
-				RedisConnectionFactory redisConnectionFactory)
-						throws UnknownHostException {
+		public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory)
+				throws UnknownHostException {
 			StringRedisTemplate template = new StringRedisTemplate();
 			template.setConnectionFactory(redisConnectionFactory);
 			return template;

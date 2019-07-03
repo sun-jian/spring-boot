@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,6 +41,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableGlobalMethodSecurity(securedEnabled = true)
 public class SampleMethodSecurityApplication extends WebMvcConfigurerAdapter {
 
+	@Override
+	public void addViewControllers(ViewControllerRegistry registry) {
+		registry.addViewController("/login").setViewName("login");
+		registry.addViewController("/access").setViewName("access");
+	}
+
+	public static void main(String[] args) throws Exception {
+		new SpringApplicationBuilder(SampleMethodSecurityApplication.class).run(args);
+	}
+
 	@Controller
 	protected static class HomeController {
 
@@ -55,26 +65,14 @@ public class SampleMethodSecurityApplication extends WebMvcConfigurerAdapter {
 
 	}
 
-	@Override
-	public void addViewControllers(ViewControllerRegistry registry) {
-		registry.addViewController("/login").setViewName("login");
-		registry.addViewController("/access").setViewName("access");
-	}
-
-	public static void main(String[] args) throws Exception {
-		new SpringApplicationBuilder(SampleMethodSecurityApplication.class).run(args);
-	}
-
 	@Order(Ordered.HIGHEST_PRECEDENCE)
 	@Configuration
-	protected static class AuthenticationSecurity
-			extends GlobalAuthenticationConfigurerAdapter {
+	protected static class AuthenticationSecurity extends GlobalAuthenticationConfigurerAdapter {
 
 		@Override
 		public void init(AuthenticationManagerBuilder auth) throws Exception {
-			auth.inMemoryAuthentication().withUser("admin").password("admin")
-					.roles("ADMIN", "USER", "ACTUATOR").and().withUser("user")
-					.password("user").roles("USER");
+			auth.inMemoryAuthentication().withUser("admin").password("admin").roles("ADMIN", "USER", "ACTUATOR").and()
+					.withUser("user").password("user").roles("USER");
 		}
 
 	}
@@ -85,11 +83,10 @@ public class SampleMethodSecurityApplication extends WebMvcConfigurerAdapter {
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
-			http.authorizeRequests().antMatchers("/login").permitAll().anyRequest()
-					.fullyAuthenticated().and().formLogin().loginPage("/login")
-					.failureUrl("/login?error").and().logout()
-					.logoutRequestMatcher(new AntPathRequestMatcher("/logout")).and()
-					.exceptionHandling().accessDeniedPage("/access?error");
+			http.authorizeRequests().antMatchers("/login").permitAll().anyRequest().fullyAuthenticated().and()
+					.formLogin().loginPage("/login").failureUrl("/login?error").and().logout()
+					.logoutRequestMatcher(new AntPathRequestMatcher("/logout")).and().exceptionHandling()
+					.accessDeniedPage("/access?error");
 		}
 
 	}

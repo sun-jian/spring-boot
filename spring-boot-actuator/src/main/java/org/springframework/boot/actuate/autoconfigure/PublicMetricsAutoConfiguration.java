@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,9 @@
 
 package org.springframework.boot.actuate.autoconfigure;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.Servlet;
 import javax.sql.DataSource;
@@ -75,8 +77,7 @@ public class PublicMetricsAutoConfiguration {
 
 	private final List<MetricReader> metricReaders;
 
-	public PublicMetricsAutoConfiguration(
-			@ExportMetricReader ObjectProvider<List<MetricReader>> metricReaders) {
+	public PublicMetricsAutoConfiguration(@ExportMetricReader ObjectProvider<List<MetricReader>> metricReaders) {
 		this.metricReaders = metricReaders.getIfAvailable();
 	}
 
@@ -87,16 +88,14 @@ public class PublicMetricsAutoConfiguration {
 
 	@Bean
 	public MetricReaderPublicMetrics metricReaderPublicMetrics() {
-		return new MetricReaderPublicMetrics(
-				new CompositeMetricReader(this.metricReaders == null ? new MetricReader[0]
-						: this.metricReaders
-								.toArray(new MetricReader[this.metricReaders.size()])));
+		MetricReader[] readers = (this.metricReaders != null)
+				? this.metricReaders.toArray(new MetricReader[this.metricReaders.size()]) : new MetricReader[0];
+		return new MetricReaderPublicMetrics(new CompositeMetricReader(readers));
 	}
 
 	@Bean
 	@ConditionalOnBean(RichGaugeReader.class)
-	public RichGaugeReaderPublicMetrics richGaugePublicMetrics(
-			RichGaugeReader richGaugeReader) {
+	public RichGaugeReaderPublicMetrics richGaugePublicMetrics(RichGaugeReader richGaugeReader) {
 		return new RichGaugeReaderPublicMetrics(richGaugeReader);
 	}
 
@@ -135,8 +134,9 @@ public class PublicMetricsAutoConfiguration {
 		@Bean
 		@ConditionalOnMissingBean
 		@ConditionalOnBean(CacheStatisticsProvider.class)
-		public CachePublicMetrics cachePublicMetrics() {
-			return new CachePublicMetrics();
+		public CachePublicMetrics cachePublicMetrics(Map<String, CacheManager> cacheManagers,
+				Collection<CacheStatisticsProvider<?>> statisticsProviders) {
+			return new CachePublicMetrics(cacheManagers, statisticsProviders);
 		}
 
 	}
@@ -148,7 +148,8 @@ public class PublicMetricsAutoConfiguration {
 	static class IntegrationMetricsConfiguration {
 
 		@Bean(name = IntegrationManagementConfigurer.MANAGEMENT_CONFIGURER_NAME)
-		@ConditionalOnMissingBean(value = IntegrationManagementConfigurer.class, name = IntegrationManagementConfigurer.MANAGEMENT_CONFIGURER_NAME, search = SearchStrategy.CURRENT)
+		@ConditionalOnMissingBean(value = IntegrationManagementConfigurer.class,
+				name = IntegrationManagementConfigurer.MANAGEMENT_CONFIGURER_NAME, search = SearchStrategy.CURRENT)
 		public IntegrationManagementConfigurer managementConfigurer() {
 			IntegrationManagementConfigurer configurer = new IntegrationManagementConfigurer();
 			configurer.setDefaultCountsEnabled(true);
@@ -160,8 +161,7 @@ public class PublicMetricsAutoConfiguration {
 		@ConditionalOnMissingBean(name = "springIntegrationPublicMetrics")
 		public MetricReaderPublicMetrics springIntegrationPublicMetrics(
 				IntegrationManagementConfigurer managementConfigurer) {
-			return new MetricReaderPublicMetrics(
-					new SpringIntegrationMetricReader(managementConfigurer));
+			return new MetricReaderPublicMetrics(new SpringIntegrationMetricReader(managementConfigurer));
 		}
 
 	}

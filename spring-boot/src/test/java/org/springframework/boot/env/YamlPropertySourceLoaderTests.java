@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,8 +40,7 @@ public class YamlPropertySourceLoaderTests {
 
 	@Test
 	public void load() throws Exception {
-		ByteArrayResource resource = new ByteArrayResource(
-				"foo:\n  bar: spam".getBytes());
+		ByteArrayResource resource = new ByteArrayResource("foo:\n  bar: spam".getBytes());
 		PropertySource<?> source = this.loader.load("resource", resource, null);
 		assertThat(source).isNotNull();
 		assertThat(source.getProperty("foo.bar")).isEqualTo("spam");
@@ -56,11 +55,9 @@ public class YamlPropertySourceLoaderTests {
 			expected.add(String.valueOf(c));
 		}
 		ByteArrayResource resource = new ByteArrayResource(yaml.toString().getBytes());
-		EnumerablePropertySource<?> source = (EnumerablePropertySource<?>) this.loader
-				.load("resource", resource, null);
+		EnumerablePropertySource<?> source = (EnumerablePropertySource<?>) this.loader.load("resource", resource, null);
 		assertThat(source).isNotNull();
-		assertThat(source.getPropertyNames())
-				.isEqualTo(expected.toArray(new String[] {}));
+		assertThat(source.getPropertyNames()).isEqualTo(expected.toArray(new String[] {}));
 	}
 
 	@Test

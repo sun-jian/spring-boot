@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,6 @@
 
 package org.springframework.boot.actuate.endpoint.mvc;
 
-import com.google.common.net.HttpHeaders;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +25,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.MinimalActuatorHypermediaApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
@@ -67,16 +67,14 @@ public class HalBrowserMvcEndpointDisabledIntegrationTests {
 
 	@Test
 	public void linksOnActuator() throws Exception {
-		this.mockMvc.perform(get("/actuator").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(jsonPath("$._links").exists())
-				.andExpect(header().doesNotExist("cache-control"));
+		this.mockMvc.perform(get("/actuator").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("$._links").exists()).andExpect(header().doesNotExist("cache-control"));
 	}
 
 	@Test
 	public void browserRedirect() throws Exception {
-		this.mockMvc.perform(get("/actuator/").accept(MediaType.TEXT_HTML))
-				.andExpect(status().isFound()).andExpect(header().string(
-						HttpHeaders.LOCATION, "http://localhost/actuator/browser.html"));
+		this.mockMvc.perform(get("/actuator/").accept(MediaType.TEXT_HTML)).andExpect(status().isFound())
+				.andExpect(header().string(HttpHeaders.LOCATION, "http://localhost/actuator/browser.html"));
 	}
 
 	@Test
@@ -86,13 +84,12 @@ public class HalBrowserMvcEndpointDisabledIntegrationTests {
 			if ("/actuator".equals(path) || endpoint instanceof HeapdumpMvcEndpoint) {
 				continue;
 			}
-			path = path.length() > 0 ? path : "/";
+			path = (path.length() > 0) ? path : "/";
 			MockHttpServletRequestBuilder requestBuilder = get(path);
 			if (endpoint instanceof AuditEventsMvcEndpoint) {
 				requestBuilder.param("after", "2016-01-01T12:00:00+00:00");
 			}
-			this.mockMvc.perform(requestBuilder.accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isOk())
+			this.mockMvc.perform(requestBuilder.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 					.andExpect(jsonPath("$._links").doesNotExist());
 		}
 	}
@@ -102,8 +99,7 @@ public class HalBrowserMvcEndpointDisabledIntegrationTests {
 	public static class SpringBootHypermediaApplication {
 
 		public static void main(String[] args) {
-			SpringApplication.run(SpringBootHypermediaApplication.class,
-					"--endpoints.hypermedia.enabled=false");
+			SpringApplication.run(SpringBootHypermediaApplication.class, "--endpoints.hypermedia.enabled=false");
 		}
 
 	}

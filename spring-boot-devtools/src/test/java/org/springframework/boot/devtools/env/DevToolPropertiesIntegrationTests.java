@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -61,8 +61,7 @@ public class DevToolPropertiesIntegrationTests {
 
 	@Test
 	public void classPropertyConditionIsAffectedByDevToolProperties() {
-		SpringApplication application = new SpringApplication(
-				ClassConditionConfiguration.class);
+		SpringApplication application = new SpringApplication(ClassConditionConfiguration.class);
 		application.setWebEnvironment(false);
 		this.context = application.run();
 		this.context.getBean(ClassConditionConfiguration.class);
@@ -70,20 +69,17 @@ public class DevToolPropertiesIntegrationTests {
 
 	@Test
 	public void beanMethodPropertyConditionIsAffectedByDevToolProperties() {
-		SpringApplication application = new SpringApplication(
-				BeanConditionConfiguration.class);
+		SpringApplication application = new SpringApplication(BeanConditionConfiguration.class);
 		application.setWebEnvironment(false);
 		this.context = application.run();
 		this.context.getBean(MyBean.class);
 	}
 
 	@Test
-	public void postProcessWhenRestarterDisabledAndRemoteSecretNotSetShouldNotAddPropertySource()
-			throws Exception {
+	public void postProcessWhenRestarterDisabledAndRemoteSecretNotSetShouldNotAddPropertySource() throws Exception {
 		Restarter.clearInstance();
 		Restarter.disable();
-		SpringApplication application = new SpringApplication(
-				BeanConditionConfiguration.class);
+		SpringApplication application = new SpringApplication(BeanConditionConfiguration.class);
 		application.setWebEnvironment(false);
 		this.context = application.run();
 		this.thrown.expect(NoSuchBeanDefinitionException.class);
@@ -91,15 +87,13 @@ public class DevToolPropertiesIntegrationTests {
 	}
 
 	@Test
-	public void postProcessWhenRestarterDisabledAndRemoteSecretSetShouldAddPropertySource()
-			throws Exception {
+	public void postProcessWhenRestarterDisabledAndRemoteSecretSetShouldAddPropertySource() throws Exception {
 		Restarter.clearInstance();
 		Restarter.disable();
-		SpringApplication application = new SpringApplication(
-				BeanConditionConfiguration.class);
+		SpringApplication application = new SpringApplication(BeanConditionConfiguration.class);
 		application.setWebEnvironment(false);
-		application.setDefaultProperties(Collections.<String, Object>singletonMap(
-				"spring.devtools.remote.secret", "donttell"));
+		application.setDefaultProperties(
+				Collections.<String, Object>singletonMap("spring.devtools.remote.secret", "donttell"));
 		this.context = application.run();
 		this.context.getBean(MyBean.class);
 	}

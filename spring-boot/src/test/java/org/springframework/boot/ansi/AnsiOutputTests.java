@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,8 +43,8 @@ public class AnsiOutputTests {
 
 	@Test
 	public void encoding() throws Exception {
-		String encoded = AnsiOutput.toString("A", AnsiColor.RED, AnsiStyle.BOLD, "B",
-				AnsiStyle.NORMAL, "D", AnsiColor.GREEN, "E", AnsiStyle.FAINT, "F");
+		String encoded = AnsiOutput.toString("A", AnsiColor.RED, AnsiStyle.BOLD, "B", AnsiStyle.NORMAL, "D",
+				AnsiColor.GREEN, "E", AnsiStyle.FAINT, "F");
 		assertThat(encoded).isEqualTo("A[31;1mB[0mD[32mE[2mF[0;39m");
 	}
 

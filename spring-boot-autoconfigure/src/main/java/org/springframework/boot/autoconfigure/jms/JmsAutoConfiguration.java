@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,6 +39,7 @@ import org.springframework.jms.support.destination.DestinationResolver;
  *
  * @author Greg Turnquist
  * @author Stephane Nicoll
+ * @since 1.0.0
  */
 @Configuration
 @ConditionalOnClass({ Message.class, JmsTemplate.class })
@@ -70,8 +71,7 @@ public class JmsAutoConfiguration {
 		public JmsTemplate jmsTemplate(ConnectionFactory connectionFactory) {
 			JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
 			jmsTemplate.setPubSubDomain(this.properties.isPubSubDomain());
-			DestinationResolver destinationResolver = this.destinationResolver
-					.getIfUnique();
+			DestinationResolver destinationResolver = this.destinationResolver.getIfUnique();
 			if (destinationResolver != null) {
 				jmsTemplate.setDestinationResolver(destinationResolver);
 			}
@@ -104,6 +104,7 @@ public class JmsAutoConfiguration {
 
 	}
 
+	@Configuration
 	@ConditionalOnClass(JmsMessagingTemplate.class)
 	@Import(JmsTemplateConfiguration.class)
 	protected static class MessagingTemplateConfiguration {

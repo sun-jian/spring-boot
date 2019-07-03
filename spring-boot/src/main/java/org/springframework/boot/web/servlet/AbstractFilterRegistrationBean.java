@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,8 +39,9 @@ import org.springframework.util.Assert;
  * Servlet 3.0+ container.
  *
  * @author Phillip Webb
+ * @since 1.5.22
  */
-abstract class AbstractFilterRegistrationBean extends RegistrationBean {
+public abstract class AbstractFilterRegistrationBean extends RegistrationBean {
 
 	/**
 	 * Filters that wrap the servlet request should be ordered less than or equal to this.
@@ -49,12 +50,11 @@ abstract class AbstractFilterRegistrationBean extends RegistrationBean {
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	private static final EnumSet<DispatcherType> ASYNC_DISPATCHER_TYPES = EnumSet.of(
-			DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.REQUEST,
-			DispatcherType.ASYNC);
+	private static final EnumSet<DispatcherType> ASYNC_DISPATCHER_TYPES = EnumSet.of(DispatcherType.FORWARD,
+			DispatcherType.INCLUDE, DispatcherType.REQUEST, DispatcherType.ASYNC);
 
-	private static final EnumSet<DispatcherType> NON_ASYNC_DISPATCHER_TYPES = EnumSet
-			.of(DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.REQUEST);
+	private static final EnumSet<DispatcherType> NON_ASYNC_DISPATCHER_TYPES = EnumSet.of(DispatcherType.FORWARD,
+			DispatcherType.INCLUDE, DispatcherType.REQUEST);
 
 	private static final String[] DEFAULT_URL_MAPPINGS = { "/*" };
 
@@ -74,8 +74,7 @@ abstract class AbstractFilterRegistrationBean extends RegistrationBean {
 	 * @param servletRegistrationBeans associate {@link ServletRegistrationBean}s
 	 */
 	AbstractFilterRegistrationBean(ServletRegistrationBean... servletRegistrationBeans) {
-		Assert.notNull(servletRegistrationBeans,
-				"ServletRegistrationBeans must not be null");
+		Assert.notNull(servletRegistrationBeans, "ServletRegistrationBeans must not be null");
 		Collections.addAll(this.servletRegistrationBeans, servletRegistrationBeans);
 	}
 
@@ -83,12 +82,9 @@ abstract class AbstractFilterRegistrationBean extends RegistrationBean {
 	 * Set {@link ServletRegistrationBean}s that the filter will be registered against.
 	 * @param servletRegistrationBeans the Servlet registration beans
 	 */
-	public void setServletRegistrationBeans(
-			Collection<? extends ServletRegistrationBean> servletRegistrationBeans) {
-		Assert.notNull(servletRegistrationBeans,
-				"ServletRegistrationBeans must not be null");
-		this.servletRegistrationBeans = new LinkedHashSet<ServletRegistrationBean>(
-				servletRegistrationBeans);
+	public void setServletRegistrationBeans(Collection<? extends ServletRegistrationBean> servletRegistrationBeans) {
+		Assert.notNull(servletRegistrationBeans, "ServletRegistrationBeans must not be null");
+		this.servletRegistrationBeans = new LinkedHashSet<ServletRegistrationBean>(servletRegistrationBeans);
 	}
 
 	/**
@@ -107,10 +103,8 @@ abstract class AbstractFilterRegistrationBean extends RegistrationBean {
 	 * @param servletRegistrationBeans the servlet registration beans to add
 	 * @see #setServletRegistrationBeans
 	 */
-	public void addServletRegistrationBeans(
-			ServletRegistrationBean... servletRegistrationBeans) {
-		Assert.notNull(servletRegistrationBeans,
-				"ServletRegistrationBeans must not be null");
+	public void addServletRegistrationBeans(ServletRegistrationBean... servletRegistrationBeans) {
+		Assert.notNull(servletRegistrationBeans, "ServletRegistrationBeans must not be null");
 		Collections.addAll(this.servletRegistrationBeans, servletRegistrationBeans);
 	}
 
@@ -157,8 +151,8 @@ abstract class AbstractFilterRegistrationBean extends RegistrationBean {
 	}
 
 	/**
-	 * Return a mutable collection of URL patterns that the filter will be registered
-	 * against.
+	 * Return a mutable collection of URL patterns, as defined in the Servlet
+	 * specification, that the filter will be registered against.
 	 * @return the URL patterns
 	 */
 	public Collection<String> getUrlPatterns() {
@@ -166,7 +160,8 @@ abstract class AbstractFilterRegistrationBean extends RegistrationBean {
 	}
 
 	/**
-	 * Add URL patterns that the filter will be registered against.
+	 * Add URL patterns, as defined in the Servlet specification, that the filter will be
+	 * registered against.
 	 * @param urlPatterns the URL patterns
 	 */
 	public void addUrlPatterns(String... urlPatterns) {
@@ -224,8 +219,7 @@ abstract class AbstractFilterRegistrationBean extends RegistrationBean {
 		}
 		FilterRegistration.Dynamic added = servletContext.addFilter(name, filter);
 		if (added == null) {
-			this.logger.info("Filter " + name + " was not registered "
-					+ "(possibly already registered?)");
+			this.logger.info("Filter " + name + " was not registered " + "(possibly already registered?)");
 			return;
 		}
 		configure(added);
@@ -246,8 +240,7 @@ abstract class AbstractFilterRegistrationBean extends RegistrationBean {
 		super.configure(registration);
 		EnumSet<DispatcherType> dispatcherTypes = this.dispatcherTypes;
 		if (dispatcherTypes == null) {
-			dispatcherTypes = (isAsyncSupported() ? ASYNC_DISPATCHER_TYPES
-					: NON_ASYNC_DISPATCHER_TYPES);
+			dispatcherTypes = (isAsyncSupported() ? ASYNC_DISPATCHER_TYPES : NON_ASYNC_DISPATCHER_TYPES);
 		}
 		Set<String> servletNames = new LinkedHashSet<String>();
 		for (ServletRegistrationBean servletRegistrationBean : this.servletRegistrationBeans) {
@@ -255,21 +248,18 @@ abstract class AbstractFilterRegistrationBean extends RegistrationBean {
 		}
 		servletNames.addAll(this.servletNames);
 		if (servletNames.isEmpty() && this.urlPatterns.isEmpty()) {
-			this.logger.info("Mapping filter: '" + registration.getName() + "' to: "
-					+ Arrays.asList(DEFAULT_URL_MAPPINGS));
-			registration.addMappingForUrlPatterns(dispatcherTypes, this.matchAfter,
-					DEFAULT_URL_MAPPINGS);
+			this.logger.info(
+					"Mapping filter: '" + registration.getName() + "' to: " + Arrays.asList(DEFAULT_URL_MAPPINGS));
+			registration.addMappingForUrlPatterns(dispatcherTypes, this.matchAfter, DEFAULT_URL_MAPPINGS);
 		}
 		else {
 			if (!servletNames.isEmpty()) {
-				this.logger.info("Mapping filter: '" + registration.getName()
-						+ "' to servlets: " + servletNames);
+				this.logger.info("Mapping filter: '" + registration.getName() + "' to servlets: " + servletNames);
 				registration.addMappingForServletNames(dispatcherTypes, this.matchAfter,
 						servletNames.toArray(new String[servletNames.size()]));
 			}
 			if (!this.urlPatterns.isEmpty()) {
-				this.logger.info("Mapping filter: '" + registration.getName()
-						+ "' to urls: " + this.urlPatterns);
+				this.logger.info("Mapping filter: '" + registration.getName() + "' to urls: " + this.urlPatterns);
 				registration.addMappingForUrlPatterns(dispatcherTypes, this.matchAfter,
 						this.urlPatterns.toArray(new String[this.urlPatterns.size()]));
 			}

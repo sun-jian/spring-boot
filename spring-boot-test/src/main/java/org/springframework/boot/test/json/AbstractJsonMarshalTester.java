@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -311,8 +311,7 @@ public abstract class AbstractJsonMarshalTester<T> {
 	}
 
 	private void verify() {
-		Assert.state(this.resourceLoadClass != null,
-				"Uninitialized JsonMarshalTester (ResourceLoadClass is null)");
+		Assert.state(this.resourceLoadClass != null, "Uninitialized JsonMarshalTester (ResourceLoadClass is null)");
 		Assert.state(this.type != null, "Uninitialized JsonMarshalTester (Type is null)");
 	}
 
@@ -323,8 +322,7 @@ public abstract class AbstractJsonMarshalTester<T> {
 	 * @return the JSON string
 	 * @throws IOException on write error
 	 */
-	protected abstract String writeObject(T value, ResolvableType type)
-			throws IOException;
+	protected abstract String writeObject(T value, ResolvableType type) throws IOException;
 
 	/**
 	 * Read from the specified input stream to create an object of the specified type. The
@@ -334,8 +332,7 @@ public abstract class AbstractJsonMarshalTester<T> {
 	 * @return the resulting object
 	 * @throws IOException on read error
 	 */
-	protected T readObject(InputStream inputStream, ResolvableType type)
-			throws IOException {
+	protected T readObject(InputStream inputStream, ResolvableType type) throws IOException {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 		return readObject(reader, type);
 	}
@@ -347,22 +344,20 @@ public abstract class AbstractJsonMarshalTester<T> {
 	 * @return the resulting object
 	 * @throws IOException on read error
 	 */
-	protected abstract T readObject(Reader reader, ResolvableType type)
-			throws IOException;
+	protected abstract T readObject(Reader reader, ResolvableType type) throws IOException;
 
 	/**
 	 * Utility class used to support field initialization. Used by subclasses to support
 	 * {@code initFields}.
 	 *
-	 * @param <M> The marshaller type
+	 * @param <M> the marshaller type
 	 */
-	protected static abstract class FieldInitializer<M> {
+	protected abstract static class FieldInitializer<M> {
 
 		private final Class<?> testerClass;
 
 		@SuppressWarnings("rawtypes")
-		protected FieldInitializer(
-				Class<? extends AbstractJsonMarshalTester> testerClass) {
+		protected FieldInitializer(Class<? extends AbstractJsonMarshalTester> testerClass) {
 			Assert.notNull(testerClass, "TesterClass must not be null");
 			this.testerClass = testerClass;
 		}
@@ -380,23 +375,20 @@ public abstract class AbstractJsonMarshalTester<T> {
 			});
 		}
 
-		public void initFields(final Object testInstance,
-				final ObjectFactory<M> marshaller) {
+		public void initFields(final Object testInstance, final ObjectFactory<M> marshaller) {
 			Assert.notNull(testInstance, "TestInstance must not be null");
 			Assert.notNull(marshaller, "Marshaller must not be null");
 			ReflectionUtils.doWithFields(testInstance.getClass(), new FieldCallback() {
 
 				@Override
-				public void doWith(Field field)
-						throws IllegalArgumentException, IllegalAccessException {
+				public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
 					doWithField(field, testInstance, marshaller);
 				}
 
 			});
 		}
 
-		protected void doWithField(Field field, Object test,
-				ObjectFactory<M> marshaller) {
+		protected void doWithField(Field field, Object test, ObjectFactory<M> marshaller) {
 			if (this.testerClass.isAssignableFrom(field.getType())) {
 				ReflectionUtils.makeAccessible(field);
 				Object existingValue = ReflectionUtils.getField(field, test);
@@ -408,12 +400,11 @@ public abstract class AbstractJsonMarshalTester<T> {
 
 		private void setupField(Field field, Object test, ObjectFactory<M> marshaller) {
 			ResolvableType type = ResolvableType.forField(field).getGeneric();
-			ReflectionUtils.setField(field, test,
-					createTester(test.getClass(), type, marshaller.getObject()));
+			ReflectionUtils.setField(field, test, createTester(test.getClass(), type, marshaller.getObject()));
 		}
 
-		protected abstract AbstractJsonMarshalTester<Object> createTester(
-				Class<?> resourceLoadClass, ResolvableType type, M marshaller);
+		protected abstract AbstractJsonMarshalTester<Object> createTester(Class<?> resourceLoadClass,
+				ResolvableType type, M marshaller);
 
 	}
 

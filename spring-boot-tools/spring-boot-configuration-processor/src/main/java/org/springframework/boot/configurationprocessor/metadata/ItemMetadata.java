@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,7 @@ package org.springframework.boot.configurationprocessor.metadata;
  * @since 1.2.0
  * @see ConfigurationMetadata
  */
-public class ItemMetadata implements Comparable<ItemMetadata> {
+public final class ItemMetadata implements Comparable<ItemMetadata> {
 
 	private ItemType itemType;
 
@@ -42,9 +42,8 @@ public class ItemMetadata implements Comparable<ItemMetadata> {
 
 	private ItemDeprecation deprecation;
 
-	ItemMetadata(ItemType itemType, String prefix, String name, String type,
-			String sourceType, String sourceMethod, String description,
-			Object defaultValue, ItemDeprecation deprecation) {
+	ItemMetadata(ItemType itemType, String prefix, String name, String type, String sourceType, String sourceMethod,
+			String description, Object defaultValue, ItemDeprecation deprecation) {
 		super();
 		this.itemType = itemType;
 		this.name = buildName(prefix, name);
@@ -60,11 +59,11 @@ public class ItemMetadata implements Comparable<ItemMetadata> {
 		while (prefix != null && prefix.endsWith(".")) {
 			prefix = prefix.substring(0, prefix.length() - 1);
 		}
-		StringBuilder fullName = new StringBuilder(prefix == null ? "" : prefix);
+		StringBuilder fullName = new StringBuilder((prefix != null) ? prefix : "");
 		if (fullName.length() > 0 && name != null) {
 			fullName.append(".");
 		}
-		fullName.append(name == null ? "" : ConfigurationMetadata.toDashedCase(name));
+		fullName.append((name != null) ? ConfigurationMetadata.toDashedCase(name) : "");
 		return fullName.toString();
 	}
 
@@ -132,6 +131,42 @@ public class ItemMetadata implements Comparable<ItemMetadata> {
 		this.deprecation = deprecation;
 	}
 
+	protected void buildToStringProperty(StringBuilder string, String property, Object value) {
+		if (value != null) {
+			string.append(" ").append(property).append(":").append(value);
+		}
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ItemMetadata other = (ItemMetadata) o;
+		return nullSafeEquals(this.itemType, other.itemType) && nullSafeEquals(this.name, other.name)
+				&& nullSafeEquals(this.type, other.type) && nullSafeEquals(this.description, other.description)
+				&& nullSafeEquals(this.sourceType, other.sourceType)
+				&& nullSafeEquals(this.sourceMethod, other.sourceMethod)
+				&& nullSafeEquals(this.defaultValue, other.defaultValue)
+				&& nullSafeEquals(this.deprecation, other.deprecation);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = nullSafeHashCode(this.itemType);
+		result = 31 * result + nullSafeHashCode(this.name);
+		result = 31 * result + nullSafeHashCode(this.type);
+		result = 31 * result + nullSafeHashCode(this.description);
+		result = 31 * result + nullSafeHashCode(this.sourceType);
+		result = 31 * result + nullSafeHashCode(this.sourceMethod);
+		result = 31 * result + nullSafeHashCode(this.defaultValue);
+		result = 31 * result + nullSafeHashCode(this.deprecation);
+		return result;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder string = new StringBuilder(this.name);
@@ -143,11 +178,18 @@ public class ItemMetadata implements Comparable<ItemMetadata> {
 		return string.toString();
 	}
 
-	protected final void buildToStringProperty(StringBuilder string, String property,
-			Object value) {
-		if (value != null) {
-			string.append(" ").append(property).append(":").append(value);
+	private boolean nullSafeEquals(Object o1, Object o2) {
+		if (o1 == o2) {
+			return true;
 		}
+		if (o1 == null || o2 == null) {
+			return false;
+		}
+		return o1.equals(o2);
+	}
+
+	private int nullSafeHashCode(Object o) {
+		return (o != null) ? o.hashCode() : 0;
 	}
 
 	@Override
@@ -155,17 +197,14 @@ public class ItemMetadata implements Comparable<ItemMetadata> {
 		return getName().compareTo(o.getName());
 	}
 
-	public static ItemMetadata newGroup(String name, String type, String sourceType,
-			String sourceMethod) {
-		return new ItemMetadata(ItemType.GROUP, name, null, type, sourceType,
-				sourceMethod, null, null, null);
+	public static ItemMetadata newGroup(String name, String type, String sourceType, String sourceMethod) {
+		return new ItemMetadata(ItemType.GROUP, name, null, type, sourceType, sourceMethod, null, null, null);
 	}
 
-	public static ItemMetadata newProperty(String prefix, String name, String type,
-			String sourceType, String sourceMethod, String description,
-			Object defaultValue, ItemDeprecation deprecation) {
-		return new ItemMetadata(ItemType.PROPERTY, prefix, name, type, sourceType,
-				sourceMethod, description, defaultValue, deprecation);
+	public static ItemMetadata newProperty(String prefix, String name, String type, String sourceType,
+			String sourceMethod, String description, Object defaultValue, ItemDeprecation deprecation) {
+		return new ItemMetadata(ItemType.PROPERTY, prefix, name, type, sourceType, sourceMethod, description,
+				defaultValue, deprecation);
 	}
 
 	/**

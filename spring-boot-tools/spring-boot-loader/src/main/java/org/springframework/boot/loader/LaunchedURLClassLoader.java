@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,6 +35,7 @@ import org.springframework.lang.UsesJava7;
  * @author Phillip Webb
  * @author Dave Syer
  * @author Andy Wilkinson
+ * @since 1.0.0
  */
 public class LaunchedURLClassLoader extends URLClassLoader {
 
@@ -74,8 +75,7 @@ public class LaunchedURLClassLoader extends URLClassLoader {
 	}
 
 	@Override
-	protected Class<?> loadClass(String name, boolean resolve)
-			throws ClassNotFoundException {
+	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 		Handler.setUseFastConnectionExceptions(true);
 		try {
 			try {
@@ -87,8 +87,8 @@ public class LaunchedURLClassLoader extends URLClassLoader {
 					// This should never happen as the IllegalArgumentException indicates
 					// that the package has already been defined and, therefore,
 					// getPackage(name) should not return null.
-					throw new AssertionError("Package " + name + " has already been "
-							+ "defined but it could not be found");
+					throw new AssertionError(
+							"Package " + name + " has already been " + "defined but it could not be found");
 				}
 			}
 			return super.loadClass(name, resolve);
@@ -119,8 +119,7 @@ public class LaunchedURLClassLoader extends URLClassLoader {
 						// indicates that the package has already been defined and,
 						// therefore, getPackage(name) should not have returned null.
 						throw new AssertionError(
-								"Package " + packageName + " has already been defined "
-										+ "but it could not be found");
+								"Package " + packageName + " has already been defined " + "but it could not be found");
 					}
 				}
 			}
@@ -138,13 +137,11 @@ public class LaunchedURLClassLoader extends URLClassLoader {
 						try {
 							URLConnection connection = url.openConnection();
 							if (connection instanceof JarURLConnection) {
-								JarFile jarFile = ((JarURLConnection) connection)
-										.getJarFile();
+								JarFile jarFile = ((JarURLConnection) connection).getJarFile();
 								if (jarFile.getEntry(classEntryName) != null
 										&& jarFile.getEntry(packageEntryName) != null
 										&& jarFile.getManifest() != null) {
-									definePackage(packageName, jarFile.getManifest(),
-											url);
+									definePackage(packageName, jarFile.getManifest(), url);
 									return null;
 								}
 							}

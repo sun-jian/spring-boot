@@ -212,9 +212,9 @@ For example, to mark _all_ endpoints as sensitive except `info`:
 [[production-ready-endpoint-hypermedia]]
 === Hypermedia for actuator MVC endpoints
 If `endpoints.hypermedia.enabled` is set to `true` and
-http://projects.spring.io/spring-hateoas[Spring HATEOAS] is on the classpath (e.g.
+https://projects.spring.io/spring-hateoas[Spring HATEOAS] is on the classpath (e.g.
 through the `spring-boot-starter-hateoas` or if you are using
-http://projects.spring.io/spring-data-rest[Spring Data REST]) then the HTTP endpoints
+https://projects.spring.io/spring-data-rest[Spring Data REST]) then the HTTP endpoints
 from the Actuator are enhanced with hypermedia links, and a "`discovery page`" is added
 with links to all the endpoints. The "`discovery page`" is available on `/actuator` by
 default. It is implemented as an endpoint, allowing properties to be used to configure
@@ -234,8 +234,8 @@ an HTML "`discovery page`", in the form of the HAL Browser, is also provided.
 
 [[production-ready-endpoint-cors]]
 === CORS support
-http://en.wikipedia.org/wiki/Cross-origin_resource_sharing[Cross-origin resource sharing]
-(CORS) is a http://www.w3.org/TR/cors/[W3C specification] that allows you to specify in a
+https://en.wikipedia.org/wiki/Cross-origin_resource_sharing[Cross-origin resource sharing]
+(CORS) is a https://www.w3.org/TR/cors/[W3C specification] that allows you to specify in a
 flexible way what kind of cross domain requests are authorized. Actuator's MVC endpoints
 can be configured to support such scenarios.
 
@@ -245,7 +245,7 @@ CORS support is disabled by default and is only enabled once the
 
 [source,properties,indent=0]
 ----
-	endpoints.cors.allowed-origins=http://example.com
+	endpoints.cors.allowed-origins=https://example.com
 	endpoints.cors.allowed-methods=GET,POST
 ----
 
@@ -283,7 +283,11 @@ returned, and for an authenticated connection additional details are also displa
 Health information is collected from all
 {sc-spring-boot-actuator}/health/HealthIndicator.{sc-ext}[`HealthIndicator`] beans defined
 in your `ApplicationContext`. Spring Boot includes a number of auto-configured
-`HealthIndicators` and you can also write your own.
+`HealthIndicators` and you can also write your own. By default, the final system state is
+derived by the `HealthAggregator` which sorts the statuses from each `HealthIndicator`
+based on an ordered list of statuses. The first status in the sorted list is used as the
+overall health status. If no `HealthIndicator` returns a status that is known to the
+`HealthAggregator`, an `UNKNOWN` status is used.
 
 
 
@@ -303,7 +307,7 @@ of 1000 milliseconds.
 ==== Auto-configured HealthIndicators
 The following `HealthIndicators` are auto-configured by Spring Boot when appropriate:
 
-[cols="1,4"]
+[cols="4,6"]
 |===
 |Name |Description
 
@@ -387,18 +391,37 @@ to your application properties:
 
 [source,properties,indent=0]
 ----
-	management.health.status.order=DOWN, OUT_OF_SERVICE, UNKNOWN, UP
+	management.health.status.order=FATAL, DOWN, OUT_OF_SERVICE, UNKNOWN, UP
 ----
 
 The HTTP status code in the response reflects the overall health status (e.g. `UP`
 maps to 200, `OUT_OF_SERVICE` or `DOWN` to 503). You might also want to register custom
 status mappings with the `HealthMvcEndpoint` if you access the health endpoint over HTTP.
-For example, the following maps `FATAL` to `HttpStatus.SERVICE_UNAVAILABLE`:
+For example, the following maps `FATAL` to 503 (service unavailable):
 
 [source,properties,indent=0]
 ----
-	endpoints.health.mappings.FATAL=503
+	endpoints.health.mapping.FATAL=503
 ----
+
+The default status mappings for the built-in statuses are:
+
+[cols="1,3"]
+|===
+|Status |Mapping
+
+|DOWN
+|SERVICE_UNAVAILABLE (503)
+
+|OUT_OF_SERVICE
+|SERVICE_UNAVAILABLE (503)
+
+|UP
+|No mapping by default, so http status is 200
+
+|UNKNOWN
+|No mapping by default, so http status is 200
+|===
 
 
 
@@ -613,6 +636,10 @@ your application might already use `/info` for another purpose. You can use the
 The `application.properties` example above will change the endpoint from `/{id}` to
 `/manage/{id}` (e.g. `/manage/info`).
 
+NOTE: Unless the management port has been configured to
+<<production-ready-customizing-management-server-port,expose endpoints using a different
+HTTP port>>, `management.context-path` is relative to `server.context-path`.
+
 You can also change the "`id`" of an endpoint (using `endpoints.{name}.id`) which then
 changes the default resource path for the MVC endpoint. Legal endpoint ids are composed
 only of alphanumeric characters (because they can be exposed in a number of places,
@@ -794,16 +821,11 @@ users full access to the health endpoint in a secure application. To do so, set
 `sensitive` flag value "`false`" indicated in bold):
 
 |====
-| `management.security.enabled` | `endpoints.health.sensitive` | Unauthenticated | Authenticated
+| `management.security.enabled` | `endpoints.health.sensitive` | Unauthenticated | Authenticated (with right role)
 
 |false
-|**false**
+|*
 |Full content
-|Full content
-
-|false
-|true
-|Status only
 |Full content
 
 |true
@@ -870,7 +892,7 @@ using Maven you would add the following:
 	<dependency>
 		<groupId>org.jolokia</groupId>
 		<artifactId>jolokia-core</artifactId>
- 	</dependency>
+	</dependency>
 ----
 
 Jolokia can then be accessed using `/jolokia` on your management HTTP server.
@@ -939,7 +961,7 @@ authentication will be applied and you should see a message like this:
 ----
 
 Linux and OSX users can use `ssh` to connect to the remote shell, Windows users can
-download and install http://www.putty.org/[PuTTY].
+download and install https://www.putty.org/[PuTTY].
 
 [indent=0,subs="attributes"]
 ----
@@ -1042,7 +1064,7 @@ In addition to new commands, it is also possible to extend other CRaSH shell fea
 All Spring Beans that extend `org.crsh.plugin.CRaSHPlugin` will be automatically
 registered with the shell.
 
-For more information please refer to the http://www.crashub.org/[CRaSH reference
+For more information please refer to the https://www.crashub.org/[CRaSH reference
 documentation].
 
 
@@ -1251,7 +1273,7 @@ Here is a simple example that counts the number of times that a method is invoke
 
 TIP: You can use any string as a metric name but you should follow guidelines of your chosen
 store/graphing technology. Some good guidelines for Graphite are available on
-http://matt.aimonetti.net/posts/2013/06/26/practical-guide-to-graphite-monitoring/[Matt Aimonetti's Blog].
+https://matt.aimonetti.net/posts/2013/06/26/practical-guide-to-graphite-monitoring/[Matt Aimonetti's Blog].
 
 
 
@@ -1370,8 +1392,8 @@ recommendations.
 [[production-ready-metric-writers-export-to-open-tsdb]]
 ==== Example: Export to Open TSDB
 If you provide a `@Bean` of type `OpenTsdbGaugeWriter` and mark it
-`@ExportMetricWriter` metrics are exported to http://opentsdb.net/[Open TSDB] for
-aggregation. The `OpenTsdbGaugeWriter` has a `url` property that you need to set
+`@ExportMetricWriter` metrics are exported to https://github.com/OpenTSDB/opentsdb[Open
+TSDB] for aggregation. The `OpenTsdbGaugeWriter` has a `url` property that you need to set
 to the Open TSDB "`/put`" endpoint, e.g. `http://localhost:4242/api/put`). It also has a
 `namingStrategy` that you can customize or configure to make the metrics match the data
 structure you need on the server. By default it just passes through the metric name as an
@@ -1725,7 +1747,7 @@ include::{code-examples}/cloudfoundry/CloudFoundryIgnorePathsExample.java[tag=se
 == What to read next
 If you want to explore some of the concepts discussed in this chapter, you can take a
 look at the actuator {github-code}/spring-boot-samples[sample applications]. You also
-might want to read about graphing tools such as http://graphite.wikidot.com/[Graphite].
+might want to read about graphing tools such as https://graphite.wikidot.com/[Graphite].
 
 Otherwise, you can continue on, to read about <<deployment.adoc#deployment,
 '`deployment options`'>> or jump ahead

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,16 +42,13 @@ class BindFailureAnalyzer extends AbstractFailureAnalyzer<BindException> {
 		for (ObjectError error : cause.getAllErrors()) {
 			if (error instanceof FieldError) {
 				FieldError fieldError = (FieldError) error;
-				description.append(String.format("%n    Property: %s",
-						cause.getObjectName() + "." + fieldError.getField()));
 				description.append(
-						String.format("%n    Value: %s", fieldError.getRejectedValue()));
+						String.format("%n    Property: %s", cause.getObjectName() + "." + fieldError.getField()));
+				description.append(String.format("%n    Value: %s", fieldError.getRejectedValue()));
 			}
-			description.append(
-					String.format("%n    Reason: %s%n", error.getDefaultMessage()));
+			description.append(String.format("%n    Reason: %s%n", error.getDefaultMessage()));
 		}
-		return new FailureAnalysis(description.toString(),
-				"Update your application's configuration", cause);
+		return new FailureAnalysis(description.toString(), "Update your application's configuration", cause);
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,9 +27,12 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.test.json.AbstractJsonMarshalTester;
 import org.springframework.boot.test.json.BasicJsonTester;
 import org.springframework.boot.test.json.GsonTester;
@@ -52,6 +55,7 @@ import org.springframework.util.ReflectionUtils.FieldCallback;
 @Configuration
 @ConditionalOnClass(name = "org.assertj.core.api.Assert")
 @ConditionalOnProperty("spring.test.jsontesters.enabled")
+@AutoConfigureAfter({ JacksonAutoConfiguration.class, GsonAutoConfiguration.class })
 public class JsonTestersAutoConfiguration {
 
 	@Bean
@@ -62,26 +66,25 @@ public class JsonTestersAutoConfiguration {
 	@Bean
 	@Scope("prototype")
 	public FactoryBean<BasicJsonTester> basicJsonTesterFactoryBean() {
-		return new JsonTesterFactoryBean<BasicJsonTester, Void>(BasicJsonTester.class,
-				null);
+		return new JsonTesterFactoryBean<BasicJsonTester, Void>(BasicJsonTester.class, null);
 	}
 
+	@Configuration
 	@ConditionalOnClass(ObjectMapper.class)
-	private static class JacksonJsonTestersConfiguration {
+	static class JacksonJsonTestersConfiguration {
 
 		@Bean
 		@Scope("prototype")
 		@ConditionalOnBean(ObjectMapper.class)
-		public FactoryBean<JacksonTester<?>> jacksonTesterFactoryBean(
-				ObjectMapper mapper) {
-			return new JsonTesterFactoryBean<JacksonTester<?>, ObjectMapper>(
-					JacksonTester.class, mapper);
+		public FactoryBean<JacksonTester<?>> jacksonTesterFactoryBean(ObjectMapper mapper) {
+			return new JsonTesterFactoryBean<JacksonTester<?>, ObjectMapper>(JacksonTester.class, mapper);
 		}
 
 	}
 
+	@Configuration
 	@ConditionalOnClass(Gson.class)
-	private static class GsonJsonTestersConfiguration {
+	static class GsonJsonTestersConfiguration {
 
 		@Bean
 		@Scope("prototype")
@@ -123,14 +126,12 @@ public class JsonTestersAutoConfiguration {
 			Constructor<?>[] constructors = this.objectType.getDeclaredConstructors();
 			for (Constructor<?> constructor : constructors) {
 				if (constructor.getParameterTypes().length == 1
-						&& constructor.getParameterTypes()[0]
-								.isInstance(this.marshaller)) {
+						&& constructor.getParameterTypes()[0].isInstance(this.marshaller)) {
 					ReflectionUtils.makeAccessible(constructor);
 					return (T) BeanUtils.instantiateClass(constructor, this.marshaller);
 				}
 			}
-			throw new IllegalStateException(
-					this.objectType + " does not have a usable constructor");
+			throw new IllegalStateException(this.objectType + " does not have a usable constructor");
 		}
 
 		@Override
@@ -143,18 +144,15 @@ public class JsonTestersAutoConfiguration {
 	/**
 	 * {@link BeanPostProcessor} used to initialize JSON testers.
 	 */
-	private static class JsonMarshalTestersBeanPostProcessor
-			extends InstantiationAwareBeanPostProcessorAdapter {
+	private static class JsonMarshalTestersBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter {
 
 		@Override
-		public Object postProcessAfterInitialization(final Object bean, String beanName)
-				throws BeansException {
+		public Object postProcessAfterInitialization(final Object bean, String beanName) throws BeansException {
 
 			ReflectionUtils.doWithFields(bean.getClass(), new FieldCallback() {
 
 				@Override
-				public void doWith(Field field)
-						throws IllegalArgumentException, IllegalAccessException {
+				public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
 					processField(bean, field);
 				}
 
@@ -169,8 +167,7 @@ public class JsonTestersAutoConfiguration {
 				ReflectionUtils.makeAccessible(field);
 				Object tester = ReflectionUtils.getField(field, bean);
 				if (tester != null) {
-					ReflectionTestUtils.invokeMethod(tester, "initialize",
-							bean.getClass(), type);
+					ReflectionTestUtils.invokeMethod(tester, "initialize", bean.getClass(), type);
 				}
 			}
 		}

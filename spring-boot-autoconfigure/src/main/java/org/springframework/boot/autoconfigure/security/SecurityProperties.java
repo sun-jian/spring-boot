@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,6 +33,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Dave Syer
  * @author Andy Wilkinson
+ * @since 1.0.0
  */
 @ConfigurationProperties(prefix = "security")
 public class SecurityProperties implements SecurityPrerequisite {
@@ -42,8 +43,7 @@ public class SecurityProperties implements SecurityPrerequisite {
 	 * useful place to put user-defined access rules if you want to override the default
 	 * access rules.
 	 */
-	public static final int ACCESS_OVERRIDE_ORDER = SecurityProperties.BASIC_AUTH_ORDER
-			- 2;
+	public static final int ACCESS_OVERRIDE_ORDER = SecurityProperties.BASIC_AUTH_ORDER - 2;
 
 	/**
 	 * Order applied to the WebSecurityConfigurerAdapter that is used to configure basic
@@ -64,8 +64,7 @@ public class SecurityProperties implements SecurityPrerequisite {
 	 * other filters registered with the container). There is no connection between this
 	 * and the <code>@Order</code> on a WebSecurityConfigurer.
 	 */
-	public static final int DEFAULT_FILTER_ORDER = FilterRegistrationBean.REQUEST_WRAPPER_FILTER_MAX_ORDER
-			- 100;
+	public static final int DEFAULT_FILTER_ORDER = FilterRegistrationBean.REQUEST_WRAPPER_FILTER_MAX_ORDER - 100;
 
 	/**
 	 * Enable secure channel for all requests.
@@ -75,7 +74,6 @@ public class SecurityProperties implements SecurityPrerequisite {
 	/**
 	 * Enable Cross Site Request Forgery support.
 	 */
-	// Flip this when session creation is disabled by default
 	private boolean enableCsrf = false;
 
 	private Basic basic = new Basic();
@@ -269,8 +267,7 @@ public class SecurityProperties implements SecurityPrerequisite {
 			return this.contentSecurityPolicyMode;
 		}
 
-		public void setContentSecurityPolicyMode(
-				ContentSecurityPolicyMode contentSecurityPolicyMode) {
+		public void setContentSecurityPolicyMode(ContentSecurityPolicyMode contentSecurityPolicyMode) {
 			this.contentSecurityPolicyMode = contentSecurityPolicyMode;
 		}
 
@@ -355,8 +352,7 @@ public class SecurityProperties implements SecurityPrerequisite {
 		/**
 		 * Granted roles for the default user name.
 		 */
-		private List<String> role = new ArrayList<String>(
-				Collections.singletonList("USER"));
+		private List<String> role = new ArrayList<String>(Collections.singletonList("USER"));
 
 		private boolean defaultPassword = true;
 
@@ -373,8 +369,7 @@ public class SecurityProperties implements SecurityPrerequisite {
 		}
 
 		public void setPassword(String password) {
-			if (password.startsWith("${") && password.endsWith("}")
-					|| !StringUtils.hasLength(password)) {
+			if (password.startsWith("${") && password.endsWith("}") || !StringUtils.hasLength(password)) {
 				return;
 			}
 			this.defaultPassword = false;

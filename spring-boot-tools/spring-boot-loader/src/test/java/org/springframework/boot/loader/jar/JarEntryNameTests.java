@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,21 +38,17 @@ public class JarEntryNameTests {
 
 	@Test
 	public void nameWithSingleByteEncodedCharacters() {
-		assertThat(new JarEntryName("%61/%62/%43.class").toString())
-				.isEqualTo("a/b/C.class");
+		assertThat(new JarEntryName("%61/%62/%43.class").toString()).isEqualTo("a/b/C.class");
 	}
 
 	@Test
 	public void nameWithDoubleByteEncodedCharacters() {
-		assertThat(new JarEntryName("%c3%a1/b/C.class").toString())
-				.isEqualTo("\u00e1/b/C.class");
+		assertThat(new JarEntryName("%c3%a1/b/C.class").toString()).isEqualTo("\u00e1/b/C.class");
 	}
 
 	@Test
-	public void nameWithMixtureOfEncodedAndUnencodedDoubleByteCharacters()
-			throws UnsupportedEncodingException {
-		assertThat(new JarEntryName("%c3%a1/b/\u00c7.class").toString())
-				.isEqualTo("\u00e1/b/\u00c7.class");
+	public void nameWithMixtureOfEncodedAndUnencodedDoubleByteCharacters() throws UnsupportedEncodingException {
+		assertThat(new JarEntryName("%c3%a1/b/\u00c7.class").toString()).isEqualTo("\u00e1/b/\u00c7.class");
 	}
 
 }

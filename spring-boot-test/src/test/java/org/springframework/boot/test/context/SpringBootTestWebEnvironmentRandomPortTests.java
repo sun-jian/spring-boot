@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,8 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @DirtiesContext
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = { "value=123" })
-public class SpringBootTestWebEnvironmentRandomPortTests
-		extends AbstractSpringBootTestEmbeddedWebEnvironmentTests {
+public class SpringBootTestWebEnvironmentRandomPortTests extends AbstractSpringBootTestEmbeddedWebEnvironmentTests {
 
 	@Test
 	public void testRestTemplateShouldUseBuilder() throws Exception {
@@ -56,8 +55,7 @@ public class SpringBootTestWebEnvironmentRandomPortTests
 
 		@Bean
 		public RestTemplateBuilder restTemplateBuilder() {
-			return new RestTemplateBuilder()
-					.additionalMessageConverters(new MyConverter());
+			return new RestTemplateBuilder().additionalMessageConverters(new MyConverter());
 
 		}
 

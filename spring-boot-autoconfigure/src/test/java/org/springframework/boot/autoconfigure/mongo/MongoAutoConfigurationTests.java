@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,6 @@ package org.springframework.boot.autoconfigure.mongo;
 
 import javax.net.SocketFactory;
 
-import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import org.junit.After;
@@ -52,48 +51,42 @@ public class MongoAutoConfigurationTests {
 
 	@Test
 	public void clientExists() {
-		this.context = new AnnotationConfigApplicationContext(
-				PropertyPlaceholderAutoConfiguration.class, MongoAutoConfiguration.class);
-		assertThat(this.context.getBeanNamesForType(Mongo.class).length).isEqualTo(1);
+		this.context = new AnnotationConfigApplicationContext(PropertyPlaceholderAutoConfiguration.class,
+				MongoAutoConfiguration.class);
+		assertThat(this.context.getBeanNamesForType(MongoClient.class)).hasSize(1);
 	}
 
 	@Test
 	public void optionsAdded() {
 		this.context = new AnnotationConfigApplicationContext();
-		EnvironmentTestUtils.addEnvironment(this.context,
-				"spring.data.mongodb.host:localhost");
-		this.context.register(OptionsConfig.class,
-				PropertyPlaceholderAutoConfiguration.class, MongoAutoConfiguration.class);
+		EnvironmentTestUtils.addEnvironment(this.context, "spring.data.mongodb.host:localhost");
+		this.context.register(OptionsConfig.class, PropertyPlaceholderAutoConfiguration.class,
+				MongoAutoConfiguration.class);
 		this.context.refresh();
-		assertThat(this.context.getBean(MongoClient.class).getMongoClientOptions()
-				.getSocketTimeout()).isEqualTo(300);
+		assertThat(this.context.getBean(MongoClient.class).getMongoClientOptions().getSocketTimeout()).isEqualTo(300);
 	}
 
 	@Test
 	public void optionsAddedButNoHost() {
 		this.context = new AnnotationConfigApplicationContext();
-		EnvironmentTestUtils.addEnvironment(this.context,
-				"spring.data.mongodb.uri:mongodb://localhost/test");
-		this.context.register(OptionsConfig.class,
-				PropertyPlaceholderAutoConfiguration.class, MongoAutoConfiguration.class);
+		EnvironmentTestUtils.addEnvironment(this.context, "spring.data.mongodb.uri:mongodb://localhost/test");
+		this.context.register(OptionsConfig.class, PropertyPlaceholderAutoConfiguration.class,
+				MongoAutoConfiguration.class);
 		this.context.refresh();
-		assertThat(this.context.getBean(MongoClient.class).getMongoClientOptions()
-				.getSocketTimeout()).isEqualTo(300);
+		assertThat(this.context.getBean(MongoClient.class).getMongoClientOptions().getSocketTimeout()).isEqualTo(300);
 	}
 
 	@Test
 	public void optionsSslConfig() {
 		this.context = new AnnotationConfigApplicationContext();
-		EnvironmentTestUtils.addEnvironment(this.context,
-				"spring.data.mongodb.uri:mongodb://localhost/test");
-		this.context.register(SslOptionsConfig.class,
-				PropertyPlaceholderAutoConfiguration.class, MongoAutoConfiguration.class);
+		EnvironmentTestUtils.addEnvironment(this.context, "spring.data.mongodb.uri:mongodb://localhost/test");
+		this.context.register(SslOptionsConfig.class, PropertyPlaceholderAutoConfiguration.class,
+				MongoAutoConfiguration.class);
 		this.context.refresh();
 		MongoClient mongo = this.context.getBean(MongoClient.class);
 		MongoClientOptions options = mongo.getMongoClientOptions();
 		assertThat(options.isSslEnabled()).isTrue();
-		assertThat(options.getSocketFactory())
-				.isSameAs(this.context.getBean("mySocketFactory"));
+		assertThat(options.getSocketFactory()).isSameAs(this.context.getBean("mySocketFactory"));
 	}
 
 	@Configuration
@@ -111,8 +104,7 @@ public class MongoAutoConfigurationTests {
 
 		@Bean
 		public MongoClientOptions mongoClientOptions() {
-			return MongoClientOptions.builder().sslEnabled(true)
-					.socketFactory(mySocketFactory()).build();
+			return MongoClientOptions.builder().sslEnabled(true).socketFactory(mySocketFactory()).build();
 		}
 
 		@Bean

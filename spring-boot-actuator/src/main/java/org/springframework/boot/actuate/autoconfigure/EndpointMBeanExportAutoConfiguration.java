@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -50,6 +50,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Christian Dupuis
  * @author Andy Wilkinson
+ * @since 1.0.0
  */
 @Configuration
 @Conditional(JmxEnabledCondition.class)
@@ -69,8 +70,7 @@ public class EndpointMBeanExportAutoConfiguration {
 
 	@Bean
 	public EndpointMBeanExporter endpointMBeanExporter(MBeanServer server) {
-		EndpointMBeanExporter mbeanExporter = new EndpointMBeanExporter(
-				this.objectMapper);
+		EndpointMBeanExporter mbeanExporter = new EndpointMBeanExporter(this.objectMapper);
 		String domain = this.properties.getDomain();
 		if (StringUtils.hasText(domain)) {
 			mbeanExporter.setDomain(domain);
@@ -90,8 +90,7 @@ public class EndpointMBeanExportAutoConfiguration {
 	@Bean
 	@ConditionalOnBean(AuditEventRepository.class)
 	@ConditionalOnEnabledEndpoint("auditevents")
-	public AuditEventsJmxEndpoint auditEventsEndpoint(
-			AuditEventRepository auditEventRepository) {
+	public AuditEventsJmxEndpoint auditEventsEndpoint(AuditEventRepository auditEventRepository) {
 		return new AuditEventsJmxEndpoint(this.objectMapper, auditEventRepository);
 	}
 
@@ -101,22 +100,19 @@ public class EndpointMBeanExportAutoConfiguration {
 	static class JmxEnabledCondition extends SpringBootCondition {
 
 		@Override
-		public ConditionOutcome getMatchOutcome(ConditionContext context,
-				AnnotatedTypeMetadata metadata) {
+		public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			boolean jmxEnabled = isEnabled(context, "spring.jmx.");
 			boolean jmxEndpointsEnabled = isEnabled(context, "endpoints.jmx.");
 			if (jmxEnabled && jmxEndpointsEnabled) {
-				return ConditionOutcome.match(
-						ConditionMessage.forCondition("JMX Enabled").found("properties")
-								.items("spring.jmx.enabled", "endpoints.jmx.enabled"));
+				return ConditionOutcome.match(ConditionMessage.forCondition("JMX Enabled").found("properties")
+						.items("spring.jmx.enabled", "endpoints.jmx.enabled"));
 			}
 			return ConditionOutcome.noMatch(ConditionMessage.forCondition("JMX Enabled")
 					.because("spring.jmx.enabled or endpoints.jmx.enabled is not set"));
 		}
 
 		private boolean isEnabled(ConditionContext context, String prefix) {
-			RelaxedPropertyResolver resolver = new RelaxedPropertyResolver(
-					context.getEnvironment(), prefix);
+			RelaxedPropertyResolver resolver = new RelaxedPropertyResolver(context.getEnvironment(), prefix);
 			return resolver.getProperty("enabled", Boolean.class, true);
 		}
 

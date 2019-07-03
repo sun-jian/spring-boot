@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,8 +38,7 @@ import org.springframework.util.ClassUtils;
  */
 class JasperInitializer extends AbstractLifeCycle {
 
-	private static final String[] INITIALIZER_CLASSES = {
-			"org.eclipse.jetty.apache.jsp.JettyJasperInitializer",
+	private static final String[] INITIALIZER_CLASSES = { "org.eclipse.jetty.apache.jsp.JettyJasperInitializer",
 			"org.apache.jasper.servlet.JasperInitializer" };
 
 	private final WebAppContext context;
@@ -127,8 +126,7 @@ class JasperInitializer extends AbstractLifeCycle {
 			String path = "jar:" + spec.substring("war:".length());
 			int separator = path.indexOf("*/");
 			if (separator >= 0) {
-				path = path.substring(0, separator) + "!/"
-						+ path.substring(separator + 2);
+				path = path.substring(0, separator) + "!/" + path.substring(separator + 2);
 			}
 			setURL(u, u.getProtocol(), "", -1, null, null, path, null, null);
 		}

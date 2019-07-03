@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,15 +40,13 @@ import org.springframework.util.ClassUtils;
  */
 @Configuration
 @Conditional(NeedsWebSecurityCondition.class)
-public class OAuth2SsoDefaultConfiguration extends WebSecurityConfigurerAdapter
-		implements Ordered {
+public class OAuth2SsoDefaultConfiguration extends WebSecurityConfigurerAdapter implements Ordered {
 
 	private final ApplicationContext applicationContext;
 
 	private final OAuth2SsoProperties sso;
 
-	public OAuth2SsoDefaultConfiguration(ApplicationContext applicationContext,
-			OAuth2SsoProperties sso) {
+	public OAuth2SsoDefaultConfiguration(ApplicationContext applicationContext, OAuth2SsoProperties sso) {
 		this.applicationContext = applicationContext;
 		this.sso = sso;
 	}
@@ -64,9 +62,7 @@ public class OAuth2SsoDefaultConfiguration extends WebSecurityConfigurerAdapter
 		if (this.sso.getFilterOrder() != null) {
 			return this.sso.getFilterOrder();
 		}
-		if (ClassUtils.isPresent(
-				"org.springframework.boot.actuate.autoconfigure.ManagementServerProperties",
-				null)) {
+		if (ClassUtils.isPresent("org.springframework.boot.actuate.autoconfigure.ManagementServerProperties", null)) {
 			// If > BASIC_AUTH_ORDER then the existing rules for the actuator
 			// endpoints will take precedence. This value is < BASIC_AUTH_ORDER.
 			return SecurityProperties.ACCESS_OVERRIDE_ORDER - 5;
@@ -77,8 +73,7 @@ public class OAuth2SsoDefaultConfiguration extends WebSecurityConfigurerAdapter
 	protected static class NeedsWebSecurityCondition extends EnableOAuth2SsoCondition {
 
 		@Override
-		public ConditionOutcome getMatchOutcome(ConditionContext context,
-				AnnotatedTypeMetadata metadata) {
+		public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			return ConditionOutcome.inverse(super.getMatchOutcome(context, metadata));
 		}
 

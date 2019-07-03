@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -121,19 +121,16 @@ public class AggregateMetricReader implements MetricReader {
 		String name = this.prefix + key;
 		Metric<?> aggregate = result.findOne(name);
 		if (aggregate == null) {
-			aggregate = new Metric<Number>(name, metric.getValue(),
-					metric.getTimestamp());
+			aggregate = new Metric<Number>(name, metric.getValue(), metric.getTimestamp());
 		}
 		else if (key.contains("counter.")) {
 			// accumulate all values
-			aggregate = new Metric<Number>(name,
-					metric.increment(aggregate.getValue().intValue()).getValue(),
+			aggregate = new Metric<Number>(name, metric.increment(aggregate.getValue().intValue()).getValue(),
 					metric.getTimestamp());
 		}
 		else if (aggregate.getTimestamp().before(metric.getTimestamp())) {
 			// sort by timestamp and only take the latest
-			aggregate = new Metric<Number>(name, metric.getValue(),
-					metric.getTimestamp());
+			aggregate = new Metric<Number>(name, metric.getValue(), metric.getTimestamp());
 		}
 		result.set(aggregate);
 	}
@@ -144,12 +141,12 @@ public class AggregateMetricReader implements MetricReader {
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < patterns.length; i++) {
 			if ("k".equals(patterns[i])) {
-				builder.append(builder.length() > 0 ? "." : "");
+				builder.append((builder.length() > 0) ? "." : "");
 				builder.append(keys[i]);
 			}
 		}
 		for (int i = patterns.length; i < keys.length; i++) {
-			builder.append(builder.length() > 0 ? "." : "");
+			builder.append((builder.length() > 0) ? "." : "");
 			builder.append(keys[i]);
 		}
 		return builder.toString();

@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,8 +45,7 @@ public class StarterDependenciesIntegrationTests {
 
 	private static final String STARTER_NAME_PREFIX = "spring-boot-starter";
 
-	private static final List<String> EXCLUDED_STARTERS = Arrays
-			.asList("spring-boot-starter-parent");
+	private static final List<String> EXCLUDED_STARTERS = Arrays.asList("spring-boot-starter-parent");
 
 	private static ProjectConnection project;
 
@@ -62,8 +61,7 @@ public class StarterDependenciesIntegrationTests {
 		for (File file : new File("../../spring-boot-starters").listFiles()) {
 			if (file.isDirectory() && new File(file, "pom.xml").exists()) {
 				String name = file.getName();
-				if (name.startsWith(STARTER_NAME_PREFIX)
-						&& !EXCLUDED_STARTERS.contains(file.getName())) {
+				if (name.startsWith(STARTER_NAME_PREFIX) && !EXCLUDED_STARTERS.contains(file.getName())) {
 					starters.add(new String[] { file.getName() });
 				}
 			}
@@ -88,8 +86,8 @@ public class StarterDependenciesIntegrationTests {
 	}
 
 	public StarterDependenciesIntegrationTests(String starter) {
-		this.buildArguments = new String[] { "-Pstarter=" + starter,
-				"-PbootVersion=" + bootVersion, "-PspringVersion=" + springVersion };
+		this.buildArguments = new String[] { "-Pstarter=" + starter, "-PbootVersion=" + bootVersion,
+				"-PspringVersion=" + springVersion };
 	}
 
 	@Test

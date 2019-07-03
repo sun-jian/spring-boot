@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * {@link PublicMetrics} exposed from a {@link RichGaugeReader}.
  *
  * @author Johannes Edmeier
- * @since 1.2
+ * @since 1.2.0
  */
 public class RichGaugeReaderPublicMetrics implements PublicMetrics {
 
@@ -51,13 +51,11 @@ public class RichGaugeReaderPublicMetrics implements PublicMetrics {
 
 	private List<Metric<?>> convert(RichGauge gauge) {
 		List<Metric<?>> result = new ArrayList<Metric<?>>(6);
-		result.add(
-				new Metric<Double>(gauge.getName() + RichGauge.AVG, gauge.getAverage()));
+		result.add(new Metric<Double>(gauge.getName() + RichGauge.AVG, gauge.getAverage()));
 		result.add(new Metric<Double>(gauge.getName() + RichGauge.VAL, gauge.getValue()));
 		result.add(new Metric<Double>(gauge.getName() + RichGauge.MIN, gauge.getMin()));
 		result.add(new Metric<Double>(gauge.getName() + RichGauge.MAX, gauge.getMax()));
-		result.add(
-				new Metric<Double>(gauge.getName() + RichGauge.ALPHA, gauge.getAlpha()));
+		result.add(new Metric<Double>(gauge.getName() + RichGauge.ALPHA, gauge.getAlpha()));
 		result.add(new Metric<Long>(gauge.getName() + RichGauge.COUNT, gauge.getCount()));
 		return result;
 	}

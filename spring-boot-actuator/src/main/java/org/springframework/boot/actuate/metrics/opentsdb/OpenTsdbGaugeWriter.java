@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -74,8 +74,7 @@ public class OpenTsdbGaugeWriter implements GaugeWriter {
 	 */
 	private MediaType mediaType = MediaType.APPLICATION_JSON;
 
-	private final List<OpenTsdbData> buffer = new ArrayList<OpenTsdbData>(
-			this.bufferSize);
+	private final List<OpenTsdbData> buffer = new ArrayList<OpenTsdbData>(this.bufferSize);
 
 	private OpenTsdbNamingStrategy namingStrategy = new DefaultOpenTsdbNamingStrategy();
 
@@ -126,8 +125,8 @@ public class OpenTsdbGaugeWriter implements GaugeWriter {
 
 	@Override
 	public void set(Metric<?> value) {
-		OpenTsdbData data = new OpenTsdbData(this.namingStrategy.getName(value.getName()),
-				value.getValue(), value.getTimestamp().getTime());
+		OpenTsdbData data = new OpenTsdbData(this.namingStrategy.getName(value.getName()), value.getValue(),
+				value.getTimestamp().getTime());
 		synchronized (this.buffer) {
 			this.buffer.add(data);
 			if (this.buffer.size() >= this.bufferSize) {
@@ -151,8 +150,7 @@ public class OpenTsdbGaugeWriter implements GaugeWriter {
 		ResponseEntity<Map> response = this.restTemplate.postForEntity(this.url,
 				new HttpEntity<List<OpenTsdbData>>(snapshot, headers), Map.class);
 		if (!response.getStatusCode().is2xxSuccessful()) {
-			logger.warn("Cannot write metrics (discarded " + snapshot.size()
-					+ " values): " + response.getBody());
+			logger.warn("Cannot write metrics (discarded " + snapshot.size() + " values): " + response.getBody());
 		}
 	}
 

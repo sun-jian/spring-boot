@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -59,8 +59,7 @@ public class AtomikosDependsOnBeanFactoryPostProcessorTests {
 			assertThat(expected).as("No dependsOn expected for " + bean).isEmpty();
 			return;
 		}
-		HashSet<String> dependsOn = new HashSet<String>(
-				Arrays.asList(definition.getDependsOn()));
+		HashSet<String> dependsOn = new HashSet<String>(Arrays.asList(definition.getDependsOn()));
 		assertThat(dependsOn).isEqualTo(new HashSet<String>(Arrays.asList(expected)));
 	}
 

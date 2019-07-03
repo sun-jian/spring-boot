@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,9 @@
 
 package org.springframework.boot.autoconfigure.jdbc;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,13 +31,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class DataSourcePropertiesTests {
 
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
+
 	@Test
 	public void determineDriver() {
 		DataSourceProperties properties = new DataSourceProperties();
 		properties.setUrl("jdbc:mysql://mydb");
 		assertThat(properties.getDriverClassName()).isNull();
-		assertThat(properties.determineDriverClassName())
-				.isEqualTo("com.mysql.jdbc.Driver");
+		assertThat(properties.determineDriverClassName()).isEqualTo("com.mysql.jdbc.Driver");
 	}
 
 	@Test
@@ -44,8 +48,7 @@ public class DataSourcePropertiesTests {
 		properties.setUrl("jdbc:mysql://mydb");
 		properties.setDriverClassName("org.hsqldb.jdbcDriver");
 		assertThat(properties.getDriverClassName()).isEqualTo("org.hsqldb.jdbcDriver");
-		assertThat(properties.determineDriverClassName())
-				.isEqualTo("org.hsqldb.jdbcDriver");
+		assertThat(properties.determineDriverClassName()).isEqualTo("org.hsqldb.jdbcDriver");
 	}
 
 	@Test
@@ -53,8 +56,17 @@ public class DataSourcePropertiesTests {
 		DataSourceProperties properties = new DataSourceProperties();
 		properties.afterPropertiesSet();
 		assertThat(properties.getUrl()).isNull();
-		assertThat(properties.determineUrl())
-				.isEqualTo(EmbeddedDatabaseConnection.H2.getUrl());
+		assertThat(properties.determineUrl()).isEqualTo(EmbeddedDatabaseConnection.H2.getUrl());
+	}
+
+	@Test
+	public void determineUrlWithNoEmbeddedSupport() throws Exception {
+		DataSourceProperties properties = new DataSourceProperties();
+		properties.setBeanClassLoader(new HidePackagesClassLoader("org.h2", "org.apache.derby", "org.hsqldb"));
+		properties.afterPropertiesSet();
+		this.thrown.expect(DataSourceProperties.DataSourceBeanCreationException.class);
+		this.thrown.expectMessage("Cannot determine embedded database url");
+		properties.determineUrl();
 	}
 
 	@Test

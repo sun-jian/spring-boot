@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,6 +38,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Dave Syer
  * @author Andy Wilkinson
+ * @since 1.0.0
  */
 @Configuration
 @EnableConfigurationProperties
@@ -59,8 +60,8 @@ public class ServerPropertiesAutoConfiguration {
 	 * {@link EmbeddedServletContainerCustomizer} that ensures there is exactly one
 	 * {@link ServerProperties} bean in the application context.
 	 */
-	private static class DuplicateServerPropertiesDetector implements
-			EmbeddedServletContainerCustomizer, Ordered, ApplicationContextAware {
+	private static class DuplicateServerPropertiesDetector
+			implements EmbeddedServletContainerCustomizer, Ordered, ApplicationContextAware {
 
 		private ApplicationContext applicationContext;
 
@@ -70,8 +71,7 @@ public class ServerPropertiesAutoConfiguration {
 		}
 
 		@Override
-		public void setApplicationContext(ApplicationContext applicationContext)
-				throws BeansException {
+		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 			this.applicationContext = applicationContext;
 		}
 
@@ -79,11 +79,10 @@ public class ServerPropertiesAutoConfiguration {
 		public void customize(ConfigurableEmbeddedServletContainer container) {
 			// ServerProperties handles customization, this just checks we only have
 			// a single bean
-			String[] serverPropertiesBeans = this.applicationContext
-					.getBeanNamesForType(ServerProperties.class);
-			Assert.state(serverPropertiesBeans.length == 1,
-					"Multiple ServerProperties beans registered " + StringUtils
-							.arrayToCommaDelimitedString(serverPropertiesBeans));
+			String[] serverPropertiesBeans = this.applicationContext.getBeanNamesForType(ServerProperties.class);
+			Assert.state(serverPropertiesBeans.length != 0, "No ServerProperties registered");
+			Assert.state(serverPropertiesBeans.length == 1, "Multiple ServerProperties registered "
+					+ StringUtils.arrayToCommaDelimitedString(serverPropertiesBeans));
 		}
 
 	}

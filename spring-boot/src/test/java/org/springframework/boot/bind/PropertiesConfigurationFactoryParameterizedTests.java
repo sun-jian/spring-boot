@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,8 +45,7 @@ public class PropertiesConfigurationFactoryParameterizedTests {
 
 	private String targetName;
 
-	private PropertiesConfigurationFactory<Foo> factory = new PropertiesConfigurationFactory<Foo>(
-			Foo.class);
+	private PropertiesConfigurationFactory<Foo> factory = new PropertiesConfigurationFactory<Foo>(Foo.class);
 
 	@Parameters
 	public static Object[] parameters() {
@@ -98,8 +97,7 @@ public class PropertiesConfigurationFactoryParameterizedTests {
 	}
 
 	private Foo bindFoo(final String values) throws Exception {
-		Properties properties = PropertiesLoaderUtils
-				.loadProperties(new ByteArrayResource(values.getBytes()));
+		Properties properties = PropertiesLoaderUtils.loadProperties(new ByteArrayResource(values.getBytes()));
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new PropertiesPropertySource("test", properties));
 		this.factory.setPropertySources(propertySources);

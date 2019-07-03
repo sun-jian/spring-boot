@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -50,12 +50,11 @@ public abstract class AbstractConfigurationClassTests {
 	public void allBeanMethodsArePublic() throws IOException, ClassNotFoundException {
 		Set<String> nonPublicBeanMethods = new HashSet<String>();
 		for (AnnotationMetadata configurationClass : findConfigurationClasses()) {
-			Set<MethodMetadata> beanMethods = configurationClass
-					.getAnnotatedMethods(Bean.class.getName());
+			Set<MethodMetadata> beanMethods = configurationClass.getAnnotatedMethods(Bean.class.getName());
 			for (MethodMetadata methodMetadata : beanMethods) {
 				if (!isPublic(methodMetadata)) {
-					nonPublicBeanMethods.add(methodMetadata.getDeclaringClassName() + "."
-							+ methodMetadata.getMethodName());
+					nonPublicBeanMethods
+							.add(methodMetadata.getDeclaringClassName() + "." + methodMetadata.getMethodName());
 				}
 			}
 		}
@@ -64,16 +63,13 @@ public abstract class AbstractConfigurationClassTests {
 
 	private Set<AnnotationMetadata> findConfigurationClasses() throws IOException {
 		Set<AnnotationMetadata> configurationClasses = new HashSet<AnnotationMetadata>();
-		Resource[] resources = this.resolver.getResources("classpath*:"
-				+ getClass().getPackage().getName().replace('.', '/') + "/**/*.class");
+		Resource[] resources = this.resolver
+				.getResources("classpath*:" + getClass().getPackage().getName().replace('.', '/') + "/**/*.class");
 		for (Resource resource : resources) {
 			if (!isTestClass(resource)) {
-				MetadataReader metadataReader = new SimpleMetadataReaderFactory()
-						.getMetadataReader(resource);
-				AnnotationMetadata annotationMetadata = metadataReader
-						.getAnnotationMetadata();
-				if (annotationMetadata.getAnnotationTypes()
-						.contains(Configuration.class.getName())) {
+				MetadataReader metadataReader = new SimpleMetadataReaderFactory().getMetadataReader(resource);
+				AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
+				if (annotationMetadata.getAnnotationTypes().contains(Configuration.class.getName())) {
 					configurationClasses.add(annotationMetadata);
 				}
 			}
@@ -82,13 +78,11 @@ public abstract class AbstractConfigurationClassTests {
 	}
 
 	private boolean isTestClass(Resource resource) throws IOException {
-		return resource.getFile().getAbsolutePath()
-				.contains("target" + File.separator + "test-classes");
+		return resource.getFile().getAbsolutePath().contains("target" + File.separator + "test-classes");
 	}
 
 	private boolean isPublic(MethodMetadata methodMetadata) {
-		int access = (Integer) new DirectFieldAccessor(methodMetadata)
-				.getPropertyValue("access");
+		int access = (Integer) new DirectFieldAccessor(methodMetadata).getPropertyValue("access");
 		return (access & Opcodes.ACC_PUBLIC) != 0;
 	}
 

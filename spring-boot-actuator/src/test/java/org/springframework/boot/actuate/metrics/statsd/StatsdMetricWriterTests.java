@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,8 +44,7 @@ public class StatsdMetricWriterTests {
 
 	private DummyStatsDServer server = new DummyStatsDServer(this.port);
 
-	private StatsdMetricWriter writer = new StatsdMetricWriter("me", "localhost",
-			this.port);
+	private StatsdMetricWriter writer = new StatsdMetricWriter("me", "localhost", this.port);
 
 	@After
 	public void close() {
@@ -102,8 +101,7 @@ public class StatsdMetricWriterTests {
 	public void incrementMetricWithInvalidCharsInName() throws Exception {
 		this.writer.increment(new Delta<Long>("counter.fo:o", 3L));
 		this.server.waitForMessage();
-		assertThat(this.server.messagesReceived().get(0))
-				.isEqualTo("me.counter.fo-o:3|c");
+		assertThat(this.server.messagesReceived().get(0)).isEqualTo("me.counter.fo-o:3|c");
 	}
 
 	@Test
@@ -138,8 +136,7 @@ public class StatsdMetricWriterTests {
 			try {
 				DatagramPacket packet = new DatagramPacket(new byte[256], 256);
 				this.server.receive(packet);
-				this.messagesReceived.add(
-						new String(packet.getData(), Charset.forName("UTF-8")).trim());
+				this.messagesReceived.add(new String(packet.getData(), Charset.forName("UTF-8")).trim());
 			}
 			catch (Exception ex) {
 				// Ignore
@@ -151,7 +148,7 @@ public class StatsdMetricWriterTests {
 				try {
 					Thread.sleep(50L);
 				}
-				catch (InterruptedException e) {
+				catch (InterruptedException ex) {
 					Thread.currentThread().interrupt();
 				}
 			}

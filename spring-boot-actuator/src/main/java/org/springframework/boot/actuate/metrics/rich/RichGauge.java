@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,10 +24,11 @@ import org.springframework.util.Assert;
  * The value of the average will depend on whether a weight ('alpha') is set for the
  * gauge. If it is unset, the average will contain a simple arithmetic mean. If a weight
  * is set, an exponential moving average will be calculated as defined in this
- * <a href="http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm">NIST
+ * <a href="https://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm">NIST
  * document</a>.
  *
  * @author Luke Taylor
+ * @since 1.0.0
  */
 public final class RichGauge {
 
@@ -96,8 +97,7 @@ public final class RichGauge {
 		this.count = 1;
 	}
 
-	public RichGauge(String name, double value, double alpha, double mean, double max,
-			double min, long count) {
+	public RichGauge(String name, double value, double alpha, double mean, double max, double min, long count) {
 		this.name = name;
 		this.value = value;
 		this.alpha = alpha;
@@ -126,7 +126,7 @@ public final class RichGauge {
 	/**
 	 * Return either an exponential weighted moving average or a simple mean,
 	 * respectively, depending on whether the weight 'alpha' has been set for this gauge.
-	 * @return The average over all the accumulated values
+	 * @return the average over all the accumulated values
 	 */
 	public double getAverage() {
 		return this.average;
@@ -230,9 +230,8 @@ public final class RichGauge {
 
 	@Override
 	public String toString() {
-		return "Gauge [name = " + this.name + ", value = " + this.value + ", alpha = "
-				+ this.alpha + ", average = " + this.average + ", max = " + this.max
-				+ ", min = " + this.min + ", count = " + this.count + "]";
+		return "Gauge [name = " + this.name + ", value = " + this.value + ", alpha = " + this.alpha + ", average = "
+				+ this.average + ", max = " + this.max + ", min = " + this.min + ", count = " + this.count + "]";
 	}
 
 }

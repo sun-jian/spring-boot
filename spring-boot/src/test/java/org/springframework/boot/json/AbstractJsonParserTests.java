@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dave Syer
  * @author Jean de Klerk
+ * @author Stephane Nicoll
  */
 public abstract class AbstractJsonParserTests {
 
@@ -57,6 +58,20 @@ public abstract class AbstractJsonParserTests {
 	}
 
 	@Test
+	public void stringContainingNumber() {
+		Map<String, Object> map = this.parser.parseMap("{\"foo\":\"123\"}");
+		assertThat(map).hasSize(1);
+		assertThat(map.get("foo")).isEqualTo("123");
+	}
+
+	@Test
+	public void stringContainingComma() {
+		Map<String, Object> map = this.parser.parseMap("{\"foo\":\"bar1,bar2\"}");
+		assertThat(map).hasSize(1);
+		assertThat(map.get("foo")).isEqualTo("bar1,bar2");
+	}
+
+	@Test
 	public void emptyMap() {
 		Map<String, Object> map = this.parser.parseMap("{}");
 		assertThat(map).isEmpty();
@@ -78,8 +93,7 @@ public abstract class AbstractJsonParserTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void listOfMaps() {
-		List<Object> list = this.parser
-				.parseList("[{\"foo\":\"bar\",\"spam\":1},{\"foo\":\"baz\",\"spam\":2}]");
+		List<Object> list = this.parser.parseList("[{\"foo\":\"bar\",\"spam\":1},{\"foo\":\"baz\",\"spam\":2}]");
 		assertThat(list).hasSize(2);
 		assertThat(((Map<String, Object>) list.get(1))).hasSize(2);
 	}
@@ -87,8 +101,8 @@ public abstract class AbstractJsonParserTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void mapOfLists() {
-		Map<String, Object> map = this.parser.parseMap(
-				"{\"foo\":[{\"foo\":\"bar\",\"spam\":1},{\"foo\":\"baz\",\"spam\":2}]}");
+		Map<String, Object> map = this.parser
+				.parseMap("{\"foo\":[{\"foo\":\"bar\",\"spam\":1},{\"foo\":\"baz\",\"spam\":2}]}");
 		assertThat(map).hasSize(1);
 		assertThat(((List<Object>) map.get("foo"))).hasSize(2);
 	}
@@ -153,6 +167,13 @@ public abstract class AbstractJsonParserTests {
 	public void listWithLeadingWhitespaceMapThrowsARuntimeException() {
 		this.thrown.expect(RuntimeException.class);
 		this.parser.parseList("\n\t{}");
+	}
+
+	@Test
+	public void escapeQuote() {
+		String input = "{\"foo\": \"\\\"bar\\\"\"}";
+		Map<String, Object> map = this.parser.parseMap(input);
+		assertThat(map.get("foo")).isEqualTo("\"bar\"");
 	}
 
 }

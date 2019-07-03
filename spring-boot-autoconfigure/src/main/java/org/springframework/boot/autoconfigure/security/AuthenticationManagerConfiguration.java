@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -61,6 +61,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Dave Syer
  * @author Rob Winch
+ * @since 1.0.0
  */
 @Configuration
 @ConditionalOnBean(ObjectPostProcessor.class)
@@ -68,20 +69,17 @@ import org.springframework.util.ReflectionUtils;
 @Order(0)
 public class AuthenticationManagerConfiguration {
 
-	private static final Log logger = LogFactory
-			.getLog(AuthenticationManagerConfiguration.class);
+	private static final Log logger = LogFactory.getLog(AuthenticationManagerConfiguration.class);
 
 	@Bean
 	@Primary
-	public AuthenticationManager authenticationManager(
-			AuthenticationConfiguration configuration) throws Exception {
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
 		return configuration.getAuthenticationManager();
 	}
 
 	@Bean
 	public static SpringBootAuthenticationConfigurerAdapter springBootAuthenticationConfigurerAdapter(
-			SecurityProperties securityProperties,
-			List<SecurityPrerequisite> dependencies) {
+			SecurityProperties securityProperties, List<SecurityPrerequisite> dependencies) {
 		return new SpringBootAuthenticationConfigurerAdapter(securityProperties);
 	}
 
@@ -115,8 +113,7 @@ public class AuthenticationManagerConfiguration {
 	 * </ul>
 	 */
 	@Order(Ordered.LOWEST_PRECEDENCE - 100)
-	private static class SpringBootAuthenticationConfigurerAdapter
-			extends GlobalAuthenticationConfigurerAdapter {
+	private static class SpringBootAuthenticationConfigurerAdapter extends GlobalAuthenticationConfigurerAdapter {
 
 		private final SecurityProperties securityProperties;
 
@@ -126,8 +123,7 @@ public class AuthenticationManagerConfiguration {
 
 		@Override
 		public void init(AuthenticationManagerBuilder auth) throws Exception {
-			auth.apply(new DefaultInMemoryUserDetailsManagerConfigurer(
-					this.securityProperties));
+			auth.apply(new DefaultInMemoryUserDetailsManagerConfigurer(this.securityProperties));
 		}
 
 	}
@@ -158,8 +154,7 @@ public class AuthenticationManagerConfiguration {
 
 		private final SecurityProperties securityProperties;
 
-		DefaultInMemoryUserDetailsManagerConfigurer(
-				SecurityProperties securityProperties) {
+		DefaultInMemoryUserDetailsManagerConfigurer(SecurityProperties securityProperties) {
 			this.securityProperties = securityProperties;
 		}
 
@@ -170,12 +165,10 @@ public class AuthenticationManagerConfiguration {
 			}
 			User user = this.securityProperties.getUser();
 			if (user.isDefaultPassword()) {
-				logger.info(String.format("%n%nUsing default security password: %s%n",
-						user.getPassword()));
+				logger.info(String.format("%n%nUsing default security password: %s%n", user.getPassword()));
 			}
 			Set<String> roles = new LinkedHashSet<String>(user.getRole());
-			withUser(user.getName()).password(user.getPassword())
-					.roles(roles.toArray(new String[roles.size()]));
+			withUser(user.getName()).password(user.getPassword()).roles(roles.toArray(new String[roles.size()]));
 			setField(auth, "defaultUserDetailsService", getUserDetailsService());
 			super.configure(auth);
 		}
@@ -197,8 +190,7 @@ public class AuthenticationManagerConfiguration {
 	 * {@link ApplicationListener} to autowire the {@link AuthenticationEventPublisher}
 	 * into the {@link AuthenticationManager}.
 	 */
-	protected static class AuthenticationManagerConfigurationListener
-			implements SmartInitializingSingleton {
+	protected static class AuthenticationManagerConfigurationListener implements SmartInitializingSingleton {
 
 		@Autowired
 		private AuthenticationEventPublisher eventPublisher;
@@ -209,8 +201,7 @@ public class AuthenticationManagerConfiguration {
 		@Override
 		public void afterSingletonsInstantiated() {
 			try {
-				configureAuthenticationManager(
-						this.context.getBean(AuthenticationManager.class));
+				configureAuthenticationManager(this.context.getBean(AuthenticationManager.class));
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				// Ignore
@@ -219,8 +210,7 @@ public class AuthenticationManagerConfiguration {
 
 		private void configureAuthenticationManager(AuthenticationManager manager) {
 			if (manager instanceof ProviderManager) {
-				((ProviderManager) manager)
-						.setAuthenticationEventPublisher(this.eventPublisher);
+				((ProviderManager) manager).setAuthenticationEventPublisher(this.eventPublisher);
 			}
 		}
 

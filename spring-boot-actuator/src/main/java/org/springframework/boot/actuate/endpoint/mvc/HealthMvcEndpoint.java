@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.security.Principal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,20 +54,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @since 1.1.0
  */
 @ConfigurationProperties(prefix = "endpoints.health")
-public class HealthMvcEndpoint extends AbstractEndpointMvcAdapter<HealthEndpoint>
-		implements EnvironmentAware {
+public class HealthMvcEndpoint extends AbstractEndpointMvcAdapter<HealthEndpoint> implements EnvironmentAware {
 
 	private final boolean secure;
 
 	private final List<String> roles;
 
+	private volatile CachedHealth cachedHealth;
+
 	private Map<String, HttpStatus> statusMapping = new HashMap<String, HttpStatus>();
 
 	private RelaxedPropertyResolver securityPropertyResolver;
-
-	private long lastAccess = 0;
-
-	private Health cached;
 
 	public HealthMvcEndpoint(HealthEndpoint delegate) {
 		this(delegate, true);
@@ -76,8 +74,7 @@ public class HealthMvcEndpoint extends AbstractEndpointMvcAdapter<HealthEndpoint
 		this(delegate, secure, null);
 	}
 
-	public HealthMvcEndpoint(HealthEndpoint delegate, boolean secure,
-			List<String> roles) {
+	public HealthMvcEndpoint(HealthEndpoint delegate, boolean secure, List<String> roles) {
 		super(delegate);
 		this.secure = secure;
 		setupDefaultStatusMapping();
@@ -91,8 +88,7 @@ public class HealthMvcEndpoint extends AbstractEndpointMvcAdapter<HealthEndpoint
 
 	@Override
 	public void setEnvironment(Environment environment) {
-		this.securityPropertyResolver = new RelaxedPropertyResolver(environment,
-				"management.security.");
+		this.securityPropertyResolver = new RelaxedPropertyResolver(environment, "management.security.");
 	}
 
 	/**
@@ -153,7 +149,7 @@ public class HealthMvcEndpoint extends AbstractEndpointMvcAdapter<HealthEndpoint
 	private HttpStatus getStatus(Health health) {
 		String code = health.getStatus().getCode();
 		if (code != null) {
-			code = code.toLowerCase().replace('_', '-');
+			code = code.toLowerCase(Locale.ENGLISH).replace('_', '-');
 			for (String candidate : RelaxedNames.forCamelCase(code)) {
 				HttpStatus status = this.statusMapping.get(candidate);
 				if (status != null) {
@@ -165,26 +161,25 @@ public class HealthMvcEndpoint extends AbstractEndpointMvcAdapter<HealthEndpoint
 	}
 
 	private Health getHealth(HttpServletRequest request, Principal principal) {
-		long accessTime = System.currentTimeMillis();
-		if (isCacheStale(accessTime)) {
-			this.lastAccess = accessTime;
-			this.cached = getDelegate().invoke();
-		}
+		Health currentHealth = getCurrentHealth();
 		if (exposeHealthDetails(request, principal)) {
-			return this.cached;
+			return currentHealth;
 		}
-		return Health.status(this.cached.getStatus()).build();
+		return Health.status(currentHealth.getStatus()).build();
 	}
 
-	private boolean isCacheStale(long accessTime) {
-		if (this.cached == null) {
-			return true;
+	private Health getCurrentHealth() {
+		long accessTime = System.currentTimeMillis();
+		CachedHealth cached = this.cachedHealth;
+		if (cached == null || cached.isStale(accessTime, getDelegate().getTimeToLive())) {
+			Health health = getDelegate().invoke();
+			this.cachedHealth = new CachedHealth(health, accessTime);
+			return health;
 		}
-		return (accessTime - this.lastAccess) >= getDelegate().getTimeToLive();
+		return cached.getHealth();
 	}
 
-	protected boolean exposeHealthDetails(HttpServletRequest request,
-			Principal principal) {
+	protected boolean exposeHealthDetails(HttpServletRequest request, Principal principal) {
 		if (!this.secure) {
 			return true;
 		}
@@ -210,15 +205,40 @@ public class HealthMvcEndpoint extends AbstractEndpointMvcAdapter<HealthEndpoint
 		if (this.roles != null) {
 			return this.roles;
 		}
-		String[] roles = StringUtils.commaDelimitedListToStringArray(
-				this.securityPropertyResolver.getProperty("roles", "ROLE_ACTUATOR"));
+		String[] roles = StringUtils
+				.commaDelimitedListToStringArray(this.securityPropertyResolver.getProperty("roles", "ROLE_ACTUATOR"));
 		roles = StringUtils.trimArrayElements(roles);
 		return Arrays.asList(roles);
 	}
 
 	private boolean isSpringSecurityAuthentication(Principal principal) {
-		return ClassUtils.isPresent("org.springframework.security.core.Authentication",
-				null) && principal instanceof Authentication;
+		return ClassUtils.isPresent("org.springframework.security.core.Authentication", null)
+				&& principal instanceof Authentication;
+	}
+
+	/**
+	 * A cached {@link Health} that encapsulates the {@code Health} itself and the time at
+	 * which it was created.
+	 */
+	static class CachedHealth {
+
+		private final Health health;
+
+		private final long creationTime;
+
+		CachedHealth(Health health, long creationTime) {
+			this.health = health;
+			this.creationTime = creationTime;
+		}
+
+		public boolean isStale(long accessTime, long timeToLive) {
+			return (accessTime - this.creationTime) >= timeToLive;
+		}
+
+		public Health getHealth() {
+			return this.health;
+		}
+
 	}
 
 }

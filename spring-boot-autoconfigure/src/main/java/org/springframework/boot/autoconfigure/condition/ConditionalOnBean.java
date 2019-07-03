@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,22 @@ import org.springframework.context.annotation.Conditional;
 
 /**
  * {@link Conditional} that only matches when the specified bean classes and/or names are
+ * already contained in the {@link BeanFactory}. When placed on a {@code @Bean} method,
+ * the bean class defaults to the return type of the factory method:
+ *
+ * <pre class="code">
+ * &#064;Configuration
+ * public class MyAutoConfiguration {
+ *
+ *     &#064;ConditionalOnBean
+ *     &#064;Bean
+ *     public MyService myService() {
+ *         ...
+ *     }
+ *
+ * }</pre>
+ * <p>
+ * In the sample above the condition will match if a bean of type {@code MyService} is
  * already contained in the {@link BeanFactory}.
  * <p>
  * The condition can only match the bean definitions that have been processed by the
@@ -37,6 +53,7 @@ import org.springframework.context.annotation.Conditional;
  * another auto-configuration, make sure that the one using this condition runs after.
  *
  * @author Phillip Webb
+ * @since 1.0.0
  */
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)

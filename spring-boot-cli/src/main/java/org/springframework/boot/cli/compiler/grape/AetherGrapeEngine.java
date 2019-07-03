@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,11 +44,12 @@ import org.eclipse.aether.util.filter.DependencyFilterUtils;
 
 /**
  * A {@link GrapeEngine} implementation that uses
- * <a href="http://eclipse.org/aether">Aether</a>, the dependency resolution system used
+ * <a href="https://eclipse.org/aether">Aether</a>, the dependency resolution system used
  * by Maven.
  *
  * @author Andy Wilkinson
  * @author Phillip Webb
+ * @since 1.0.0
  */
 @SuppressWarnings("rawtypes")
 public class AetherGrapeEngine implements GrapeEngine {
@@ -73,18 +74,15 @@ public class AetherGrapeEngine implements GrapeEngine {
 
 	private final List<RemoteRepository> repositories;
 
-	public AetherGrapeEngine(GroovyClassLoader classLoader,
-			RepositorySystem repositorySystem,
-			DefaultRepositorySystemSession repositorySystemSession,
-			List<RemoteRepository> remoteRepositories,
+	public AetherGrapeEngine(GroovyClassLoader classLoader, RepositorySystem repositorySystem,
+			DefaultRepositorySystemSession repositorySystemSession, List<RemoteRepository> remoteRepositories,
 			DependencyResolutionContext resolutionContext, boolean quiet) {
 		this.classLoader = classLoader;
 		this.repositorySystem = repositorySystem;
 		this.session = repositorySystemSession;
 		this.resolutionContext = resolutionContext;
 		this.repositories = new ArrayList<RemoteRepository>();
-		List<RemoteRepository> remotes = new ArrayList<RemoteRepository>(
-				remoteRepositories);
+		List<RemoteRepository> remotes = new ArrayList<RemoteRepository>(remoteRepositories);
 		Collections.reverse(remotes); // priority is reversed in addRepository
 		for (RemoteRepository repository : remotes) {
 			addRepository(repository);
@@ -92,13 +90,10 @@ public class AetherGrapeEngine implements GrapeEngine {
 		this.progressReporter = getProgressReporter(this.session, quiet);
 	}
 
-	private ProgressReporter getProgressReporter(DefaultRepositorySystemSession session,
-			boolean quiet) {
+	private ProgressReporter getProgressReporter(DefaultRepositorySystemSession session, boolean quiet) {
 		String progressReporter = (quiet ? "none"
-				: System.getProperty(
-						"org.springframework.boot.cli.compiler.grape.ProgressReporter"));
-		if ("detail".equals(progressReporter)
-				|| Boolean.getBoolean("groovy.grape.report.downloads")) {
+				: System.getProperty("org.springframework.boot.cli.compiler.grape.ProgressReporter"));
+		if ("detail".equals(progressReporter) || Boolean.getBoolean("groovy.grape.report.downloads")) {
 			return new DetailedProgressReporter(session, System.out);
 		}
 		else if ("none".equals(progressReporter)) {
@@ -145,8 +140,7 @@ public class AetherGrapeEngine implements GrapeEngine {
 	private List<Exclusion> createExclusions(Map<?, ?> args) {
 		List<Exclusion> exclusions = new ArrayList<Exclusion>();
 		if (args != null) {
-			List<Map<String, Object>> exclusionMaps = (List<Map<String, Object>>) args
-					.get("excludes");
+			List<Map<String, Object>> exclusionMaps = (List<Map<String, Object>>) args.get("excludes");
 			if (exclusionMaps != null) {
 				for (Map<String, Object> exclusionMap : exclusionMaps) {
 					exclusions.add(createExclusion(exclusionMap));
@@ -162,8 +156,7 @@ public class AetherGrapeEngine implements GrapeEngine {
 		return new Exclusion(group, module, "*", "*");
 	}
 
-	private List<Dependency> createDependencies(Map<?, ?>[] dependencyMaps,
-			List<Exclusion> exclusions) {
+	private List<Dependency> createDependencies(Map<?, ?>[] dependencyMaps, List<Exclusion> exclusions) {
 		List<Dependency> dependencies = new ArrayList<Dependency>(dependencyMaps.length);
 		for (Map<?, ?> dependencyMap : dependencyMaps) {
 			dependencies.add(createDependency(dependencyMap, exclusions));
@@ -171,8 +164,7 @@ public class AetherGrapeEngine implements GrapeEngine {
 		return dependencies;
 	}
 
-	private Dependency createDependency(Map<?, ?> dependencyMap,
-			List<Exclusion> exclusions) {
+	private Dependency createDependency(Map<?, ?> dependencyMap, List<Exclusion> exclusions) {
 		Artifact artifact = createArtifact(dependencyMap);
 		if (isTransitive(dependencyMap)) {
 			return new Dependency(artifact, JavaScopes.COMPILE, false, exclusions);
@@ -202,22 +194,20 @@ public class AetherGrapeEngine implements GrapeEngine {
 			}
 		}
 		else if (ext != null && !type.equals(ext)) {
-			throw new IllegalArgumentException(
-					"If both type and ext are specified they must have the same value");
+			throw new IllegalArgumentException("If both type and ext are specified they must have the same value");
 		}
 		return type;
 	}
 
 	private boolean isTransitive(Map<?, ?> dependencyMap) {
 		Boolean transitive = (Boolean) dependencyMap.get("transitive");
-		return (transitive == null ? true : transitive);
+		return (transitive != null) ? transitive : true;
 	}
 
 	private List<Dependency> getDependencies(DependencyResult dependencyResult) {
 		List<Dependency> dependencies = new ArrayList<Dependency>();
 		for (ArtifactResult artifactResult : dependencyResult.getArtifactResults()) {
-			dependencies.add(
-					new Dependency(artifactResult.getArtifact(), JavaScopes.COMPILE));
+			dependencies.add(new Dependency(artifactResult.getArtifact(), JavaScopes.COMPILE));
 		}
 		return dependencies;
 	}
@@ -232,15 +222,14 @@ public class AetherGrapeEngine implements GrapeEngine {
 
 	private GroovyClassLoader getClassLoader(Map args) {
 		GroovyClassLoader classLoader = (GroovyClassLoader) args.get("classLoader");
-		return (classLoader == null ? this.classLoader : classLoader);
+		return (classLoader != null) ? classLoader : this.classLoader;
 	}
 
 	@Override
 	public void addResolver(Map<String, Object> args) {
 		String name = (String) args.get("name");
 		String root = (String) args.get("root");
-		RemoteRepository.Builder builder = new RemoteRepository.Builder(name, "default",
-				root);
+		RemoteRepository.Builder builder = new RemoteRepository.Builder(name, "default", root);
 		RemoteRepository repository = builder.build();
 		addRepository(repository);
 	}
@@ -256,8 +245,7 @@ public class AetherGrapeEngine implements GrapeEngine {
 	}
 
 	private RemoteRepository getPossibleMirror(RemoteRepository remoteRepository) {
-		RemoteRepository mirror = this.session.getMirrorSelector()
-				.getMirror(remoteRepository);
+		RemoteRepository mirror = this.session.getMirrorSelector().getMirror(remoteRepository);
 		if (mirror != null) {
 			return mirror;
 		}
@@ -276,8 +264,7 @@ public class AetherGrapeEngine implements GrapeEngine {
 	private RemoteRepository applyAuthentication(RemoteRepository repository) {
 		if (repository.getAuthentication() == null) {
 			RemoteRepository.Builder builder = new RemoteRepository.Builder(repository);
-			builder.setAuthentication(this.session.getAuthenticationSelector()
-					.getAuthentication(repository));
+			builder.setAuthentication(this.session.getAuthenticationSelector().getAuthentication(repository));
 			repository = builder.build();
 		}
 		return repository;
@@ -310,13 +297,11 @@ public class AetherGrapeEngine implements GrapeEngine {
 		}
 	}
 
-	private List<File> resolve(List<Dependency> dependencies)
-			throws ArtifactResolutionException {
+	private List<File> resolve(List<Dependency> dependencies) throws ArtifactResolutionException {
 		try {
 			CollectRequest collectRequest = getCollectRequest(dependencies);
 			DependencyRequest dependencyRequest = getDependencyRequest(collectRequest);
-			DependencyResult result = this.repositorySystem
-					.resolveDependencies(this.session, dependencyRequest);
+			DependencyResult result = this.repositorySystem.resolveDependencies(this.session, dependencyRequest);
 			addManagedDependencies(result);
 			return getFiles(result);
 		}
@@ -329,17 +314,15 @@ public class AetherGrapeEngine implements GrapeEngine {
 	}
 
 	private CollectRequest getCollectRequest(List<Dependency> dependencies) {
-		CollectRequest collectRequest = new CollectRequest((Dependency) null,
-				dependencies, new ArrayList<RemoteRepository>(this.repositories));
-		collectRequest
-				.setManagedDependencies(this.resolutionContext.getManagedDependencies());
+		CollectRequest collectRequest = new CollectRequest((Dependency) null, dependencies,
+				new ArrayList<RemoteRepository>(this.repositories));
+		collectRequest.setManagedDependencies(this.resolutionContext.getManagedDependencies());
 		return collectRequest;
 	}
 
 	private DependencyRequest getDependencyRequest(CollectRequest collectRequest) {
 		DependencyRequest dependencyRequest = new DependencyRequest(collectRequest,
-				DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE,
-						JavaScopes.RUNTIME));
+				DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE, JavaScopes.RUNTIME));
 		return dependencyRequest;
 	}
 
@@ -354,8 +337,7 @@ public class AetherGrapeEngine implements GrapeEngine {
 
 	@Override
 	public Object grab(String endorsedModule) {
-		throw new UnsupportedOperationException(
-				"Grabbing an endorsed module is not supported");
+		throw new UnsupportedOperationException("Grabbing an endorsed module is not supported");
 	}
 
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,8 +39,7 @@ public class MockResetTests {
 
 	@Test
 	public void withSettingsOfNoneAttachesReset() {
-		ExampleService mock = mock(ExampleService.class,
-				MockReset.withSettings(MockReset.NONE));
+		ExampleService mock = mock(ExampleService.class, MockReset.withSettings(MockReset.NONE));
 		assertThat(MockReset.get(mock)).isEqualTo(MockReset.NONE);
 	}
 
@@ -58,15 +57,13 @@ public class MockResetTests {
 
 	@Test
 	public void withSettingsAttachesReset() {
-		ExampleService mock = mock(ExampleService.class,
-				MockReset.withSettings(MockReset.BEFORE));
+		ExampleService mock = mock(ExampleService.class, MockReset.withSettings(MockReset.BEFORE));
 		assertThat(MockReset.get(mock)).isEqualTo(MockReset.BEFORE);
 	}
 
 	@Test
 	public void apply() throws Exception {
-		ExampleService mock = mock(ExampleService.class,
-				MockReset.apply(MockReset.AFTER, withSettings()));
+		ExampleService mock = mock(ExampleService.class, MockReset.apply(MockReset.AFTER, withSettings()));
 		assertThat(MockReset.get(mock)).isEqualTo(MockReset.AFTER);
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.boot.actuate.endpoint.mvc;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +40,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.MutablePropertySources;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
@@ -75,38 +77,33 @@ public class EnvironmentMvcEndpointTests {
 	public void setUp() {
 		this.context.getBean(EnvironmentEndpoint.class).setEnabled(true);
 		this.mvc = MockMvcBuilders.webAppContextSetup(this.context).build();
-		EnvironmentTestUtils.addEnvironment((ConfigurableApplicationContext) this.context,
-				"foo:bar", "fool:baz");
+		EnvironmentTestUtils.addEnvironment((ConfigurableApplicationContext) this.context, "foo:bar", "fool:baz");
 	}
 
 	@Test
 	public void homeContentTypeDefaultsToActuatorV1Json() throws Exception {
-		this.mvc.perform(get("/env")).andExpect(status().isOk())
-				.andExpect(header().string("Content-Type",
-						"application/vnd.spring-boot.actuator.v1+json;charset=UTF-8"));
+		this.mvc.perform(get("/env")).andExpect(status().isOk()).andExpect(
+				header().string("Content-Type", "application/vnd.spring-boot.actuator.v1+json;charset=UTF-8"));
 	}
 
 	@Test
 	public void homeContentTypeCanBeApplicationJson() throws Exception {
-		this.mvc.perform(
-				get("/env").header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
-				.andExpect(status().isOk()).andExpect(header().string("Content-Type",
-						MediaType.APPLICATION_JSON_UTF8_VALUE));
+		this.mvc.perform(get("/env").header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().isOk())
+				.andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_UTF8_VALUE));
 	}
 
 	@Test
 	public void subContentTypeDefaultsToActuatorV1Json() throws Exception {
-		this.mvc.perform(get("/env/foo")).andExpect(status().isOk())
-				.andExpect(header().string("Content-Type",
-						"application/vnd.spring-boot.actuator.v1+json;charset=UTF-8"));
+		this.mvc.perform(get("/env/foo")).andExpect(status().isOk()).andExpect(
+				header().string("Content-Type", "application/vnd.spring-boot.actuator.v1+json;charset=UTF-8"));
 	}
 
 	@Test
 	public void subContentTypeCanBeApplicationJson() throws Exception {
-		this.mvc.perform(get("/env/foo").header(HttpHeaders.ACCEPT,
-				MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isOk())
-				.andExpect(header().string("Content-Type",
-						MediaType.APPLICATION_JSON_UTF8_VALUE));
+		this.mvc.perform(get("/env/foo").header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().isOk())
+				.andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_UTF8_VALUE));
 	}
 
 	@Test
@@ -117,8 +114,7 @@ public class EnvironmentMvcEndpointTests {
 
 	@Test
 	public void sub() throws Exception {
-		this.mvc.perform(get("/env/foo")).andExpect(status().isOk())
-				.andExpect(content().string("{\"foo\":\"bar\"}"));
+		this.mvc.perform(get("/env/foo")).andExpect(status().isOk()).andExpect(content().string("{\"foo\":\"bar\"}"));
 	}
 
 	@Test
@@ -139,13 +135,12 @@ public class EnvironmentMvcEndpointTests {
 	}
 
 	@Test
-	public void nestedPathWhenPlaceholderCannotBeResolvedShouldReturnUnresolvedProperty()
-			throws Exception {
+	public void nestedPathWhenPlaceholderCannotBeResolvedShouldReturnUnresolvedProperty() throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("my.foo", "${my.bar}");
 		((ConfigurableEnvironment) this.context.getEnvironment()).getPropertySources()
 				.addFirst(new MapPropertySource("unresolved-placeholder", map));
-		this.mvc.perform(get("/env/my.*")).andExpect(status().isOk())
+		this.mvc.perform(get("/env/my.foo")).andExpect(status().isOk())
 				.andExpect(content().string(containsString("\"my.foo\":\"${my.bar}\"")));
 	}
 
@@ -156,14 +151,46 @@ public class EnvironmentMvcEndpointTests {
 		map.put("my.password", "hello");
 		((ConfigurableEnvironment) this.context.getEnvironment()).getPropertySources()
 				.addFirst(new MapPropertySource("placeholder", map));
+		this.mvc.perform(get("/env/my.foo")).andExpect(status().isOk())
+				.andExpect(content().string(containsString("\"my.foo\":\"******\"")));
+	}
+
+	@Test
+	public void nestedPathMatchedByRegexWhenPlaceholderCannotBeResolvedShouldReturnUnresolvedProperty()
+			throws Exception {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("my.foo", "${my.bar}");
+		((ConfigurableEnvironment) this.context.getEnvironment()).getPropertySources()
+				.addFirst(new MapPropertySource("unresolved-placeholder", map));
+		this.mvc.perform(get("/env/my.*")).andExpect(status().isOk())
+				.andExpect(content().string(containsString("\"my.foo\":\"${my.bar}\"")));
+	}
+
+	@Test
+	public void nestedPathMatchedByRegexWithSensitivePlaceholderShouldSanitize() throws Exception {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("my.foo", "${my.password}");
+		map.put("my.password", "hello");
+		((ConfigurableEnvironment) this.context.getEnvironment()).getPropertySources()
+				.addFirst(new MapPropertySource("placeholder", map));
 		this.mvc.perform(get("/env/my.*")).andExpect(status().isOk())
 				.andExpect(content().string(containsString("\"my.foo\":\"******\"")));
 	}
 
+	@Test
+	public void propertyWithTypeOtherThanStringShouldNotFail() throws Exception {
+		MutablePropertySources propertySources = ((ConfigurableEnvironment) this.context.getEnvironment())
+				.getPropertySources();
+		Map<String, Object> source = new HashMap<String, Object>();
+		source.put("foo", Collections.singletonMap("bar", "baz"));
+		propertySources.addFirst(new MapPropertySource("test", source));
+		this.mvc.perform(get("/env/foo.*")).andExpect(status().isOk())
+				.andExpect(content().string("{\"foo\":{\"bar\":\"baz\"}}"));
+	}
+
 	@Configuration
-	@Import({ JacksonAutoConfiguration.class,
-			HttpMessageConvertersAutoConfiguration.class, WebMvcAutoConfiguration.class,
-			EndpointWebMvcAutoConfiguration.class, AuditAutoConfiguration.class,
+	@Import({ JacksonAutoConfiguration.class, HttpMessageConvertersAutoConfiguration.class,
+			WebMvcAutoConfiguration.class, EndpointWebMvcAutoConfiguration.class, AuditAutoConfiguration.class,
 			ManagementServerPropertiesAutoConfiguration.class })
 	public static class TestConfiguration {
 

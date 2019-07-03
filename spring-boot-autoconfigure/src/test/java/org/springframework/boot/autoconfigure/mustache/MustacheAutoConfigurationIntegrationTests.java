@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -54,8 +54,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @DirtiesContext
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = {
-		"spring.mustache.prefix:classpath:/mustache-templates/" })
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT,
+		properties = { "spring.mustache.prefix:classpath:/mustache-templates/" })
 public class MustacheAutoConfigurationIntegrationTests {
 
 	@Autowired
@@ -70,15 +70,13 @@ public class MustacheAutoConfigurationIntegrationTests {
 
 	@Test
 	public void testHomePage() throws Exception {
-		String body = new TestRestTemplate().getForObject("http://localhost:" + this.port,
-				String.class);
+		String body = new TestRestTemplate().getForObject("http://localhost:" + this.port, String.class);
 		assertThat(body.contains("Hello World")).isTrue();
 	}
 
 	@Test
 	public void testPartialPage() throws Exception {
-		String body = new TestRestTemplate()
-				.getForObject("http://localhost:" + this.port + "/partial", String.class);
+		String body = new TestRestTemplate().getForObject("http://localhost:" + this.port + "/partial", String.class);
 		assertThat(body.contains("Hello World")).isTrue();
 	}
 
@@ -112,10 +110,8 @@ public class MustacheAutoConfigurationIntegrationTests {
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	@Import({ MustacheAutoConfiguration.class,
-			EmbeddedServletContainerAutoConfiguration.class,
-			ServerPropertiesAutoConfiguration.class,
-			DispatcherServletAutoConfiguration.class,
+	@Import({ MustacheAutoConfiguration.class, EmbeddedServletContainerAutoConfiguration.class,
+			ServerPropertiesAutoConfiguration.class, DispatcherServletAutoConfiguration.class,
 			PropertyPlaceholderAutoConfiguration.class })
 	protected @interface MinimalWebConfiguration {
 

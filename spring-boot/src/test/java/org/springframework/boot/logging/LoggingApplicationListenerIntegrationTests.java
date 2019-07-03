@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,8 +42,7 @@ public class LoggingApplicationListenerIntegrationTests {
 
 	@Test
 	public void loggingSystemRegisteredInTheContext() {
-		ConfigurableApplicationContext context = new SpringApplicationBuilder(
-				SampleService.class).web(false).run();
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(SampleService.class).web(false).run();
 		try {
 			SampleService service = context.getBean(SampleService.class);
 			assertThat(service.loggingSystem).isNotNull();
@@ -55,8 +54,7 @@ public class LoggingApplicationListenerIntegrationTests {
 
 	@Test
 	public void loggingPerformedDuringChildApplicationStartIsNotLost() {
-		new SpringApplicationBuilder(Config.class).web(false).child(Config.class)
-				.web(false)
+		new SpringApplicationBuilder(Config.class).web(false).child(Config.class).web(false)
 				.listeners(new ApplicationListener<ApplicationStartingEvent>() {
 
 					private final Logger logger = LoggerFactory.getLogger(getClass());

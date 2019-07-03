@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,16 @@
 
 package org.springframework.boot.gradle.run;
 
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.file.FileCollection;
 import org.gradle.api.plugins.ApplicationPluginConvention;
 import org.gradle.api.plugins.ExtraPropertiesExtension;
 import org.gradle.api.tasks.Input;
@@ -30,6 +35,7 @@ import org.gradle.api.tasks.TaskAction;
 
 import org.springframework.boot.gradle.SpringBootPluginExtension;
 import org.springframework.boot.loader.tools.MainClassFinder;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Task to find and set the 'mainClassName' convention when it's missing by searching the
@@ -38,6 +44,7 @@ import org.springframework.boot.loader.tools.MainClassFinder;
  * @author Dave Syer
  * @author Phillip Webb
  * @author Andy Wilkinson
+ * @since 1.2.7
  */
 public class FindMainClassTask extends DefaultTask {
 
@@ -54,15 +61,14 @@ public class FindMainClassTask extends DefaultTask {
 	@TaskAction
 	public void setMainClassNameProperty() {
 		Project project = getProject();
-		if (!project.hasProperty("mainClassName")
-				|| project.property("mainClassName") == null) {
+		if (!project.hasProperty("mainClassName") || project.property("mainClassName") == null) {
 			String mainClass = findMainClass();
 			if (project.hasProperty("mainClassName")) {
 				project.setProperty("mainClassName", mainClass);
 			}
 			else {
-				ExtraPropertiesExtension extraProperties = (ExtraPropertiesExtension) project
-						.getExtensions().getByName("ext");
+				ExtraPropertiesExtension extraProperties = (ExtraPropertiesExtension) project.getExtensions()
+						.getByName("ext");
 				extraProperties.set("mainClassName", mainClass);
 			}
 		}
@@ -74,14 +80,13 @@ public class FindMainClassTask extends DefaultTask {
 		String mainClass = null;
 
 		// Try the SpringBoot extension setting
-		SpringBootPluginExtension bootExtension = project.getExtensions()
-				.getByType(SpringBootPluginExtension.class);
+		SpringBootPluginExtension bootExtension = project.getExtensions().getByType(SpringBootPluginExtension.class);
 		if (bootExtension.getMainClass() != null) {
 			mainClass = bootExtension.getMainClass();
 		}
 
-		ApplicationPluginConvention application = (ApplicationPluginConvention) project
-				.getConvention().getPlugins().get("application");
+		ApplicationPluginConvention application = (ApplicationPluginConvention) project.getConvention().getPlugins()
+				.get("application");
 
 		if (mainClass == null && application != null) {
 			// Try the Application extension setting
@@ -103,13 +108,11 @@ public class FindMainClassTask extends DefaultTask {
 		if (mainClass == null) {
 			// Search
 			if (this.mainClassSourceSetOutput != null) {
-				project.getLogger().debug("Looking for main in: "
-						+ this.mainClassSourceSetOutput.getClassesDir());
+				Collection<File> classesDirs = getClassesDirs(this.mainClassSourceSetOutput);
+				getProject().getLogger().debug("Looking for main in: " + classesDirs);
 				try {
-					mainClass = MainClassFinder.findSingleMainClass(
-							this.mainClassSourceSetOutput.getClassesDir(),
-							SPRING_BOOT_APPLICATION_CLASS_NAME);
-					project.getLogger().info("Computed main class: " + mainClass);
+					mainClass = MainClassFinder.findSingleMainClass(classesDirs, SPRING_BOOT_APPLICATION_CLASS_NAME);
+					getProject().getLogger().info("Computed main class: " + mainClass);
 				}
 				catch (IOException ex) {
 					throw new IllegalStateException("Cannot find main class", ex);
@@ -130,6 +133,15 @@ public class FindMainClassTask extends DefaultTask {
 		}
 
 		return mainClass;
+	}
+
+	private Collection<File> getClassesDirs(SourceSetOutput sourceSetOutput) {
+		Method getClassesDirs = ReflectionUtils.findMethod(SourceSetOutput.class, "getClassesDirs");
+		if (getClassesDirs == null) {
+			return Arrays.asList(sourceSetOutput.getClassesDir());
+		}
+		FileCollection classesDirs = (FileCollection) ReflectionUtils.invokeMethod(getClassesDirs, sourceSetOutput);
+		return classesDirs.getFiles();
 	}
 
 	private JavaExec findRunTask(Project project) {

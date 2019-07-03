@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -69,12 +69,9 @@ public class DataSourceXAResourceRecoveryHelperTests {
 	}
 
 	@Test
-	public void shouldCreateConnectionWithCredentialsAndGetXAResource()
-			throws SQLException {
-		given(this.xaDataSource.getXAConnection(anyString(), anyString()))
-				.willReturn(this.xaConnection);
-		this.recoveryHelper = new DataSourceXAResourceRecoveryHelper(this.xaDataSource,
-				"username", "password");
+	public void shouldCreateConnectionWithCredentialsAndGetXAResource() throws SQLException {
+		given(this.xaDataSource.getXAConnection(anyString(), anyString())).willReturn(this.xaConnection);
+		this.recoveryHelper = new DataSourceXAResourceRecoveryHelper(this.xaDataSource, "username", "password");
 		XAResource[] xaResources = this.recoveryHelper.getXAResources();
 		assertThat(xaResources.length).isEqualTo(1);
 		assertThat(xaResources[0]).isSameAs(this.recoveryHelper);
@@ -84,8 +81,7 @@ public class DataSourceXAResourceRecoveryHelperTests {
 
 	@Test
 	public void shouldFailToCreateConnectionAndNotGetXAResource() throws SQLException {
-		given(this.xaDataSource.getXAConnection())
-				.willThrow(new SQLException("Test exception"));
+		given(this.xaDataSource.getXAConnection()).willThrow(new SQLException("Test exception"));
 		XAResource[] xaResources = this.recoveryHelper.getXAResources();
 		assertThat(xaResources.length).isEqualTo(0);
 		verify(this.xaDataSource, times(1)).getXAConnection();
@@ -100,8 +96,7 @@ public class DataSourceXAResourceRecoveryHelperTests {
 	}
 
 	@Test
-	public void shouldDelegateRecoverCallAndCloseConnection()
-			throws XAException, SQLException {
+	public void shouldDelegateRecoverCallAndCloseConnection() throws XAException, SQLException {
 		this.recoveryHelper.getXAResources();
 		this.recoveryHelper.recover(XAResource.TMENDRSCAN);
 		verify(this.xaResource, times(1)).recover(XAResource.TMENDRSCAN);

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -85,8 +85,7 @@ public class ExitCodeGeneratorsTests {
 	}
 
 	@Test
-	public void getExitCodeWhenUsingExitCodeExceptionMapperShouldCallMapper()
-			throws Exception {
+	public void getExitCodeWhenUsingExitCodeExceptionMapperShouldCallMapper() throws Exception {
 		ExitCodeGenerators generators = new ExitCodeGenerators();
 		Exception e = new IOException();
 		generators.add(e, mockMapper(IllegalStateException.class, 1));
@@ -101,8 +100,7 @@ public class ExitCodeGeneratorsTests {
 		return generator;
 	}
 
-	private ExitCodeExceptionMapper mockMapper(final Class<?> exceptionType,
-			final int exitCode) {
+	private ExitCodeExceptionMapper mockMapper(final Class<?> exceptionType, final int exitCode) {
 		return new ExitCodeExceptionMapper() {
 
 			@Override

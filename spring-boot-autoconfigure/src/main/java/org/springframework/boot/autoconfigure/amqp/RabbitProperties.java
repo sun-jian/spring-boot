@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.List;
 import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory.CacheMode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -35,6 +36,7 @@ import org.springframework.util.StringUtils;
  * @author Andy Wilkinson
  * @author Josh Thornhill
  * @author Gary Russell
+ * @since 1.0.0
  */
 @ConfigurationProperties(prefix = "spring.rabbitmq")
 public class RabbitProperties {
@@ -202,7 +204,7 @@ public class RabbitProperties {
 			return this.username;
 		}
 		Address address = this.parsedAddresses.get(0);
-		return address.username == null ? this.username : address.username;
+		return (address.username != null) ? address.username : this.username;
 	}
 
 	public void setUsername(String username) {
@@ -225,7 +227,7 @@ public class RabbitProperties {
 			return getPassword();
 		}
 		Address address = this.parsedAddresses.get(0);
-		return address.password == null ? getPassword() : address.password;
+		return (address.password != null) ? address.password : getPassword();
 	}
 
 	public void setPassword(String password) {
@@ -252,7 +254,7 @@ public class RabbitProperties {
 			return getVirtualHost();
 		}
 		Address address = this.parsedAddresses.get(0);
-		return address.virtualHost == null ? getVirtualHost() : address.virtualHost;
+		return (address.virtualHost != null) ? address.virtualHost : getVirtualHost();
 	}
 
 	public void setVirtualHost(String virtualHost) {
@@ -336,6 +338,17 @@ public class RabbitProperties {
 		 */
 		private String algorithm;
 
+		/**
+		 * Whether to enable server side certificate validation.
+		 */
+		private boolean validateServerCertificate = true;
+
+		/**
+		 * Whether to enable hostname verification. Requires AMQP client 4.8 or above and
+		 * defaults to true when a suitable client version is used.
+		 */
+		private Boolean verifyHostname;
+
 		public boolean isEnabled() {
 			return this.enabled;
 		}
@@ -382,6 +395,22 @@ public class RabbitProperties {
 
 		public void setAlgorithm(String sslAlgorithm) {
 			this.algorithm = sslAlgorithm;
+		}
+
+		public boolean isValidateServerCertificate() {
+			return this.validateServerCertificate;
+		}
+
+		public void setValidateServerCertificate(boolean validateServerCertificate) {
+			this.validateServerCertificate = validateServerCertificate;
+		}
+
+		public Boolean getVerifyHostname() {
+			return this.verifyHostname;
+		}
+
+		public void setVerifyHostname(Boolean verifyHostname) {
+			this.verifyHostname = verifyHostname;
 		}
 
 	}
@@ -465,6 +494,111 @@ public class RabbitProperties {
 	}
 
 	public static class Listener {
+
+		@NestedConfigurationProperty
+		private final AmqpContainer simple = new AmqpContainer();
+
+		@DeprecatedConfigurationProperty(replacement = "spring.rabbitmq.listener.simple.auto-startup")
+		@Deprecated
+		public boolean isAutoStartup() {
+			return getSimple().isAutoStartup();
+		}
+
+		@Deprecated
+		public void setAutoStartup(boolean autoStartup) {
+			getSimple().setAutoStartup(autoStartup);
+		}
+
+		@DeprecatedConfigurationProperty(replacement = "spring.rabbitmq.listener.simple.acknowledge-mode")
+		@Deprecated
+		public AcknowledgeMode getAcknowledgeMode() {
+			return getSimple().getAcknowledgeMode();
+		}
+
+		@Deprecated
+		public void setAcknowledgeMode(AcknowledgeMode acknowledgeMode) {
+			getSimple().setAcknowledgeMode(acknowledgeMode);
+		}
+
+		@DeprecatedConfigurationProperty(replacement = "spring.rabbitmq.listener.simple.concurrency")
+		@Deprecated
+		public Integer getConcurrency() {
+			return getSimple().getConcurrency();
+		}
+
+		@Deprecated
+		public void setConcurrency(Integer concurrency) {
+			getSimple().setConcurrency(concurrency);
+		}
+
+		@DeprecatedConfigurationProperty(replacement = "spring.rabbitmq.listener.simple.max-concurrency")
+		@Deprecated
+		public Integer getMaxConcurrency() {
+			return getSimple().getMaxConcurrency();
+		}
+
+		@Deprecated
+		public void setMaxConcurrency(Integer maxConcurrency) {
+			getSimple().setMaxConcurrency(maxConcurrency);
+		}
+
+		@DeprecatedConfigurationProperty(replacement = "spring.rabbitmq.listener.simple.prefetch")
+		@Deprecated
+		public Integer getPrefetch() {
+			return getSimple().getPrefetch();
+		}
+
+		@Deprecated
+		public void setPrefetch(Integer prefetch) {
+			getSimple().setPrefetch(prefetch);
+		}
+
+		@DeprecatedConfigurationProperty(replacement = "spring.rabbitmq.listener.simple.transaction-size")
+		@Deprecated
+		public Integer getTransactionSize() {
+			return getSimple().getTransactionSize();
+		}
+
+		@Deprecated
+		public void setTransactionSize(Integer transactionSize) {
+			getSimple().setTransactionSize(transactionSize);
+		}
+
+		@DeprecatedConfigurationProperty(replacement = "spring.rabbitmq.listener.simple.default-requeue-rejected")
+		@Deprecated
+		public Boolean getDefaultRequeueRejected() {
+			return getSimple().getDefaultRequeueRejected();
+		}
+
+		@Deprecated
+		public void setDefaultRequeueRejected(Boolean defaultRequeueRejected) {
+			getSimple().setDefaultRequeueRejected(defaultRequeueRejected);
+		}
+
+		@DeprecatedConfigurationProperty(replacement = "spring.rabbitmq.listener.simple.idle-event-interval")
+		@Deprecated
+		public Long getIdleEventInterval() {
+			return getSimple().getIdleEventInterval();
+		}
+
+		@Deprecated
+		public void setIdleEventInterval(Long idleEventInterval) {
+			getSimple().setIdleEventInterval(idleEventInterval);
+		}
+
+		@DeprecatedConfigurationProperty(replacement = "spring.rabbitmq.listener.simple.retry")
+		@Deprecated
+		public ListenerRetry getRetry() {
+			return getSimple().getRetry();
+		}
+
+		public AmqpContainer getSimple() {
+			return this.simple;
+		}
+
+	}
+
+	public static class AmqpContainer {
 
 		/**
 		 * Start the container automatically on startup.

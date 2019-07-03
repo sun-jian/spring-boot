@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -107,21 +107,21 @@ import org.springframework.util.StringUtils;
  * context.
  * <p>
  * Additional shell commands can be implemented using the guide and documentation at
- * <a href="http://www.crashub.org">crashub.org</a>. By default Boot will search for
+ * <a href="https://www.crashub.org">crashub.org</a>. By default Boot will search for
  * commands using the following classpath scanning pattern {@code classpath*:/commands/**}
  * . To add different locations or override the default use
  * {@code management.shell.command-path-patterns} in your application configuration.
  *
  * @author Christian Dupuis
  * @author Matt Benson
+ * @since 1.0.0
  * @see ShellProperties
  * @deprecated as of 1.5 since CRaSH is not actively maintained
  */
 @Configuration
 @ConditionalOnClass(PluginLifeCycle.class)
 @EnableConfigurationProperties(ShellProperties.class)
-@AutoConfigureAfter({ SecurityAutoConfiguration.class,
-		ManagementWebSecurityAutoConfiguration.class })
+@AutoConfigureAfter({ SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class })
 @Deprecated
 public class CrshAutoConfiguration {
 
@@ -179,8 +179,7 @@ public class CrshAutoConfiguration {
 
 		private final ManagementServerProperties management;
 
-		public AuthenticationManagerAdapterConfiguration(
-				ObjectProvider<ManagementServerProperties> management) {
+		public AuthenticationManagerAdapterConfiguration(ObjectProvider<ManagementServerProperties> management) {
 			this.management = management.getIfAvailable();
 		}
 
@@ -201,8 +200,7 @@ public class CrshAutoConfiguration {
 			SpringAuthenticationProperties authenticationProperties = new SpringAuthenticationProperties();
 			if (this.management != null) {
 				List<String> roles = this.management.getSecurity().getRoles();
-				authenticationProperties
-						.setRoles(roles.toArray(new String[roles.size()]));
+				authenticationProperties.setRoles(roles.toArray(new String[roles.size()]));
 			}
 			return authenticationProperties;
 		}
@@ -233,18 +231,14 @@ public class CrshAutoConfiguration {
 
 		@PostConstruct
 		public void init() {
-			FS commandFileSystem = createFileSystem(
-					this.properties.getCommandPathPatterns(),
+			FS commandFileSystem = createFileSystem(this.properties.getCommandPathPatterns(),
 					this.properties.getDisabledCommands());
-			FS configurationFileSystem = createFileSystem(
-					this.properties.getConfigPathPatterns(), new String[0]);
+			FS configurationFileSystem = createFileSystem(this.properties.getConfigPathPatterns(), new String[0]);
 
-			PluginDiscovery discovery = new BeanFactoryFilteringPluginDiscovery(
-					this.resourceLoader.getClassLoader(), this.beanFactory,
-					this.properties.getDisabledPlugins());
+			PluginDiscovery discovery = new BeanFactoryFilteringPluginDiscovery(this.resourceLoader.getClassLoader(),
+					this.beanFactory, this.properties.getDisabledPlugins());
 
-			PluginContext context = new PluginContext(discovery,
-					createPluginContextAttributes(), commandFileSystem,
+			PluginContext context = new PluginContext(discovery, createPluginContextAttributes(), commandFileSystem,
 					configurationFileSystem, this.resourceLoader.getClassLoader());
 
 			context.refresh();
@@ -257,12 +251,11 @@ public class CrshAutoConfiguration {
 			FS fileSystem = new FS();
 			for (String pathPattern : pathPatterns) {
 				try {
-					fileSystem.mount(new SimpleFileSystemDriver(new DirectoryHandle(
-							pathPattern, this.resourceLoader, filterPatterns)));
+					fileSystem.mount(new SimpleFileSystemDriver(
+							new DirectoryHandle(pathPattern, this.resourceLoader, filterPatterns)));
 				}
 				catch (IOException ex) {
-					throw new IllegalStateException(
-							"Failed to mount file system for '" + pathPattern + "'", ex);
+					throw new IllegalStateException("Failed to mount file system for '" + pathPattern + "'", ex);
 				}
 			}
 			return fileSystem;
@@ -270,8 +263,7 @@ public class CrshAutoConfiguration {
 
 		protected Map<String, Object> createPluginContextAttributes() {
 			Map<String, Object> attributes = new HashMap<String, Object>();
-			String bootVersion = CrshAutoConfiguration.class.getPackage()
-					.getImplementationVersion();
+			String bootVersion = CrshAutoConfiguration.class.getPackage().getImplementationVersion();
 			if (bootVersion != null) {
 				attributes.put("spring.boot.version", bootVersion);
 			}
@@ -291,12 +283,11 @@ public class CrshAutoConfiguration {
 	 * Adapts a Spring Security {@link AuthenticationManager} for use with CRaSH.
 	 */
 	@SuppressWarnings("rawtypes")
-	private static class AuthenticationManagerAdapter extends
-			CRaSHPlugin<AuthenticationPlugin> implements AuthenticationPlugin<String> {
+	private static class AuthenticationManagerAdapter extends CRaSHPlugin<AuthenticationPlugin>
+			implements AuthenticationPlugin<String> {
 
-		private static final PropertyDescriptor<String> ROLES = PropertyDescriptor.create(
-				"auth.spring.roles", "ACTUATOR",
-				"Comma separated list of roles required to access the shell");
+		private static final PropertyDescriptor<String> ROLES = PropertyDescriptor.create("auth.spring.roles",
+				"ACTUATOR", "Comma separated list of roles required to access the shell");
 
 		@Autowired
 		private AuthenticationManager authenticationManager;
@@ -309,8 +300,7 @@ public class CrshAutoConfiguration {
 
 		@Override
 		public boolean authenticate(String username, String password) throws Exception {
-			Authentication token = new UsernamePasswordAuthenticationToken(username,
-					password);
+			Authentication token = new UsernamePasswordAuthenticationToken(username, password);
 			try {
 				// Authenticate first to make sure credentials are valid
 				token = this.authenticationManager.authenticate(token);
@@ -320,11 +310,9 @@ public class CrshAutoConfiguration {
 			}
 
 			// Test access rights if a Spring Security AccessDecisionManager is installed
-			if (this.accessDecisionManager != null && token.isAuthenticated()
-					&& this.roles != null) {
+			if (this.accessDecisionManager != null && token.isAuthenticated() && this.roles != null) {
 				try {
-					this.accessDecisionManager.decide(token, this,
-							SecurityConfig.createList(this.roles));
+					this.accessDecisionManager.decide(token, this, SecurityConfig.createList(this.roles));
 				}
 				catch (AccessDeniedException ex) {
 					return false;
@@ -352,8 +340,7 @@ public class CrshAutoConfiguration {
 		public void init() {
 			String rolesPropertyValue = getContext().getProperty(ROLES);
 			if (rolesPropertyValue != null) {
-				this.roles = StringUtils
-						.commaDelimitedListToStringArray(rolesPropertyValue);
+				this.roles = StringUtils.commaDelimitedListToStringArray(rolesPropertyValue);
 			}
 		}
 
@@ -368,16 +355,14 @@ public class CrshAutoConfiguration {
 	 * {@link ServiceLoaderDiscovery} to expose {@link CRaSHPlugin} Beans from Spring and
 	 * deal with filtering disabled plugins.
 	 */
-	private static class BeanFactoryFilteringPluginDiscovery
-			extends ServiceLoaderDiscovery {
+	private static class BeanFactoryFilteringPluginDiscovery extends ServiceLoaderDiscovery {
 
 		private final ListableBeanFactory beanFactory;
 
 		private final String[] disabledPlugins;
 
-		BeanFactoryFilteringPluginDiscovery(ClassLoader classLoader,
-				ListableBeanFactory beanFactory, String[] disabledPlugins)
-						throws NullPointerException {
+		BeanFactoryFilteringPluginDiscovery(ClassLoader classLoader, ListableBeanFactory beanFactory,
+				String[] disabledPlugins) throws NullPointerException {
 			super(classLoader);
 			this.beanFactory = beanFactory;
 			this.disabledPlugins = disabledPlugins;
@@ -394,8 +379,7 @@ public class CrshAutoConfiguration {
 				}
 			}
 
-			Collection<CRaSHPlugin> pluginBeans = this.beanFactory
-					.getBeansOfType(CRaSHPlugin.class).values();
+			Collection<CRaSHPlugin> pluginBeans = this.beanFactory.getBeansOfType(CRaSHPlugin.class).values();
 			for (CRaSHPlugin<?> pluginBean : pluginBeans) {
 				if (isEnabled(pluginBean)) {
 					plugins.add(pluginBean);
@@ -426,8 +410,7 @@ public class CrshAutoConfiguration {
 		private boolean isEnabled(Class<?> pluginClass) {
 			for (String disabledPlugin : this.disabledPlugins) {
 				if (ClassUtils.getShortName(pluginClass).equalsIgnoreCase(disabledPlugin)
-						|| ClassUtils.getQualifiedName(pluginClass)
-								.equalsIgnoreCase(disabledPlugin)) {
+						|| ClassUtils.getQualifiedName(pluginClass).equalsIgnoreCase(disabledPlugin)) {
 					return false;
 				}
 			}
@@ -448,8 +431,7 @@ public class CrshAutoConfiguration {
 		}
 
 		@Override
-		public Iterable<ResourceHandle> children(ResourceHandle handle)
-				throws IOException {
+		public Iterable<ResourceHandle> children(ResourceHandle handle) throws IOException {
 			if (handle instanceof DirectoryHandle) {
 				return ((DirectoryHandle) handle).members();
 			}
@@ -477,8 +459,7 @@ public class CrshAutoConfiguration {
 		@Override
 		public Iterator<InputStream> open(ResourceHandle handle) throws IOException {
 			if (handle instanceof FileHandle) {
-				return Collections.singletonList(((FileHandle) handle).openStream())
-						.iterator();
+				return Collections.singletonList(((FileHandle) handle).openStream()).iterator();
 			}
 			return Collections.<InputStream>emptyList().iterator();
 		}
@@ -518,8 +499,7 @@ public class CrshAutoConfiguration {
 
 		private final AntPathMatcher matcher = new AntPathMatcher();
 
-		DirectoryHandle(String name, ResourcePatternResolver resourceLoader,
-				String[] filterPatterns) {
+		DirectoryHandle(String name, ResourcePatternResolver resourceLoader, String[] filterPatterns) {
 			super(name);
 			this.resourceLoader = resourceLoader;
 			this.filterPatterns = filterPatterns;
@@ -529,8 +509,7 @@ public class CrshAutoConfiguration {
 			Resource[] resources = this.resourceLoader.getResources(getName());
 			List<ResourceHandle> files = new ArrayList<ResourceHandle>();
 			for (Resource resource : resources) {
-				if (!resource.getURL().getPath().endsWith("/")
-						&& !shouldFilter(resource)) {
+				if (!resource.getURL().getPath().endsWith("/") && !shouldFilter(resource)) {
 					files.add(new FileHandle(resource.getFilename(), resource));
 				}
 			}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -54,8 +54,7 @@ import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
 @ConditionalOnProperty(prefix = "spring.mobile.devicedelegatingviewresolver", name = "enabled", havingValue = "true")
 @EnableConfigurationProperties(DeviceDelegatingViewResolverProperties.class)
 @AutoConfigureAfter({ WebMvcAutoConfiguration.class, FreeMarkerAutoConfiguration.class,
-		GroovyTemplateAutoConfiguration.class, MustacheAutoConfiguration.class,
-		ThymeleafAutoConfiguration.class })
+		GroovyTemplateAutoConfiguration.class, MustacheAutoConfiguration.class, ThymeleafAutoConfiguration.class })
 public class DeviceDelegatingViewResolverAutoConfiguration {
 
 	@Configuration
@@ -76,8 +75,7 @@ public class DeviceDelegatingViewResolverAutoConfiguration {
 		@Bean
 		@ConditionalOnBean(FreeMarkerViewResolver.class)
 		public LiteDeviceDelegatingViewResolver deviceDelegatingFreeMarkerViewResolver(
-				DeviceDelegatingViewResolverFactory factory,
-				FreeMarkerViewResolver viewResolver) {
+				DeviceDelegatingViewResolverFactory factory, FreeMarkerViewResolver viewResolver) {
 			return factory.createViewResolver(viewResolver);
 		}
 
@@ -90,8 +88,7 @@ public class DeviceDelegatingViewResolverAutoConfiguration {
 		@Bean
 		@ConditionalOnBean(GroovyMarkupViewResolver.class)
 		public LiteDeviceDelegatingViewResolver deviceDelegatingGroovyMarkupViewResolver(
-				DeviceDelegatingViewResolverFactory factory,
-				GroovyMarkupViewResolver viewResolver) {
+				DeviceDelegatingViewResolverFactory factory, GroovyMarkupViewResolver viewResolver) {
 			return factory.createViewResolver(viewResolver);
 		}
 
@@ -104,8 +101,7 @@ public class DeviceDelegatingViewResolverAutoConfiguration {
 		@Bean
 		@ConditionalOnBean(InternalResourceViewResolver.class)
 		public LiteDeviceDelegatingViewResolver deviceDelegatingJspViewResolver(
-				DeviceDelegatingViewResolverFactory factory,
-				InternalResourceViewResolver viewResolver) {
+				DeviceDelegatingViewResolverFactory factory, InternalResourceViewResolver viewResolver) {
 			return factory.createViewResolver(viewResolver);
 		}
 
@@ -118,8 +114,7 @@ public class DeviceDelegatingViewResolverAutoConfiguration {
 		@Bean
 		@ConditionalOnBean(MustacheViewResolver.class)
 		public LiteDeviceDelegatingViewResolver deviceDelegatingMustacheViewResolver(
-				DeviceDelegatingViewResolverFactory factory,
-				MustacheViewResolver viewResolver) {
+				DeviceDelegatingViewResolverFactory factory, MustacheViewResolver viewResolver) {
 			return factory.createViewResolver(viewResolver);
 		}
 
@@ -132,8 +127,7 @@ public class DeviceDelegatingViewResolverAutoConfiguration {
 		@Bean
 		@ConditionalOnBean(ThymeleafViewResolver.class)
 		public LiteDeviceDelegatingViewResolver deviceDelegatingThymeleafViewResolver(
-				DeviceDelegatingViewResolverFactory factory,
-				ThymeleafViewResolver viewResolver) {
+				DeviceDelegatingViewResolverFactory factory, ThymeleafViewResolver viewResolver) {
 			return factory.createViewResolver(viewResolver);
 		}
 

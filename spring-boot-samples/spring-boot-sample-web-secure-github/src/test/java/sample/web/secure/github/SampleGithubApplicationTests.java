@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -54,17 +54,14 @@ public class SampleGithubApplicationTests {
 	public void everythingIsSecuredByDefault() throws Exception {
 		ResponseEntity<Void> entity = this.restTemplate.getForEntity("/", Void.class);
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.FOUND);
-		assertThat(entity.getHeaders().getLocation())
-				.isEqualTo(URI.create("http://localhost:" + this.port + "/login"));
+		assertThat(entity.getHeaders().getLocation()).isEqualTo(URI.create("http://localhost:" + this.port + "/login"));
 	}
 
 	@Test
 	public void loginRedirectsToGithub() throws Exception {
-		ResponseEntity<Void> entity = this.restTemplate.getForEntity("/login",
-				Void.class);
+		ResponseEntity<Void> entity = this.restTemplate.getForEntity("/login", Void.class);
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.FOUND);
-		assertThat(entity.getHeaders().getLocation().toString())
-				.startsWith("https://github.com/login/oauth");
+		assertThat(entity.getHeaders().getLocation().toString()).startsWith("https://github.com/login/oauth");
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,6 +46,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @author Dave Syer
+ * @since 1.0.0
  */
 public class ExtendedGroovyClassLoader extends GroovyClassLoader {
 
@@ -84,8 +85,7 @@ public class ExtendedGroovyClassLoader extends GroovyClassLoader {
 			return super.findClass(name);
 		}
 		catch (ClassNotFoundException ex) {
-			if (this.scope == GroovyCompilerScope.DEFAULT
-					&& name.startsWith(SHARED_PACKAGE)) {
+			if (this.scope == GroovyCompilerScope.DEFAULT && name.startsWith(SHARED_PACKAGE)) {
 				Class<?> sharedClass = findSharedClass(name);
 				if (sharedClass != null) {
 					return sharedClass;
@@ -119,27 +119,26 @@ public class ExtendedGroovyClassLoader extends GroovyClassLoader {
 		InputStream resourceStream = super.getResourceAsStream(name);
 		if (resourceStream == null) {
 			byte[] bytes = this.classResources.get(name);
-			resourceStream = bytes == null ? null : new ByteArrayInputStream(bytes);
+			resourceStream = (bytes != null) ? new ByteArrayInputStream(bytes) : null;
 		}
 		return resourceStream;
 	}
 
 	@Override
 	public ClassCollector createCollector(CompilationUnit unit, SourceUnit su) {
-		InnerLoader loader = AccessController
-				.doPrivileged(new PrivilegedAction<InnerLoader>() {
+		InnerLoader loader = AccessController.doPrivileged(new PrivilegedAction<InnerLoader>() {
+			@Override
+			public InnerLoader run() {
+				return new InnerLoader(ExtendedGroovyClassLoader.this) {
+					// Don't return URLs from the inner loader so that Tomcat only
+					// searches the parent. Fixes 'TLD skipped' issues
 					@Override
-					public InnerLoader run() {
-						return new InnerLoader(ExtendedGroovyClassLoader.this) {
-							// Don't return URLs from the inner loader so that Tomcat only
-							// searches the parent. Fixes 'TLD skipped' issues
-							@Override
-							public URL[] getURLs() {
-								return NO_URLS;
-							}
-						};
+					public URL[] getURLs() {
+						return NO_URLS;
 					}
-				});
+				};
+			}
+		});
 		return new ExtendedClassCollector(loader, unit, su);
 	}
 
@@ -152,16 +151,14 @@ public class ExtendedGroovyClassLoader extends GroovyClassLoader {
 	 */
 	protected class ExtendedClassCollector extends ClassCollector {
 
-		protected ExtendedClassCollector(InnerLoader loader, CompilationUnit unit,
-				SourceUnit su) {
+		protected ExtendedClassCollector(InnerLoader loader, CompilationUnit unit, SourceUnit su) {
 			super(loader, unit, su);
 		}
 
 		@Override
 		protected Class<?> createClass(byte[] code, ClassNode classNode) {
 			Class<?> createdClass = super.createClass(code, classNode);
-			ExtendedGroovyClassLoader.this.classResources
-					.put(classNode.getName().replace('.', '/') + ".class", code);
+			ExtendedGroovyClassLoader.this.classResources.put(classNode.getName().replace('.', '/') + ".class", code);
 			return createdClass;
 		}
 
@@ -186,7 +183,7 @@ public class ExtendedGroovyClassLoader extends GroovyClassLoader {
 			Set<URL> urls = new HashSet<URL>();
 			findGroovyJarsDirectly(parent, urls);
 			if (urls.isEmpty()) {
-				findGroovyJarsFromClassPath(parent, urls);
+				findGroovyJarsFromClassPath(urls);
 			}
 			Assert.state(!urls.isEmpty(), "Unable to find groovy JAR");
 			return new ArrayList<URL>(urls).toArray(new URL[urls.size()]);
@@ -205,7 +202,7 @@ public class ExtendedGroovyClassLoader extends GroovyClassLoader {
 			}
 		}
 
-		private void findGroovyJarsFromClassPath(ClassLoader parent, Set<URL> urls) {
+		private void findGroovyJarsFromClassPath(Set<URL> urls) {
 			String classpath = System.getProperty("java.class.path");
 			String[] entries = classpath.split(System.getProperty("path.separator"));
 			for (String entry : entries) {
@@ -234,8 +231,7 @@ public class ExtendedGroovyClassLoader extends GroovyClassLoader {
 		}
 
 		@Override
-		protected Class<?> loadClass(String name, boolean resolve)
-				throws ClassNotFoundException {
+		protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 			this.groovyOnlyClassLoader.loadClass(name);
 			return super.loadClass(name, resolve);
 		}

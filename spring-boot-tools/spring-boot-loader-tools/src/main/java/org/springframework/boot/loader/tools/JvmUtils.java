@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,8 +31,7 @@ abstract class JvmUtils {
 	/**
 	 * Various search locations for tools, including the odd Java 6 OSX jar.
 	 */
-	private static final String[] TOOLS_LOCATIONS = { "lib/tools.jar", "../lib/tools.jar",
-			"../Classes/classes.jar" };
+	private static final String[] TOOLS_LOCATIONS = { "lib/tools.jar", "../lib/tools.jar", "../Classes/classes.jar" };
 
 	public static ClassLoader getToolsClassLoader() {
 		ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
@@ -57,11 +56,10 @@ abstract class JvmUtils {
 
 	private static String getJavaHome() {
 		try {
-			return new File(System.getProperty("java.home")).toURI().toURL()
-					.toExternalForm();
+			return new File(System.getProperty("java.home")).toURI().toURL().toExternalForm();
 		}
-		catch (MalformedURLException e) {
-			throw new IllegalStateException("Cannot locate java.home", e);
+		catch (MalformedURLException ex) {
+			throw new IllegalStateException("Cannot locate java.home", ex);
 		}
 	}
 

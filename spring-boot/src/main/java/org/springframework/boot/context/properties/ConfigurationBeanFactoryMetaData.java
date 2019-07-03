@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,8 +44,7 @@ public class ConfigurationBeanFactoryMetaData implements BeanFactoryPostProcesso
 	private Map<String, MetaData> beans = new HashMap<String, MetaData>();
 
 	@Override
-	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
-			throws BeansException {
+	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
 		for (String name : beanFactory.getBeanDefinitionNames()) {
 			BeanDefinition definition = beanFactory.getBeanDefinition(name);
@@ -57,8 +56,7 @@ public class ConfigurationBeanFactoryMetaData implements BeanFactoryPostProcesso
 		}
 	}
 
-	public <A extends Annotation> Map<String, Object> getBeansWithFactoryAnnotation(
-			Class<A> type) {
+	public <A extends Annotation> Map<String, Object> getBeansWithFactoryAnnotation(Class<A> type) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		for (String name : this.beans.keySet()) {
 			if (findFactoryAnnotation(name, type) != null) {
@@ -68,10 +66,9 @@ public class ConfigurationBeanFactoryMetaData implements BeanFactoryPostProcesso
 		return result;
 	}
 
-	public <A extends Annotation> A findFactoryAnnotation(String beanName,
-			Class<A> type) {
+	public <A extends Annotation> A findFactoryAnnotation(String beanName, Class<A> type) {
 		Method method = findFactoryMethod(beanName);
-		return (method == null ? null : AnnotationUtils.findAnnotation(method, type));
+		return (method != null) ? AnnotationUtils.findAnnotation(method, type) : null;
 	}
 
 	private Method findFactoryMethod(String beanName) {
@@ -84,8 +81,7 @@ public class ConfigurationBeanFactoryMetaData implements BeanFactoryPostProcesso
 		Class<?> type = this.beanFactory.getType(meta.getBean());
 		ReflectionUtils.doWithMethods(type, new MethodCallback() {
 			@Override
-			public void doWith(Method method)
-					throws IllegalArgumentException, IllegalAccessException {
+			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 				if (method.getName().equals(factory)) {
 					found.compareAndSet(null, method);
 				}

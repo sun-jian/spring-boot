@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,13 +41,13 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
  * to deliberately override certain bean definitions via an extra Configuration class.
  *
  * @author Phillip Webb
+ * @since 1.0.0
  * @see #register(Class...)
  * @see #scan(String...)
  * @see EmbeddedWebApplicationContext
  * @see AnnotationConfigWebApplicationContext
  */
-public class AnnotationConfigEmbeddedWebApplicationContext
-		extends EmbeddedWebApplicationContext {
+public class AnnotationConfigEmbeddedWebApplicationContext extends EmbeddedWebApplicationContext {
 
 	private final AnnotatedBeanDefinitionReader reader;
 
@@ -121,8 +121,7 @@ public class AnnotationConfigEmbeddedWebApplicationContext
 	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
 		this.reader.setBeanNameGenerator(beanNameGenerator);
 		this.scanner.setBeanNameGenerator(beanNameGenerator);
-		this.getBeanFactory().registerSingleton(
-				AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR,
+		this.getBeanFactory().registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR,
 				beanNameGenerator);
 	}
 
@@ -154,8 +153,7 @@ public class AnnotationConfigEmbeddedWebApplicationContext
 	 */
 	public final void register(Class<?>... annotatedClasses) {
 		this.annotatedClasses = annotatedClasses;
-		Assert.notEmpty(annotatedClasses,
-				"At least one annotated class must be specified");
+		Assert.notEmpty(annotatedClasses, "At least one annotated class must be specified");
 	}
 
 	/**

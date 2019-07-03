@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.boot.actuate.endpoint;
 
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.boot.actuate.health.CompositeHealthIndicator;
@@ -31,6 +32,7 @@ import org.springframework.util.Assert;
  * @author Dave Syer
  * @author Christian Dupuis
  * @author Andy Wilkinson
+ * @since 1.0.0
  */
 @ConfigurationProperties(prefix = "endpoints.health")
 public class HealthEndpoint extends AbstractEndpoint<Health> {
@@ -47,13 +49,11 @@ public class HealthEndpoint extends AbstractEndpoint<Health> {
 	 * @param healthAggregator the health aggregator
 	 * @param healthIndicators the health indicators
 	 */
-	public HealthEndpoint(HealthAggregator healthAggregator,
-			Map<String, HealthIndicator> healthIndicators) {
+	public HealthEndpoint(HealthAggregator healthAggregator, Map<String, HealthIndicator> healthIndicators) {
 		super("health", false);
 		Assert.notNull(healthAggregator, "HealthAggregator must not be null");
 		Assert.notNull(healthIndicators, "HealthIndicators must not be null");
-		CompositeHealthIndicator healthIndicator = new CompositeHealthIndicator(
-				healthAggregator);
+		CompositeHealthIndicator healthIndicator = new CompositeHealthIndicator(healthAggregator);
 		for (Map.Entry<String, HealthIndicator> entry : healthIndicators.entrySet()) {
 			healthIndicator.addHealthIndicator(getKey(entry.getKey()), entry.getValue());
 		}
@@ -69,8 +69,12 @@ public class HealthEndpoint extends AbstractEndpoint<Health> {
 		return this.timeToLive;
 	}
 
-	public void setTimeToLive(long ttl) {
-		this.timeToLive = ttl;
+	/**
+	 * Set the time to live for cached results.
+	 * @param timeToLive the time to live in milliseconds
+	 */
+	public void setTimeToLive(long timeToLive) {
+		this.timeToLive = timeToLive;
 	}
 
 	/**
@@ -87,7 +91,7 @@ public class HealthEndpoint extends AbstractEndpoint<Health> {
 	 * @return the key
 	 */
 	private String getKey(String name) {
-		int index = name.toLowerCase().indexOf("healthindicator");
+		int index = name.toLowerCase(Locale.ENGLISH).indexOf("healthindicator");
 		if (index > 0) {
 			return name.substring(0, index);
 		}

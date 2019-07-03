@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,8 +33,7 @@ public class ObjectContentTests {
 
 	private static final ExampleObject OBJECT = new ExampleObject();
 
-	private static final ResolvableType TYPE = ResolvableType
-			.forClass(ExampleObject.class);
+	private static final ResolvableType TYPE = ResolvableType.forClass(ExampleObject.class);
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -48,37 +47,31 @@ public class ObjectContentTests {
 
 	@Test
 	public void createWhenTypeIsNullShouldCreateContent() throws Exception {
-		ObjectContent<ExampleObject> content = new ObjectContent<ExampleObject>(null,
-				OBJECT);
+		ObjectContent<ExampleObject> content = new ObjectContent<ExampleObject>(null, OBJECT);
 		assertThat(content).isNotNull();
 	}
 
 	@Test
 	public void assertThatShouldReturnObjectContentAssert() throws Exception {
-		ObjectContent<ExampleObject> content = new ObjectContent<ExampleObject>(TYPE,
-				OBJECT);
+		ObjectContent<ExampleObject> content = new ObjectContent<ExampleObject>(TYPE, OBJECT);
 		assertThat(content.assertThat()).isInstanceOf(ObjectContentAssert.class);
 	}
 
 	@Test
 	public void getObjectShouldReturnObject() throws Exception {
-		ObjectContent<ExampleObject> content = new ObjectContent<ExampleObject>(TYPE,
-				OBJECT);
+		ObjectContent<ExampleObject> content = new ObjectContent<ExampleObject>(TYPE, OBJECT);
 		assertThat(content.getObject()).isEqualTo(OBJECT);
 	}
 
 	@Test
 	public void toStringWhenHasTypeShouldReturnString() throws Exception {
-		ObjectContent<ExampleObject> content = new ObjectContent<ExampleObject>(TYPE,
-				OBJECT);
-		assertThat(content.toString())
-				.isEqualTo("ObjectContent " + OBJECT + " created from " + TYPE);
+		ObjectContent<ExampleObject> content = new ObjectContent<ExampleObject>(TYPE, OBJECT);
+		assertThat(content.toString()).isEqualTo("ObjectContent " + OBJECT + " created from " + TYPE);
 	}
 
 	@Test
 	public void toStringWhenHasNoTypeShouldReturnString() throws Exception {
-		ObjectContent<ExampleObject> content = new ObjectContent<ExampleObject>(null,
-				OBJECT);
+		ObjectContent<ExampleObject> content = new ObjectContent<ExampleObject>(null, OBJECT);
 		assertThat(content.toString()).isEqualTo("ObjectContent " + OBJECT);
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,6 +38,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Eddú Meléndez
  * @author Stephane Nicoll
+ * @since 1.0.0
  * @deprecated as of 1.5 since CRaSH is not actively maintained
  */
 @ConfigurationProperties(prefix = ShellProperties.SHELL_PREFIX, ignoreUnknownFields = true)
@@ -62,8 +63,7 @@ public class ShellProperties {
 	/**
 	 * Patterns to use to look for commands.
 	 */
-	private String[] commandPathPatterns = new String[] { "classpath*:/commands/**",
-			"classpath*:/crash/commands/**" };
+	private String[] commandPathPatterns = new String[] { "classpath*:/commands/**", "classpath*:/crash/commands/**" };
 
 	/**
 	 * Patterns to use to look for configurations.
@@ -160,8 +160,7 @@ public class ShellProperties {
 		}
 
 		if (this.commandRefreshInterval > 0) {
-			properties.put("crash.vfs.refresh_period",
-					String.valueOf(this.commandRefreshInterval));
+			properties.put("crash.vfs.refresh_period", String.valueOf(this.commandRefreshInterval));
 		}
 
 		// special handling for disabling Ssh and Telnet support
@@ -190,7 +189,7 @@ public class ShellProperties {
 	/**
 	 * Base class for CRaSH properties.
 	 */
-	public static abstract class CrshShellProperties {
+	public abstract static class CrshShellProperties {
 
 		/**
 		 * Apply the properties to a CRaSH configuration.
@@ -203,8 +202,7 @@ public class ShellProperties {
 	/**
 	 * Base class for Auth specific properties.
 	 */
-	public static abstract class CrshShellAuthenticationProperties
-			extends CrshShellProperties {
+	public abstract static class CrshShellAuthenticationProperties extends CrshShellProperties {
 
 	}
 
@@ -235,10 +233,8 @@ public class ShellProperties {
 		protected void validateCrshShellConfig(Properties properties) {
 			String finalAuth = properties.getProperty("crash.auth");
 			if (!this.defaultAuth && !this.type.equals(finalAuth)) {
-				logger.warn(String.format(
-						"Shell authentication fell back to method '%s' opposed to "
-								+ "configured method '%s'. Please check your classpath.",
-						finalAuth, this.type));
+				logger.warn(String.format("Shell authentication fell back to method '%s' opposed to "
+						+ "configured method '%s'. Please check your classpath.", finalAuth, this.type));
 			}
 			// Make sure we keep track of final authentication method
 			this.type = finalAuth;
@@ -378,10 +374,8 @@ public class ShellProperties {
 	/**
 	 * Auth specific properties for JAAS authentication.
 	 */
-	@ConfigurationProperties(prefix = SHELL_PREFIX
-			+ ".auth.jaas", ignoreUnknownFields = false)
-	public static class JaasAuthenticationProperties
-			extends CrshShellAuthenticationProperties {
+	@ConfigurationProperties(prefix = SHELL_PREFIX + ".auth.jaas", ignoreUnknownFields = false)
+	public static class JaasAuthenticationProperties extends CrshShellAuthenticationProperties {
 
 		/**
 		 * JAAS domain.
@@ -408,10 +402,8 @@ public class ShellProperties {
 	/**
 	 * Auth specific properties for key authentication.
 	 */
-	@ConfigurationProperties(prefix = SHELL_PREFIX
-			+ ".auth.key", ignoreUnknownFields = false)
-	public static class KeyAuthenticationProperties
-			extends CrshShellAuthenticationProperties {
+	@ConfigurationProperties(prefix = SHELL_PREFIX + ".auth.key", ignoreUnknownFields = false)
+	public static class KeyAuthenticationProperties extends CrshShellAuthenticationProperties {
 
 		/**
 		 * Path to the authentication key. This should point to a valid ".pem" file.
@@ -440,13 +432,10 @@ public class ShellProperties {
 	/**
 	 * Auth specific properties for simple authentication.
 	 */
-	@ConfigurationProperties(prefix = SHELL_PREFIX
-			+ ".auth.simple", ignoreUnknownFields = false)
-	public static class SimpleAuthenticationProperties
-			extends CrshShellAuthenticationProperties {
+	@ConfigurationProperties(prefix = SHELL_PREFIX + ".auth.simple", ignoreUnknownFields = false)
+	public static class SimpleAuthenticationProperties extends CrshShellAuthenticationProperties {
 
-		private static final Log logger = LogFactory
-				.getLog(SimpleAuthenticationProperties.class);
+		private static final Log logger = LogFactory.getLog(SimpleAuthenticationProperties.class);
 
 		private User user = new User();
 
@@ -456,9 +445,8 @@ public class ShellProperties {
 			config.put("crash.auth.simple.username", this.user.getName());
 			config.put("crash.auth.simple.password", this.user.getPassword());
 			if (this.user.isDefaultPassword()) {
-				logger.info(String.format(
-						"%n%nUsing default password for shell access: %s%n%n",
-						this.user.getPassword()));
+				logger.info(
+						String.format("%n%nUsing default password for shell access: %s%n%n", this.user.getPassword()));
 			}
 		}
 
@@ -502,8 +490,7 @@ public class ShellProperties {
 			}
 
 			public void setPassword(String password) {
-				if (password.startsWith("${") && password.endsWith("}")
-						|| !StringUtils.hasLength(password)) {
+				if (password.startsWith("${") && password.endsWith("}") || !StringUtils.hasLength(password)) {
 					return;
 				}
 				this.password = password;
@@ -517,10 +504,8 @@ public class ShellProperties {
 	/**
 	 * Auth specific properties for Spring authentication.
 	 */
-	@ConfigurationProperties(prefix = SHELL_PREFIX
-			+ ".auth.spring", ignoreUnknownFields = false)
-	public static class SpringAuthenticationProperties
-			extends CrshShellAuthenticationProperties {
+	@ConfigurationProperties(prefix = SHELL_PREFIX + ".auth.spring", ignoreUnknownFields = false)
+	public static class SpringAuthenticationProperties extends CrshShellAuthenticationProperties {
 
 		/**
 		 * Comma-separated list of required roles to login to the CRaSH console.
@@ -530,8 +515,7 @@ public class ShellProperties {
 		@Override
 		protected void applyToCrshShellConfig(Properties config) {
 			config.put("crash.auth", "spring");
-			config.put("crash.auth.spring.roles",
-					StringUtils.arrayToCommaDelimitedString(this.roles));
+			config.put("crash.auth.spring.roles", StringUtils.arrayToCommaDelimitedString(this.roles));
 		}
 
 		public void setRoles(String[] roles) {

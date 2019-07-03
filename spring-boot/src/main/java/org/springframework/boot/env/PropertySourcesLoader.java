@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -37,6 +38,7 @@ import org.springframework.util.StringUtils;
  * {@link PropertySourceLoader}s.
  *
  * @author Phillip Webb
+ * @since 1.0.0
  */
 public class PropertySourcesLoader {
 
@@ -62,8 +64,7 @@ public class PropertySourcesLoader {
 	public PropertySourcesLoader(MutablePropertySources propertySources) {
 		Assert.notNull(propertySources, "PropertySources must not be null");
 		this.propertySources = propertySources;
-		this.loaders = SpringFactoriesLoader.loadFactories(PropertySourceLoader.class,
-				getClass().getClassLoader());
+		this.loaders = SpringFactoriesLoader.loadFactories(PropertySourceLoader.class, getClass().getClassLoader());
 	}
 
 	/**
@@ -97,8 +98,7 @@ public class PropertySourcesLoader {
 	 * @return the loaded property source or {@code null}
 	 * @throws IOException if the source cannot be loaded
 	 */
-	public PropertySource<?> load(Resource resource, String name, String profile)
-			throws IOException {
+	public PropertySource<?> load(Resource resource, String name, String profile) throws IOException {
 		return load(resource, null, name, profile);
 	}
 
@@ -118,15 +118,13 @@ public class PropertySourcesLoader {
 	 * @return the loaded property source or {@code null}
 	 * @throws IOException if the source cannot be loaded
 	 */
-	public PropertySource<?> load(Resource resource, String group, String name,
-			String profile) throws IOException {
+	public PropertySource<?> load(Resource resource, String group, String name, String profile) throws IOException {
 		if (isFile(resource)) {
 			String sourceName = generatePropertySourceName(name, profile);
 			for (PropertySourceLoader loader : this.loaders) {
 				if (canLoadFileExtension(loader, resource)) {
-					PropertySource<?> specific = loader.load(sourceName, resource,
-							profile);
-					addPropertySource(group, specific, profile);
+					PropertySource<?> specific = loader.load(sourceName, resource, profile);
+					addPropertySource(group, specific);
 					return specific;
 				}
 			}
@@ -135,26 +133,25 @@ public class PropertySourcesLoader {
 	}
 
 	private boolean isFile(Resource resource) {
-		return resource != null && resource.exists() && StringUtils
-				.hasText(StringUtils.getFilenameExtension(resource.getFilename()));
+		return resource != null && resource.exists()
+				&& StringUtils.hasText(StringUtils.getFilenameExtension(resource.getFilename()));
 	}
 
 	private String generatePropertySourceName(String name, String profile) {
-		return (profile == null ? name : name + "#" + profile);
+		return (profile != null) ? name + "#" + profile : name;
 	}
 
 	private boolean canLoadFileExtension(PropertySourceLoader loader, Resource resource) {
-		String filename = resource.getFilename().toLowerCase();
+		String filename = resource.getFilename().toLowerCase(Locale.ENGLISH);
 		for (String extension : loader.getFileExtensions()) {
-			if (filename.endsWith("." + extension.toLowerCase())) {
+			if (filename.endsWith("." + extension.toLowerCase(Locale.ENGLISH))) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private void addPropertySource(String basename, PropertySource<?> source,
-			String profile) {
+	private void addPropertySource(String basename, PropertySource<?> source) {
 
 		if (source == null) {
 			return;
@@ -182,8 +179,7 @@ public class PropertySourcesLoader {
 		if (source instanceof EnumerableCompositePropertySource) {
 			return (EnumerableCompositePropertySource) source;
 		}
-		EnumerableCompositePropertySource composite = new EnumerableCompositePropertySource(
-				name);
+		EnumerableCompositePropertySource composite = new EnumerableCompositePropertySource(name);
 		return composite;
 	}
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,8 +52,7 @@ public class MockBeanOnContextHierarchyIntegrationTests {
 		ApplicationContext context = this.childConfig.getContext();
 		ApplicationContext parentContext = context.getParent();
 		assertThat(parentContext.getBeanNamesForType(ExampleService.class)).hasSize(1);
-		assertThat(parentContext.getBeanNamesForType(ExampleServiceCaller.class))
-				.hasSize(0);
+		assertThat(parentContext.getBeanNamesForType(ExampleServiceCaller.class)).hasSize(0);
 		assertThat(context.getBeanNamesForType(ExampleService.class)).hasSize(0);
 		assertThat(context.getBeanNamesForType(ExampleServiceCaller.class)).hasSize(1);
 		assertThat(context.getBean(ExampleService.class)).isNotNull();
@@ -73,8 +72,7 @@ public class MockBeanOnContextHierarchyIntegrationTests {
 		private ApplicationContext context;
 
 		@Override
-		public void setApplicationContext(ApplicationContext applicationContext)
-				throws BeansException {
+		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 			this.context = applicationContext;
 		}
 

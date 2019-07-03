@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -71,8 +71,7 @@ public abstract class AbstractSpringBootTestEmbeddedWebEnvironmentTests {
 	@Test
 	public void runAndTestHttpEndpoint() {
 		assertThat(this.port).isNotEqualTo(8080).isNotEqualTo(0);
-		String body = new RestTemplate()
-				.getForObject("http://localhost:" + this.port + "/", String.class);
+		String body = new RestTemplate().getForObject("http://localhost:" + this.port + "/", String.class);
 		assertThat(body).isEqualTo("Hello World");
 	}
 
@@ -89,8 +88,7 @@ public abstract class AbstractSpringBootTestEmbeddedWebEnvironmentTests {
 
 	@Test
 	public void validateWebApplicationContextIsSet() {
-		assertThat(this.context).isSameAs(
-				WebApplicationContextUtils.getWebApplicationContext(this.servletContext));
+		assertThat(this.context).isSameAs(WebApplicationContextUtils.getWebApplicationContext(this.servletContext));
 	}
 
 	protected static class AbstractConfig {

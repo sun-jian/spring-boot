@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,10 +39,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * {@link DeviceResolver}.
  *
  * @author Roy Clarkson
+ * @since 1.0.0
  */
 @Configuration
-@ConditionalOnClass({ DeviceResolverHandlerInterceptor.class,
-		DeviceHandlerMethodArgumentResolver.class })
+@ConditionalOnClass({ DeviceResolverHandlerInterceptor.class, DeviceHandlerMethodArgumentResolver.class })
 @AutoConfigureAfter(WebMvcAutoConfiguration.class)
 @ConditionalOnWebApplication
 public class DeviceResolverAutoConfiguration {
@@ -60,15 +60,13 @@ public class DeviceResolverAutoConfiguration {
 
 	@Configuration
 	@Order(0)
-	protected static class DeviceResolverMvcConfiguration
-			extends WebMvcConfigurerAdapter {
+	protected static class DeviceResolverMvcConfiguration extends WebMvcConfigurerAdapter {
 
 		private DeviceResolverHandlerInterceptor deviceResolverHandlerInterceptor;
 
 		private DeviceHandlerMethodArgumentResolver deviceHandlerMethodArgumentResolver;
 
-		protected DeviceResolverMvcConfiguration(
-				DeviceResolverHandlerInterceptor deviceResolverHandlerInterceptor,
+		protected DeviceResolverMvcConfiguration(DeviceResolverHandlerInterceptor deviceResolverHandlerInterceptor,
 				DeviceHandlerMethodArgumentResolver deviceHandlerMethodArgumentResolver) {
 			this.deviceResolverHandlerInterceptor = deviceResolverHandlerInterceptor;
 			this.deviceHandlerMethodArgumentResolver = deviceHandlerMethodArgumentResolver;
@@ -80,8 +78,7 @@ public class DeviceResolverAutoConfiguration {
 		}
 
 		@Override
-		public void addArgumentResolvers(
-				List<HandlerMethodArgumentResolver> argumentResolvers) {
+		public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 			argumentResolvers.add(this.deviceHandlerMethodArgumentResolver);
 		}
 

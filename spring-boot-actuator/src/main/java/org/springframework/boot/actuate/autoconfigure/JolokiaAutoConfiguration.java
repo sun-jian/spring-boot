@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -53,12 +53,13 @@ import org.springframework.web.servlet.mvc.ServletWrappingController;
  * <p>
  * Additional configuration parameters for Jolokia can be provided by specifying
  * {@code jolokia.config.*} properties. See the
- * <a href="http://jolokia.org">http://jolokia.org</a> web site for more information on
+ * <a href="https://jolokia.org">https://jolokia.org</a> web site for more information on
  * supported configuration parameters.
  *
  * @author Christian Dupuis
  * @author Dave Syer
  * @author Andy Wilkinson
+ * @since 1.0.0
  */
 @Configuration
 @ConditionalOnWebApplication
@@ -95,8 +96,7 @@ public class JolokiaAutoConfiguration {
 	static class JolokiaCondition extends SpringBootCondition {
 
 		@Override
-		public ConditionOutcome getMatchOutcome(ConditionContext context,
-				AnnotatedTypeMetadata metadata) {
+		public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			boolean endpointsEnabled = isEnabled(context, "endpoints.", true);
 			ConditionMessage.Builder message = ConditionMessage.forCondition("Jolokia");
 			if (isEnabled(context, "endpoints.jolokia.", endpointsEnabled)) {
@@ -105,10 +105,8 @@ public class JolokiaAutoConfiguration {
 			return ConditionOutcome.noMatch(message.because("not enabled"));
 		}
 
-		private boolean isEnabled(ConditionContext context, String prefix,
-				boolean defaultValue) {
-			RelaxedPropertyResolver resolver = new RelaxedPropertyResolver(
-					context.getEnvironment(), prefix);
+		private boolean isEnabled(ConditionContext context, String prefix, boolean defaultValue) {
+			RelaxedPropertyResolver resolver = new RelaxedPropertyResolver(context.getEnvironment(), prefix);
 			return resolver.getProperty("enabled", Boolean.class, defaultValue);
 		}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.boot.autoconfigure.web;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,15 +50,13 @@ public abstract class AbstractErrorController implements ErrorController {
 		this(errorAttributes, null);
 	}
 
-	public AbstractErrorController(ErrorAttributes errorAttributes,
-			List<ErrorViewResolver> errorViewResolvers) {
+	public AbstractErrorController(ErrorAttributes errorAttributes, List<ErrorViewResolver> errorViewResolvers) {
 		Assert.notNull(errorAttributes, "ErrorAttributes must not be null");
 		this.errorAttributes = errorAttributes;
 		this.errorViewResolvers = sortErrorViewResolvers(errorViewResolvers);
 	}
 
-	private List<ErrorViewResolver> sortErrorViewResolvers(
-			List<ErrorViewResolver> resolvers) {
+	private List<ErrorViewResolver> sortErrorViewResolvers(List<ErrorViewResolver> resolvers) {
 		List<ErrorViewResolver> sorted = new ArrayList<ErrorViewResolver>();
 		if (resolvers != null) {
 			sorted.addAll(resolvers);
@@ -66,11 +65,9 @@ public abstract class AbstractErrorController implements ErrorController {
 		return sorted;
 	}
 
-	protected Map<String, Object> getErrorAttributes(HttpServletRequest request,
-			boolean includeStackTrace) {
+	protected Map<String, Object> getErrorAttributes(HttpServletRequest request, boolean includeStackTrace) {
 		RequestAttributes requestAttributes = new ServletRequestAttributes(request);
-		return this.errorAttributes.getErrorAttributes(requestAttributes,
-				includeStackTrace);
+		return this.errorAttributes.getErrorAttributes(requestAttributes, includeStackTrace);
 	}
 
 	protected boolean getTraceParameter(HttpServletRequest request) {
@@ -78,12 +75,11 @@ public abstract class AbstractErrorController implements ErrorController {
 		if (parameter == null) {
 			return false;
 		}
-		return !"false".equals(parameter.toLowerCase());
+		return !"false".equals(parameter.toLowerCase(Locale.ENGLISH));
 	}
 
 	protected HttpStatus getStatus(HttpServletRequest request) {
-		Integer statusCode = (Integer) request
-				.getAttribute("javax.servlet.error.status_code");
+		Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
 		if (statusCode == null) {
 			return HttpStatus.INTERNAL_SERVER_ERROR;
 		}
@@ -106,8 +102,8 @@ public abstract class AbstractErrorController implements ErrorController {
 	 * used
 	 * @since 1.4.0
 	 */
-	protected ModelAndView resolveErrorView(HttpServletRequest request,
-			HttpServletResponse response, HttpStatus status, Map<String, Object> model) {
+	protected ModelAndView resolveErrorView(HttpServletRequest request, HttpServletResponse response, HttpStatus status,
+			Map<String, Object> model) {
 		for (ErrorViewResolver resolver : this.errorViewResolvers) {
 			ModelAndView modelAndView = resolver.resolveErrorView(request, status, model);
 			if (modelAndView != null) {

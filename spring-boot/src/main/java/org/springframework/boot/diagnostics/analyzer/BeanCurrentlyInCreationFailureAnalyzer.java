@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,48 +33,79 @@ import org.springframework.util.StringUtils;
  *
  * @author Andy Wilkinson
  */
-class BeanCurrentlyInCreationFailureAnalyzer
-		extends AbstractFailureAnalyzer<BeanCurrentlyInCreationException> {
+class BeanCurrentlyInCreationFailureAnalyzer extends AbstractFailureAnalyzer<BeanCurrentlyInCreationException> {
 
 	@Override
-	protected FailureAnalysis analyze(Throwable rootFailure,
-			BeanCurrentlyInCreationException cause) {
-		List<BeanInCycle> cycle = new ArrayList<BeanInCycle>();
+	protected FailureAnalysis analyze(Throwable rootFailure, BeanCurrentlyInCreationException cause) {
+		DependencyCycle dependencyCycle = findCycle(rootFailure);
+		if (dependencyCycle == null) {
+			return null;
+		}
+		return new FailureAnalysis(buildMessage(dependencyCycle), null, cause);
+	}
+
+	private DependencyCycle findCycle(Throwable rootFailure) {
+		List<BeanInCycle> beansInCycle = new ArrayList<BeanInCycle>();
 		Throwable candidate = rootFailure;
 		int cycleStart = -1;
 		while (candidate != null) {
 			BeanInCycle beanInCycle = BeanInCycle.get(candidate);
 			if (beanInCycle != null) {
-				int index = cycle.indexOf(beanInCycle);
+				int index = beansInCycle.indexOf(beanInCycle);
 				if (index == -1) {
-					cycle.add(beanInCycle);
+					beansInCycle.add(beanInCycle);
 				}
-				cycleStart = (cycleStart == -1 ? index : cycleStart);
+				cycleStart = (cycleStart != -1) ? cycleStart : index;
 			}
 			candidate = candidate.getCause();
 		}
-		String message = buildMessage(cycle, cycleStart);
-		return new FailureAnalysis(message, null, cause);
+		if (cycleStart == -1) {
+			return null;
+		}
+		return new DependencyCycle(beansInCycle, cycleStart);
 	}
 
-	private String buildMessage(List<BeanInCycle> beansInCycle, int cycleStart) {
+	private String buildMessage(DependencyCycle dependencyCycle) {
 		StringBuilder message = new StringBuilder();
-		message.append(String.format("The dependencies of some of the beans in the "
-				+ "application context form a cycle:%n%n"));
+		message.append(String
+				.format("The dependencies of some of the beans in the " + "application context form a cycle:%n%n"));
+		List<BeanInCycle> beansInCycle = dependencyCycle.getBeansInCycle();
+		int cycleStart = dependencyCycle.getCycleStart();
 		for (int i = 0; i < beansInCycle.size(); i++) {
 			BeanInCycle beanInCycle = beansInCycle.get(i);
 			if (i == cycleStart) {
 				message.append(String.format("┌─────┐%n"));
 			}
 			else if (i > 0) {
-				String leftSide = (i < cycleStart ? " " : "↑");
+				String leftSide = (i < cycleStart) ? " " : "↑";
 				message.append(String.format("%s     ↓%n", leftSide));
 			}
-			String leftSide = i < cycleStart ? " " : "|";
+			String leftSide = (i < cycleStart) ? " " : "|";
 			message.append(String.format("%s  %s%n", leftSide, beanInCycle));
 		}
 		message.append(String.format("└─────┘%n"));
 		return message.toString();
+	}
+
+	private static final class DependencyCycle {
+
+		private final List<BeanInCycle> beansInCycle;
+
+		private final int cycleStart;
+
+		private DependencyCycle(List<BeanInCycle> beansInCycle, int cycleStart) {
+			this.beansInCycle = beansInCycle;
+			this.cycleStart = cycleStart;
+		}
+
+		public List<BeanInCycle> getBeansInCycle() {
+			return this.beansInCycle;
+		}
+
+		public int getCycleStart() {
+			return this.cycleStart;
+		}
+
 	}
 
 	private static final class BeanInCycle {
@@ -107,11 +138,6 @@ class BeanCurrentlyInCreationFailureAnalyzer
 		}
 
 		@Override
-		public int hashCode() {
-			return this.name.hashCode();
-		}
-
-		@Override
 		public boolean equals(Object obj) {
 			if (this == obj) {
 				return true;
@@ -120,6 +146,11 @@ class BeanCurrentlyInCreationFailureAnalyzer
 				return false;
 			}
 			return this.name.equals(((BeanInCycle) obj).name);
+		}
+
+		@Override
+		public int hashCode() {
+			return this.name.hashCode();
 		}
 
 		@Override

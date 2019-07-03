@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,6 @@ import java.util.Set;
  * This implementation is optimized for frequent calls.
  *
  * @author Phillip Webb
- * @since 1.2.0
  */
 class DefaultPropertyNamePatternsMatcher implements PropertyNamePatternsMatcher {
 
@@ -40,13 +39,11 @@ class DefaultPropertyNamePatternsMatcher implements PropertyNamePatternsMatcher 
 		this(delimiters, false, names);
 	}
 
-	protected DefaultPropertyNamePatternsMatcher(char[] delimiters, boolean ignoreCase,
-			String... names) {
+	protected DefaultPropertyNamePatternsMatcher(char[] delimiters, boolean ignoreCase, String... names) {
 		this(delimiters, ignoreCase, new HashSet<String>(Arrays.asList(names)));
 	}
 
-	DefaultPropertyNamePatternsMatcher(char[] delimiters, boolean ignoreCase,
-			Set<String> names) {
+	DefaultPropertyNamePatternsMatcher(char[] delimiters, boolean ignoreCase, Set<String> names) {
 		this.delimiters = delimiters;
 		this.ignoreCase = ignoreCase;
 		this.names = names.toArray(new String[names.size()]);
@@ -71,15 +68,13 @@ class DefaultPropertyNamePatternsMatcher implements PropertyNamePatternsMatcher 
 				if (match[nameIndex]) {
 					match[nameIndex] = false;
 					if (charIndex < this.names[nameIndex].length()) {
-						if (isCharMatch(this.names[nameIndex].charAt(charIndex),
-								propertyNameChars[charIndex])) {
+						if (isCharMatch(this.names[nameIndex].charAt(charIndex), propertyNameChars[charIndex])) {
 							match[nameIndex] = true;
 							noneMatched = false;
 						}
 					}
 					else {
-						char charAfter = propertyNameChars[this.names[nameIndex]
-								.length()];
+						char charAfter = propertyNameChars[this.names[nameIndex].length()];
 						if (isDelimiter(charAfter)) {
 							match[nameIndex] = true;
 							noneMatched = false;

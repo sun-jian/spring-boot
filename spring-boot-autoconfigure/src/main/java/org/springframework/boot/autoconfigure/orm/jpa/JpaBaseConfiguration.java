@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -62,6 +62,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * @author Andy Wilkinson
  * @author Kazuki Shimizu
  * @author Eddú Meléndez
+ * @since 1.0.0
  */
 @EnableConfigurationProperties(JpaProperties.class)
 @Import(DataSourceInitializedPublisher.Registrar.class)
@@ -83,8 +84,7 @@ public abstract class JpaBaseConfiguration implements BeanFactoryAware {
 		this.dataSource = dataSource;
 		this.properties = properties;
 		this.jtaTransactionManager = jtaTransactionManager.getIfAvailable();
-		this.transactionManagerCustomizers = transactionManagerCustomizers
-				.getIfAvailable();
+		this.transactionManagerCustomizers = transactionManagerCustomizers.getIfAvailable();
 	}
 
 	@Bean
@@ -110,26 +110,22 @@ public abstract class JpaBaseConfiguration implements BeanFactoryAware {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public EntityManagerFactoryBuilder entityManagerFactoryBuilder(
-			JpaVendorAdapter jpaVendorAdapter,
+	public EntityManagerFactoryBuilder entityManagerFactoryBuilder(JpaVendorAdapter jpaVendorAdapter,
 			ObjectProvider<PersistenceUnitManager> persistenceUnitManager) {
-		EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder(
-				jpaVendorAdapter, this.properties.getProperties(),
-				persistenceUnitManager.getIfAvailable());
+		EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder(jpaVendorAdapter,
+				this.properties.getProperties(), persistenceUnitManager.getIfAvailable());
 		builder.setCallback(getVendorCallback());
 		return builder;
 	}
 
 	@Bean
 	@Primary
-	@ConditionalOnMissingBean({ LocalContainerEntityManagerFactoryBean.class,
-			EntityManagerFactory.class })
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-			EntityManagerFactoryBuilder factoryBuilder) {
+	@ConditionalOnMissingBean({ LocalContainerEntityManagerFactoryBean.class, EntityManagerFactory.class })
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder factoryBuilder) {
 		Map<String, Object> vendorProperties = getVendorProperties();
 		customizeVendorProperties(vendorProperties);
-		return factoryBuilder.dataSource(this.dataSource).packages(getPackagesToScan())
-				.properties(vendorProperties).jta(isJta()).build();
+		return factoryBuilder.dataSource(this.dataSource).packages(getPackagesToScan()).properties(vendorProperties)
+				.jta(isJta()).build();
 	}
 
 	protected abstract AbstractJpaVendorAdapter createJpaVendorAdapter();
@@ -149,8 +145,7 @@ public abstract class JpaBaseConfiguration implements BeanFactoryAware {
 	}
 
 	protected String[] getPackagesToScan() {
-		List<String> packages = EntityScanPackages.get(this.beanFactory)
-				.getPackageNames();
+		List<String> packages = EntityScanPackages.get(this.beanFactory).getPackageNames();
 		if (packages.isEmpty() && AutoConfigurationPackages.has(this.beanFactory)) {
 			packages = AutoConfigurationPackages.get(this.beanFactory);
 		}
@@ -197,8 +192,7 @@ public abstract class JpaBaseConfiguration implements BeanFactoryAware {
 	@Configuration
 	@ConditionalOnWebApplication
 	@ConditionalOnClass(WebMvcConfigurerAdapter.class)
-	@ConditionalOnMissingBean({ OpenEntityManagerInViewInterceptor.class,
-			OpenEntityManagerInViewFilter.class })
+	@ConditionalOnMissingBean({ OpenEntityManagerInViewInterceptor.class, OpenEntityManagerInViewFilter.class })
 	@ConditionalOnProperty(prefix = "spring.jpa", name = "open-in-view", havingValue = "true", matchIfMissing = true)
 	protected static class JpaWebConfiguration {
 

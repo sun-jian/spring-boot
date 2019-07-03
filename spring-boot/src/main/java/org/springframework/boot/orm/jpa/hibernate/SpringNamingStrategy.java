@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,21 +29,20 @@ import org.springframework.util.StringUtils;
  * referenced column name.
  *
  * @author Phillip Webb
- * @see "http://stackoverflow.com/questions/7689206/ejb3namingstrategy-vs-improvednamingstrategy-foreign-key-naming"
+ * @see "https://stackoverflow.com/questions/7689206/ejb3namingstrategy-vs-improvednamingstrategy-foreign-key-naming"
  * @since 1.2.0
  */
 @SuppressWarnings("serial")
 public class SpringNamingStrategy extends ImprovedNamingStrategy {
 
 	@Override
-	public String foreignKeyColumnName(String propertyName, String propertyEntityName,
-			String propertyTableName, String referencedColumnName) {
+	public String foreignKeyColumnName(String propertyName, String propertyEntityName, String propertyTableName,
+			String referencedColumnName) {
 		String name = propertyTableName;
 		if (propertyName != null) {
 			name = StringHelper.unqualify(propertyName);
 		}
-		Assert.state(StringUtils.hasLength(name),
-				"Unable to generate foreignKeyColumnName");
+		Assert.state(StringUtils.hasLength(name), "Unable to generate foreignKeyColumnName");
 		return columnName(name) + "_" + referencedColumnName;
 	}
 

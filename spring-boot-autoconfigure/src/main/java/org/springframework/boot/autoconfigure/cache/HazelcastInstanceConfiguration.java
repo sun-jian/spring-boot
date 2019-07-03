@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -54,18 +54,16 @@ abstract class HazelcastInstanceConfiguration {
 		}
 
 		@Bean
-		public HazelcastCacheManager cacheManager(
-				HazelcastInstance existingHazelcastInstance) throws IOException {
+		public HazelcastCacheManager cacheManager(HazelcastInstance existingHazelcastInstance) throws IOException {
 			@SuppressWarnings("deprecation")
 			Resource config = this.cacheProperties.getHazelcast().getConfig();
 			Resource location = this.cacheProperties.resolveConfigLocation(config);
 			if (location != null) {
-				HazelcastInstance cacheHazelcastInstance = new HazelcastInstanceFactory(
-						location).getHazelcastInstance();
+				HazelcastInstance cacheHazelcastInstance = new HazelcastInstanceFactory(location)
+						.getHazelcastInstance();
 				return new CloseableHazelcastCacheManager(cacheHazelcastInstance);
 			}
-			HazelcastCacheManager cacheManager = new HazelcastCacheManager(
-					existingHazelcastInstance);
+			HazelcastCacheManager cacheManager = new HazelcastCacheManager(existingHazelcastInstance);
 			return this.customizers.customize(cacheManager);
 		}
 
@@ -98,8 +96,7 @@ abstract class HazelcastInstanceConfiguration {
 
 		@Bean
 		public HazelcastCacheManager cacheManager() throws IOException {
-			HazelcastCacheManager cacheManager = new HazelcastCacheManager(
-					hazelcastInstance());
+			HazelcastCacheManager cacheManager = new HazelcastCacheManager(hazelcastInstance());
 			return this.customizers.customize(cacheManager);
 		}
 
@@ -117,8 +114,7 @@ abstract class HazelcastInstanceConfiguration {
 
 	}
 
-	private static class CloseableHazelcastCacheManager extends HazelcastCacheManager
-			implements Closeable {
+	private static class CloseableHazelcastCacheManager extends HazelcastCacheManager implements Closeable {
 
 		private final HazelcastInstance hazelcastInstance;
 

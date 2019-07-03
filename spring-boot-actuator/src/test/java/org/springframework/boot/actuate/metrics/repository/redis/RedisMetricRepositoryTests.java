@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,18 +47,17 @@ public class RedisMetricRepositoryTests {
 	@Before
 	public void init() {
 		this.prefix = "spring.test." + System.currentTimeMillis();
-		this.repository = new RedisMetricRepository(this.redis.getConnectionFactory(),
-				this.prefix);
+		this.repository = new RedisMetricRepository(this.redis.getConnectionFactory(), this.prefix);
 	}
 
 	@After
 	public void clear() {
-		assertThat(new StringRedisTemplate(this.redis.getConnectionFactory())
-				.opsForValue().get(this.prefix + ".foo")).isNotNull();
+		assertThat(new StringRedisTemplate(this.redis.getConnectionFactory()).opsForValue().get(this.prefix + ".foo"))
+				.isNotNull();
 		this.repository.reset("foo");
 		this.repository.reset("bar");
-		assertThat(new StringRedisTemplate(this.redis.getConnectionFactory())
-				.opsForValue().get(this.prefix + ".foo")).isNull();
+		assertThat(new StringRedisTemplate(this.redis.getConnectionFactory()).opsForValue().get(this.prefix + ".foo"))
+				.isNull();
 	}
 
 	@Test

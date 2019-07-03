@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,14 +23,13 @@ import org.springframework.util.Assert;
 /**
  * Abstract base class for {@link MvcEndpoint} implementations.
  *
- * @param <E> The delegate endpoint
+ * @param <E> the delegate endpoint
  * @author Dave Syer
  * @author Andy Wilkinson
  * @author Phillip Webb
  * @since 1.3.0
  */
-public abstract class AbstractEndpointMvcAdapter<E extends Endpoint<?>>
-		implements NamedMvcEndpoint {
+public abstract class AbstractEndpointMvcAdapter<E extends Endpoint<?>> implements NamedMvcEndpoint {
 
 	private final E delegate;
 
@@ -67,7 +66,7 @@ public abstract class AbstractEndpointMvcAdapter<E extends Endpoint<?>>
 
 	@Override
 	public String getPath() {
-		return (this.path != null ? this.path : "/" + this.delegate.getId());
+		return (this.path != null) ? this.path : "/" + this.delegate.getId();
 	}
 
 	public void setPath(String path) {
@@ -93,7 +92,7 @@ public abstract class AbstractEndpointMvcAdapter<E extends Endpoint<?>>
 
 	/**
 	 * Returns the response that should be returned when the endpoint is disabled.
-	 * @return The response to be returned when the endpoint is disabled
+	 * @return the response to be returned when the endpoint is disabled
 	 * @since 1.2.4
 	 * @see Endpoint#isEnabled()
 	 */

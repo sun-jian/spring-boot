@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,8 +37,7 @@ import org.springframework.util.Assert;
  * @author Stephane Nicoll
  * @since 1.4.0
  */
-public class ErrorPageRegistrarBeanPostProcessor
-		implements BeanPostProcessor, BeanFactoryAware {
+public class ErrorPageRegistrarBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware {
 
 	private ListableBeanFactory beanFactory;
 
@@ -47,14 +46,12 @@ public class ErrorPageRegistrarBeanPostProcessor
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		Assert.isInstanceOf(ListableBeanFactory.class, beanFactory,
-				"ErrorPageRegistrarBeanPostProcessor can only be used "
-						+ "with a ListableBeanFactory");
+				"ErrorPageRegistrarBeanPostProcessor can only be used " + "with a ListableBeanFactory");
 		this.beanFactory = (ListableBeanFactory) beanFactory;
 	}
 
 	@Override
-	public Object postProcessBeforeInitialization(Object bean, String beanName)
-			throws BeansException {
+	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		if (bean instanceof ErrorPageRegistry) {
 			postProcessBeforeInitialization((ErrorPageRegistry) bean);
 		}
@@ -62,8 +59,7 @@ public class ErrorPageRegistrarBeanPostProcessor
 	}
 
 	@Override
-	public Object postProcessAfterInitialization(Object bean, String beanName)
-			throws BeansException {
+	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
 	}
 
@@ -76,8 +72,8 @@ public class ErrorPageRegistrarBeanPostProcessor
 	private Collection<ErrorPageRegistrar> getRegistrars() {
 		if (this.registrars == null) {
 			// Look up does not include the parent context
-			this.registrars = new ArrayList<ErrorPageRegistrar>(this.beanFactory
-					.getBeansOfType(ErrorPageRegistrar.class, false, false).values());
+			this.registrars = new ArrayList<ErrorPageRegistrar>(
+					this.beanFactory.getBeansOfType(ErrorPageRegistrar.class, false, false).values());
 			Collections.sort(this.registrars, AnnotationAwareOrderComparator.INSTANCE);
 			this.registrars = Collections.unmodifiableList(this.registrars);
 		}

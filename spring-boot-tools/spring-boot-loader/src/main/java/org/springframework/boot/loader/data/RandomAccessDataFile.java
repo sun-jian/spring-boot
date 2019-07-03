@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,6 +28,7 @@ import java.util.concurrent.Semaphore;
  * {@link RandomAccessData} implementation backed by a {@link RandomAccessFile}.
  *
  * @author Phillip Webb
+ * @since 1.0.0
  */
 public class RandomAccessDataFile implements RandomAccessData {
 
@@ -64,10 +65,10 @@ public class RandomAccessDataFile implements RandomAccessData {
 			throw new IllegalArgumentException("File must not be null");
 		}
 		if (!file.exists()) {
-			throw new IllegalArgumentException("File must exist");
+			throw new IllegalArgumentException(String.format("File %s must exist", file.getAbsolutePath()));
 		}
 		this.file = file;
-		this.filePool = new FilePool(concurrentReads);
+		this.filePool = new FilePool(file, concurrentReads);
 		this.offset = 0L;
 		this.length = file.length();
 	}
@@ -104,8 +105,7 @@ public class RandomAccessDataFile implements RandomAccessData {
 		if (offset < 0 || length < 0 || offset + length > this.length) {
 			throw new IndexOutOfBoundsException();
 		}
-		return new RandomAccessDataFile(this.file, this.filePool, this.offset + offset,
-				length);
+		return new RandomAccessDataFile(this.file, this.filePool, this.offset + offset, length);
 	}
 
 	@Override
@@ -141,7 +141,7 @@ public class RandomAccessDataFile implements RandomAccessData {
 
 		@Override
 		public int read(byte[] b) throws IOException {
-			return read(b, 0, b == null ? 0 : b.length);
+			return read(b, 0, (b != null) ? b.length : 0);
 		}
 
 		@Override
@@ -170,14 +170,14 @@ public class RandomAccessDataFile implements RandomAccessData {
 				return -1;
 			}
 			RandomAccessFile file = this.file;
-			if (file == null) {
-				file = RandomAccessDataFile.this.filePool.acquire();
-				file.seek(RandomAccessDataFile.this.offset + this.position);
-			}
 			try {
+				if (file == null) {
+					file = RandomAccessDataFile.this.filePool.acquire();
+					file.seek(RandomAccessDataFile.this.offset + this.position);
+				}
 				if (b == null) {
 					int rtn = file.read();
-					moveOn(rtn == -1 ? 0 : 1);
+					moveOn((rtn != -1) ? 1 : 0);
 					return rtn;
 				}
 				else {
@@ -185,7 +185,7 @@ public class RandomAccessDataFile implements RandomAccessData {
 				}
 			}
 			finally {
-				if (this.file == null) {
+				if (this.file == null && file != null) {
 					RandomAccessDataFile.this.filePool.release(file);
 				}
 			}
@@ -193,7 +193,7 @@ public class RandomAccessDataFile implements RandomAccessData {
 
 		@Override
 		public long skip(long n) throws IOException {
-			return (n <= 0 ? 0 : moveOn(cap(n)));
+			return (n <= 0) ? 0 : moveOn(cap(n));
 		}
 
 		@Override
@@ -229,7 +229,9 @@ public class RandomAccessDataFile implements RandomAccessData {
 	 * Manage a pool that can be used to perform concurrent reads on the underlying
 	 * {@link RandomAccessFile}.
 	 */
-	private class FilePool {
+	static class FilePool {
+
+		private final File file;
 
 		private final int size;
 
@@ -237,7 +239,8 @@ public class RandomAccessDataFile implements RandomAccessData {
 
 		private final Queue<RandomAccessFile> files;
 
-		FilePool(int size) {
+		FilePool(File file, int size) {
+			this.file = file;
 			this.size = size;
 			this.available = new Semaphore(size);
 			this.files = new ConcurrentLinkedQueue<RandomAccessFile>();
@@ -249,7 +252,7 @@ public class RandomAccessDataFile implements RandomAccessData {
 			if (file != null) {
 				return file;
 			}
-			return new RandomAccessFile(RandomAccessDataFile.this.file, "r");
+			return new RandomAccessFile(this.file, "r");
 		}
 
 		public void release(RandomAccessFile file) {

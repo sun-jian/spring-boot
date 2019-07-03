@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,37 +40,31 @@ public class FixedAuthoritiesExtractorTests {
 	@Test
 	public void authorities() {
 		this.map.put("authorities", "ROLE_ADMIN");
-		assertThat(this.extractor.extractAuthorities(this.map).toString())
-				.isEqualTo("[ROLE_ADMIN]");
+		assertThat(this.extractor.extractAuthorities(this.map).toString()).isEqualTo("[ROLE_ADMIN]");
 	}
 
 	@Test
 	public void authoritiesCommaSeparated() {
 		this.map.put("authorities", "ROLE_USER,ROLE_ADMIN");
-		assertThat(this.extractor.extractAuthorities(this.map).toString())
-				.isEqualTo("[ROLE_USER, ROLE_ADMIN]");
+		assertThat(this.extractor.extractAuthorities(this.map).toString()).isEqualTo("[ROLE_USER, ROLE_ADMIN]");
 	}
 
 	@Test
 	public void authoritiesArray() {
 		this.map.put("authorities", new String[] { "ROLE_USER", "ROLE_ADMIN" });
-		assertThat(this.extractor.extractAuthorities(this.map).toString())
-				.isEqualTo("[ROLE_USER, ROLE_ADMIN]");
+		assertThat(this.extractor.extractAuthorities(this.map).toString()).isEqualTo("[ROLE_USER, ROLE_ADMIN]");
 	}
 
 	@Test
 	public void authoritiesList() {
 		this.map.put("authorities", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
-		assertThat(this.extractor.extractAuthorities(this.map).toString())
-				.isEqualTo("[ROLE_USER, ROLE_ADMIN]");
+		assertThat(this.extractor.extractAuthorities(this.map).toString()).isEqualTo("[ROLE_USER, ROLE_ADMIN]");
 	}
 
 	@Test
 	public void authoritiesAsListOfMaps() {
-		this.map.put("authorities",
-				Arrays.asList(Collections.singletonMap("authority", "ROLE_ADMIN")));
-		assertThat(this.extractor.extractAuthorities(this.map).toString())
-				.isEqualTo("[ROLE_ADMIN]");
+		this.map.put("authorities", Arrays.asList(Collections.singletonMap("authority", "ROLE_ADMIN")));
+		assertThat(this.extractor.extractAuthorities(this.map).toString()).isEqualTo("[ROLE_ADMIN]");
 	}
 
 	@Test
@@ -79,16 +73,13 @@ public class FixedAuthoritiesExtractorTests {
 		map.put("role", "ROLE_ADMIN");
 		map.put("extra", "value");
 		this.map.put("authorities", Arrays.asList(map));
-		assertThat(this.extractor.extractAuthorities(this.map).toString())
-				.isEqualTo("[ROLE_ADMIN]");
+		assertThat(this.extractor.extractAuthorities(this.map).toString()).isEqualTo("[ROLE_ADMIN]");
 	}
 
 	@Test
 	public void authoritiesAsListOfMapsWithNonStandardKey() {
-		this.map.put("authorities",
-				Arrays.asList(Collections.singletonMap("any", "ROLE_ADMIN")));
-		assertThat(this.extractor.extractAuthorities(this.map).toString())
-				.isEqualTo("[ROLE_ADMIN]");
+		this.map.put("authorities", Arrays.asList(Collections.singletonMap("any", "ROLE_ADMIN")));
+		assertThat(this.extractor.extractAuthorities(this.map).toString()).isEqualTo("[ROLE_ADMIN]");
 	}
 
 	@Test
@@ -97,8 +88,7 @@ public class FixedAuthoritiesExtractorTests {
 		map.put("any", "ROLE_ADMIN");
 		map.put("foo", "bar");
 		this.map.put("authorities", Arrays.asList(map));
-		assertThat(this.extractor.extractAuthorities(this.map).toString())
-				.isEqualTo("[{foo=bar, any=ROLE_ADMIN}]");
+		assertThat(this.extractor.extractAuthorities(this.map).toString()).isEqualTo("[{foo=bar, any=ROLE_ADMIN}]");
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -60,8 +60,7 @@ public class ConditionalOnBeanTests {
 
 	@Test
 	public void testNameAndTypeOnBeanCondition() {
-		this.context.register(FooConfiguration.class,
-				OnBeanNameAndTypeConfiguration.class);
+		this.context.register(FooConfiguration.class, OnBeanNameAndTypeConfiguration.class);
 		this.context.refresh();
 		assertThat(this.context.containsBean("bar")).isTrue();
 	}
@@ -116,8 +115,7 @@ public class ConditionalOnBeanTests {
 
 	@Test
 	public void testOnMissingBeanType() throws Exception {
-		this.context.register(FooConfiguration.class,
-				OnBeanMissingClassConfiguration.class);
+		this.context.register(FooConfiguration.class, OnBeanMissingClassConfiguration.class);
 		this.context.refresh();
 		assertThat(this.context.containsBean("bar")).isFalse();
 	}
@@ -125,18 +123,26 @@ public class ConditionalOnBeanTests {
 	@Test
 	public void withPropertyPlaceholderClassName() throws Exception {
 		EnvironmentTestUtils.addEnvironment(this.context, "mybeanclass=java.lang.String");
-		this.context.register(PropertySourcesPlaceholderConfigurer.class,
-				WithPropertyPlaceholderClassName.class, OnBeanClassConfiguration.class);
+		this.context.register(PropertySourcesPlaceholderConfigurer.class, WithPropertyPlaceholderClassName.class,
+				OnBeanClassConfiguration.class);
 		this.context.refresh();
 	}
 
 	@Test
 	public void beanProducedByFactoryBeanIsConsideredWhenMatchingOnAnnotation() {
-		this.context.register(FactoryBeanConfiguration.class,
-				OnAnnotationWithFactoryBeanConfiguration.class);
+		this.context.register(FactoryBeanConfiguration.class, OnAnnotationWithFactoryBeanConfiguration.class);
 		this.context.refresh();
 		assertThat(this.context.containsBean("bar")).isTrue();
 		assertThat(this.context.getBeansOfType(ExampleBean.class)).hasSize(1);
+	}
+
+	@Test
+	public void conditionEvaluationConsidersChangeInTypeWhenBeanIsOverridden() {
+		this.context.register(OriginalDefinition.class, OverridingDefinition.class, ConsumingConfiguration.class);
+		this.context.refresh();
+		assertThat(this.context.containsBean("testBean")).isTrue();
+		assertThat(this.context.getBean(Integer.class)).isEqualTo(1);
+		assertThat(this.context.getBeansOfType(ConsumingConfiguration.class)).isEmpty();
 	}
 
 	@Configuration
@@ -256,8 +262,7 @@ public class ConditionalOnBeanTests {
 
 	}
 
-	protected static class WithPropertyPlaceholderClassNameRegistrar
-			implements ImportBeanDefinitionRegistrar {
+	protected static class WithPropertyPlaceholderClassNameRegistrar implements ImportBeanDefinitionRegistrar {
 
 		@Override
 		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
@@ -308,6 +313,36 @@ public class ConditionalOnBeanTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
 	public @interface TestAnnotation {
+
+	}
+
+	@Configuration
+	public static class OriginalDefinition {
+
+		@Bean
+		public String testBean() {
+			return "test";
+		}
+
+	}
+
+	@Configuration
+	@ConditionalOnBean(String.class)
+	public static class OverridingDefinition {
+
+		@Bean
+		public Integer testBean() {
+			return 1;
+		}
+
+	}
+
+	@Configuration
+	@ConditionalOnBean(String.class)
+	public static class ConsumingConfiguration {
+
+		ConsumingConfiguration(String testBean) {
+		}
 
 	}
 

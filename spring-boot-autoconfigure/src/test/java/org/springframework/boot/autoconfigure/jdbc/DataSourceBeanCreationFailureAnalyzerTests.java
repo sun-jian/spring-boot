@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,12 +41,12 @@ public class DataSourceBeanCreationFailureAnalyzerTests {
 	@Test
 	public void failureAnalysisIsPerformed() {
 		FailureAnalysis failureAnalysis = performAnalysis(TestConfiguration.class);
-		assertThat(failureAnalysis.getDescription()).isEqualTo(
-				"Cannot determine embedded database driver class for database type NONE");
-		assertThat(failureAnalysis.getAction()).isEqualTo("If you want an embedded "
-				+ "database please put a supported one on the classpath. If you have "
-				+ "database settings to be loaded from a particular profile you may "
-				+ "need to active it (no profiles are currently active).");
+		assertThat(failureAnalysis.getDescription())
+				.isEqualTo("Cannot determine embedded database driver class for database type NONE");
+		assertThat(failureAnalysis.getAction()).isEqualTo(
+				"If you want an embedded " + "database please put a supported one on the classpath. If you have "
+						+ "database settings to be loaded from a particular profile you may "
+						+ "need to active it (no profiles are currently active).");
 	}
 
 	private FailureAnalysis performAnalysis(Class<?> configuration) {

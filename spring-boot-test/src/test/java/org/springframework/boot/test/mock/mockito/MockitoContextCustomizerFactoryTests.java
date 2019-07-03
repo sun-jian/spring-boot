@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,30 +39,24 @@ public class MockitoContextCustomizerFactoryTests {
 	}
 
 	@Test
-	public void getContextCustomizerWithoutAnnotationReturnsCustomizer()
-			throws Exception {
-		ContextCustomizer customizer = this.factory
-				.createContextCustomizer(NoMockBeanAnnotation.class, null);
+	public void getContextCustomizerWithoutAnnotationReturnsCustomizer() throws Exception {
+		ContextCustomizer customizer = this.factory.createContextCustomizer(NoMockBeanAnnotation.class, null);
 		assertThat(customizer).isNotNull();
 	}
 
 	@Test
 	public void getContextCustomizerWithAnnotationReturnsCustomizer() throws Exception {
-		ContextCustomizer customizer = this.factory
-				.createContextCustomizer(WithMockBeanAnnotation.class, null);
+		ContextCustomizer customizer = this.factory.createContextCustomizer(WithMockBeanAnnotation.class, null);
 		assertThat(customizer).isNotNull();
 	}
 
 	@Test
 	public void getContextCustomizerUsesMocksAsCacheKey() throws Exception {
-		ContextCustomizer customizer = this.factory
-				.createContextCustomizer(WithMockBeanAnnotation.class, null);
+		ContextCustomizer customizer = this.factory.createContextCustomizer(WithMockBeanAnnotation.class, null);
 		assertThat(customizer).isNotNull();
-		ContextCustomizer same = this.factory
-				.createContextCustomizer(WithSameMockBeanAnnotation.class, null);
+		ContextCustomizer same = this.factory.createContextCustomizer(WithSameMockBeanAnnotation.class, null);
 		assertThat(customizer).isNotNull();
-		ContextCustomizer different = this.factory
-				.createContextCustomizer(WithDifferentMockBeanAnnotation.class, null);
+		ContextCustomizer different = this.factory.createContextCustomizer(WithDifferentMockBeanAnnotation.class, null);
 		assertThat(different).isNotNull();
 		assertThat(customizer.hashCode()).isEqualTo(same.hashCode());
 		assertThat(customizer.hashCode()).isNotEqualTo(different.hashCode());

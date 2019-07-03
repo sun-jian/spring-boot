@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -56,44 +56,31 @@ public class CloudFoundryDiscoveryMvcEndpointTests {
 
 	@Test
 	public void linksResponseWhenRequestUriHasNoTrailingSlash() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest("GET",
-				"/cloudfoundryapplication");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/cloudfoundryapplication");
 		AccessLevel.FULL.put(request);
-		Map<String, CloudFoundryDiscoveryMvcEndpoint.Link> links = this.endpoint
-				.links(request).get("_links");
-		assertThat(links.get("self").getHref())
-				.isEqualTo("http://localhost/cloudfoundryapplication");
-		assertThat(links.get("a").getHref())
-				.isEqualTo("http://localhost/cloudfoundryapplication/a");
+		Map<String, CloudFoundryDiscoveryMvcEndpoint.Link> links = this.endpoint.links(request).get("_links");
+		assertThat(links.get("self").getHref()).isEqualTo("http://localhost/cloudfoundryapplication");
+		assertThat(links.get("a").getHref()).isEqualTo("http://localhost/cloudfoundryapplication/a");
 	}
 
 	@Test
 	public void linksResponseWhenRequestUriHasTrailingSlash() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest("GET",
-				"/cloudfoundryapplication/");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/cloudfoundryapplication/");
 		AccessLevel.FULL.put(request);
-		Map<String, CloudFoundryDiscoveryMvcEndpoint.Link> links = this.endpoint
-				.links(request).get("_links");
-		assertThat(links.get("self").getHref())
-				.isEqualTo("http://localhost/cloudfoundryapplication");
-		assertThat(links.get("a").getHref())
-				.isEqualTo("http://localhost/cloudfoundryapplication/a");
+		Map<String, CloudFoundryDiscoveryMvcEndpoint.Link> links = this.endpoint.links(request).get("_links");
+		assertThat(links.get("self").getHref()).isEqualTo("http://localhost/cloudfoundryapplication");
+		assertThat(links.get("a").getHref()).isEqualTo("http://localhost/cloudfoundryapplication/a");
 	}
 
 	@Test
 	public void linksResponseWhenRequestHasAccessLevelRestricted() throws Exception {
-		NamedMvcEndpoint testHealthMvcEndpoint = new TestMvcEndpoint(
-				new TestEndpoint("health"));
+		NamedMvcEndpoint testHealthMvcEndpoint = new TestMvcEndpoint(new TestEndpoint("health"));
 		this.endpoints.add(testHealthMvcEndpoint);
-		MockHttpServletRequest request = new MockHttpServletRequest("GET",
-				"/cloudfoundryapplication/");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/cloudfoundryapplication/");
 		AccessLevel.RESTRICTED.put(request);
-		Map<String, CloudFoundryDiscoveryMvcEndpoint.Link> links = this.endpoint
-				.links(request).get("_links");
-		assertThat(links.get("self").getHref())
-				.isEqualTo("http://localhost/cloudfoundryapplication");
-		assertThat(links.get("health").getHref())
-				.isEqualTo("http://localhost/cloudfoundryapplication/health");
+		Map<String, CloudFoundryDiscoveryMvcEndpoint.Link> links = this.endpoint.links(request).get("_links");
+		assertThat(links.get("self").getHref()).isEqualTo("http://localhost/cloudfoundryapplication");
+		assertThat(links.get("health").getHref()).isEqualTo("http://localhost/cloudfoundryapplication/health");
 		assertThat(links.get("a")).isNull();
 	}
 

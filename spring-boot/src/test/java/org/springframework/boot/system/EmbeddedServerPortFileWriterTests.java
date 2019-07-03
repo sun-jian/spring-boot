@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.boot.system;
 import java.io.File;
 import java.io.FileReader;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import org.junit.After;
@@ -90,12 +91,10 @@ public class EmbeddedServerPortFileWriterTests {
 		listener.onApplicationEvent(mockEvent("management", 9090));
 		assertThat(FileCopyUtils.copyToString(new FileReader(file))).isEqualTo("8080");
 		String managementFile = file.getName();
-		managementFile = managementFile.substring(0, managementFile.length()
-				- StringUtils.getFilenameExtension(managementFile).length() - 1);
-		managementFile = managementFile + "-management."
-				+ StringUtils.getFilenameExtension(file.getName());
-		FileReader reader = new FileReader(
-				new File(file.getParentFile(), managementFile));
+		managementFile = managementFile.substring(0,
+				managementFile.length() - StringUtils.getFilenameExtension(managementFile).length() - 1);
+		managementFile = managementFile + "-management." + StringUtils.getFilenameExtension(file.getName());
+		FileReader reader = new FileReader(new File(file.getParentFile(), managementFile));
 		assertThat(FileCopyUtils.copyToString(reader)).isEqualTo("9090");
 		assertThat(collectFileNames(file.getParentFile())).contains(managementFile);
 	}
@@ -103,23 +102,20 @@ public class EmbeddedServerPortFileWriterTests {
 	@Test
 	public void createUpperCaseManagementPortFile() throws Exception {
 		File file = this.temporaryFolder.newFile();
-		file = new File(file.getParentFile(), file.getName().toUpperCase());
+		file = new File(file.getParentFile(), file.getName().toUpperCase(Locale.ENGLISH));
 		EmbeddedServerPortFileWriter listener = new EmbeddedServerPortFileWriter(file);
 		listener.onApplicationEvent(mockEvent("management", 9090));
 		String managementFile = file.getName();
-		managementFile = managementFile.substring(0, managementFile.length()
-				- StringUtils.getFilenameExtension(managementFile).length() - 1);
-		managementFile = managementFile + "-MANAGEMENT."
-				+ StringUtils.getFilenameExtension(file.getName());
-		FileReader reader = new FileReader(
-				new File(file.getParentFile(), managementFile));
+		managementFile = managementFile.substring(0,
+				managementFile.length() - StringUtils.getFilenameExtension(managementFile).length() - 1);
+		managementFile = managementFile + "-MANAGEMENT." + StringUtils.getFilenameExtension(file.getName());
+		FileReader reader = new FileReader(new File(file.getParentFile(), managementFile));
 		assertThat(FileCopyUtils.copyToString(reader)).isEqualTo("9090");
 		assertThat(collectFileNames(file.getParentFile())).contains(managementFile);
 	}
 
 	private EmbeddedServletContainerInitializedEvent mockEvent(String name, int port) {
-		EmbeddedWebApplicationContext applicationContext = mock(
-				EmbeddedWebApplicationContext.class);
+		EmbeddedWebApplicationContext applicationContext = mock(EmbeddedWebApplicationContext.class);
 		EmbeddedServletContainer source = mock(EmbeddedServletContainer.class);
 		given(applicationContext.getNamespace()).willReturn(name);
 		given(source.getPort()).willReturn(port);

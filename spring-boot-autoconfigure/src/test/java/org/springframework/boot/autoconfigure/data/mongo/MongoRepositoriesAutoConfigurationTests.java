@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,6 @@ package org.springframework.boot.autoconfigure.data.mongo;
 
 import java.util.Set;
 
-import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import org.junit.After;
 import org.junit.Test;
@@ -59,22 +58,18 @@ public class MongoRepositoriesAutoConfigurationTests {
 		prepareApplicationContext(TestConfiguration.class);
 
 		assertThat(this.context.getBean(CityRepository.class)).isNotNull();
-		Mongo mongo = this.context.getBean(Mongo.class);
-		assertThat(mongo).isInstanceOf(MongoClient.class);
-		MongoMappingContext mappingContext = this.context
-				.getBean(MongoMappingContext.class);
+		assertThat(this.context.getBeansOfType(MongoClient.class)).hasSize(1);
+		MongoMappingContext mappingContext = this.context.getBean(MongoMappingContext.class);
 		@SuppressWarnings("unchecked")
-		Set<? extends Class<?>> entities = (Set<? extends Class<?>>) ReflectionTestUtils
-				.getField(mappingContext, "initialEntitySet");
+		Set<? extends Class<?>> entities = (Set<? extends Class<?>>) ReflectionTestUtils.getField(mappingContext,
+				"initialEntitySet");
 		assertThat(entities).hasSize(1);
 	}
 
 	@Test
 	public void testNoRepositoryConfiguration() throws Exception {
 		prepareApplicationContext(EmptyConfiguration.class);
-
-		Mongo mongo = this.context.getBean(Mongo.class);
-		assertThat(mongo).isInstanceOf(MongoClient.class);
+		assertThat(this.context.getBeansOfType(MongoClient.class)).hasSize(1);
 	}
 
 	@Test
@@ -94,10 +89,8 @@ public class MongoRepositoriesAutoConfigurationTests {
 	private void prepareApplicationContext(Class<?>... configurationClasses) {
 		this.context = new AnnotationConfigApplicationContext();
 		this.context.register(configurationClasses);
-		this.context.register(MongoAutoConfiguration.class,
-				MongoDataAutoConfiguration.class,
-				MongoRepositoriesAutoConfiguration.class,
-				PropertyPlaceholderAutoConfiguration.class);
+		this.context.register(MongoAutoConfiguration.class, MongoDataAutoConfiguration.class,
+				MongoRepositoriesAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
 	}
 

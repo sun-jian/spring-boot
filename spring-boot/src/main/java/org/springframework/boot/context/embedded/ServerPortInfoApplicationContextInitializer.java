@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -53,23 +53,19 @@ public class ServerPortInfoApplicationContextInitializer
 
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
-		applicationContext.addApplicationListener(
-				new ApplicationListener<EmbeddedServletContainerInitializedEvent>() {
+		applicationContext.addApplicationListener(new ApplicationListener<EmbeddedServletContainerInitializedEvent>() {
 
-					@Override
-					public void onApplicationEvent(
-							EmbeddedServletContainerInitializedEvent event) {
-						ServerPortInfoApplicationContextInitializer.this
-								.onApplicationEvent(event);
-					}
+			@Override
+			public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
+				ServerPortInfoApplicationContextInitializer.this.onApplicationEvent(event);
+			}
 
-				});
+		});
 	}
 
 	protected void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
 		String propertyName = getPropertyName(event.getApplicationContext());
-		setPortProperty(event.getApplicationContext(), propertyName,
-				event.getEmbeddedServletContainer().getPort());
+		setPortProperty(event.getApplicationContext(), propertyName, event.getEmbeddedServletContainer().getPort());
 	}
 
 	protected String getPropertyName(EmbeddedWebApplicationContext context) {
@@ -80,11 +76,9 @@ public class ServerPortInfoApplicationContextInitializer
 		return "local." + name + ".port";
 	}
 
-	private void setPortProperty(ApplicationContext context, String propertyName,
-			int port) {
+	private void setPortProperty(ApplicationContext context, String propertyName, int port) {
 		if (context instanceof ConfigurableApplicationContext) {
-			setPortProperty(((ConfigurableApplicationContext) context).getEnvironment(),
-					propertyName, port);
+			setPortProperty(((ConfigurableApplicationContext) context).getEnvironment(), propertyName, port);
 		}
 		if (context.getParent() != null) {
 			setPortProperty(context.getParent(), propertyName, port);
@@ -92,8 +86,7 @@ public class ServerPortInfoApplicationContextInitializer
 	}
 
 	@SuppressWarnings("unchecked")
-	private void setPortProperty(ConfigurableEnvironment environment, String propertyName,
-			int port) {
+	private void setPortProperty(ConfigurableEnvironment environment, String propertyName, int port) {
 		MutablePropertySources sources = environment.getPropertySources();
 		PropertySource<?> source = sources.get("server.ports");
 		if (source == null) {

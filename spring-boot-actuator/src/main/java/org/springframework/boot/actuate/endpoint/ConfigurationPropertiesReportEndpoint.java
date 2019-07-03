@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,15 +17,18 @@
 package org.springframework.boot.actuate.endpoint;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
@@ -36,6 +39,8 @@ import com.fasterxml.jackson.databind.ser.PropertyWriter;
 import com.fasterxml.jackson.databind.ser.SerializerFactory;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetaData;
@@ -57,12 +62,14 @@ import org.springframework.util.StringUtils;
  *
  * @author Christian Dupuis
  * @author Dave Syer
+ * @author Stephane Nicoll
+ * @since 1.0.0
  */
 @ConfigurationProperties(prefix = "endpoints.configprops")
-public class ConfigurationPropertiesReportEndpoint
-		extends AbstractEndpoint<Map<String, Object>> implements ApplicationContextAware {
+public class ConfigurationPropertiesReportEndpoint extends AbstractEndpoint<Map<String, Object>>
+		implements ApplicationContextAware {
 
-	private static final String CGLIB_FILTER_ID = "cglibFilter";
+	private static final String CONFIGURATION_PROPERTIES_FILTER_ID = "configurationPropertiesFilter";
 
 	private final Sanitizer sanitizer = new Sanitizer();
 
@@ -101,15 +108,13 @@ public class ConfigurationPropertiesReportEndpoint
 
 	private Map<String, Object> extract(ApplicationContext context, ObjectMapper mapper) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		ConfigurationBeanFactoryMetaData beanFactoryMetaData = getBeanFactoryMetaData(
-				context);
-		Map<String, Object> beans = getConfigurationPropertiesBeans(context,
-				beanFactoryMetaData);
+		ConfigurationBeanFactoryMetaData beanFactoryMetaData = getBeanFactoryMetaData(context);
+		Map<String, Object> beans = getConfigurationPropertiesBeans(context, beanFactoryMetaData);
 		for (Map.Entry<String, Object> entry : beans.entrySet()) {
 			String beanName = entry.getKey();
 			Object bean = entry.getValue();
 			Map<String, Object> root = new HashMap<String, Object>();
-			String prefix = extractPrefix(context, beanFactoryMetaData, beanName, bean);
+			String prefix = extractPrefix(context, beanFactoryMetaData, beanName);
 			root.put("prefix", prefix);
 			root.put("properties", sanitize(prefix, safeSerialize(mapper, bean, prefix)));
 			result.put(beanName, root);
@@ -120,8 +125,7 @@ public class ConfigurationPropertiesReportEndpoint
 		return result;
 	}
 
-	private ConfigurationBeanFactoryMetaData getBeanFactoryMetaData(
-			ApplicationContext context) {
+	private ConfigurationBeanFactoryMetaData getBeanFactoryMetaData(ApplicationContext context) {
 		Map<String, ConfigurationBeanFactoryMetaData> beans = context
 				.getBeansOfType(ConfigurationBeanFactoryMetaData.class);
 		if (beans.size() == 1) {
@@ -130,14 +134,12 @@ public class ConfigurationPropertiesReportEndpoint
 		return null;
 	}
 
-	private Map<String, Object> getConfigurationPropertiesBeans(
-			ApplicationContext context,
+	private Map<String, Object> getConfigurationPropertiesBeans(ApplicationContext context,
 			ConfigurationBeanFactoryMetaData beanFactoryMetaData) {
 		Map<String, Object> beans = new HashMap<String, Object>();
 		beans.putAll(context.getBeansWithAnnotation(ConfigurationProperties.class));
 		if (beanFactoryMetaData != null) {
-			beans.putAll(beanFactoryMetaData
-					.getBeansWithFactoryAnnotation(ConfigurationProperties.class));
+			beans.putAll(beanFactoryMetaData.getBeansWithFactoryAnnotation(ConfigurationProperties.class));
 		}
 		return beans;
 	}
@@ -150,17 +152,15 @@ public class ConfigurationPropertiesReportEndpoint
 	 * @param prefix the prefix
 	 * @return the serialized instance
 	 */
-	private Map<String, Object> safeSerialize(ObjectMapper mapper, Object bean,
-			String prefix) {
+	private Map<String, Object> safeSerialize(ObjectMapper mapper, Object bean, String prefix) {
 		try {
 			@SuppressWarnings("unchecked")
-			Map<String, Object> result = new HashMap<String, Object>(
-					mapper.convertValue(bean, Map.class));
+			Map<String, Object> result = new HashMap<String, Object>(mapper.convertValue(bean, Map.class));
 			return result;
 		}
 		catch (Exception ex) {
-			return new HashMap<String, Object>(Collections.<String, Object>singletonMap(
-					"error", "Cannot serialize '" + prefix + "'"));
+			return new HashMap<String, Object>(
+					Collections.<String, Object>singletonMap("error", "Cannot serialize '" + prefix + "'"));
 		}
 	}
 
@@ -172,7 +172,7 @@ public class ConfigurationPropertiesReportEndpoint
 	protected void configureObjectMapper(ObjectMapper mapper) {
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
-		applyCglibFilters(mapper);
+		applyConfigurationPropertiesFilter(mapper);
 		applySerializationModifier(mapper);
 	}
 
@@ -186,15 +186,10 @@ public class ConfigurationPropertiesReportEndpoint
 		mapper.setSerializerFactory(factory);
 	}
 
-	/**
-	 * Configure PropertyFilter to make sure Jackson doesn't process CGLIB generated bean
-	 * properties.
-	 * @param mapper the object mapper
-	 */
-	private void applyCglibFilters(ObjectMapper mapper) {
-		mapper.setAnnotationIntrospector(new CglibAnnotationIntrospector());
-		mapper.setFilterProvider(new SimpleFilterProvider().addFilter(CGLIB_FILTER_ID,
-				new CglibBeanPropertyFilter()));
+	private void applyConfigurationPropertiesFilter(ObjectMapper mapper) {
+		mapper.setAnnotationIntrospector(new ConfigurationPropertiesAnnotationIntrospector());
+		mapper.setFilterProvider(
+				new SimpleFilterProvider().setDefaultFilter(new ConfigurationPropertiesPropertyFilter()));
 	}
 
 	/**
@@ -202,17 +197,14 @@ public class ConfigurationPropertiesReportEndpoint
 	 * @param context the application context
 	 * @param beanFactoryMetaData the bean factory meta-data
 	 * @param beanName the bean name
-	 * @param bean the bean
 	 * @return the prefix
 	 */
-	private String extractPrefix(ApplicationContext context,
-			ConfigurationBeanFactoryMetaData beanFactoryMetaData, String beanName,
-			Object bean) {
-		ConfigurationProperties annotation = context.findAnnotationOnBean(beanName,
-				ConfigurationProperties.class);
+	private String extractPrefix(ApplicationContext context, ConfigurationBeanFactoryMetaData beanFactoryMetaData,
+			String beanName) {
+		ConfigurationProperties annotation = context.findAnnotationOnBean(beanName, ConfigurationProperties.class);
 		if (beanFactoryMetaData != null) {
-			ConfigurationProperties override = beanFactoryMetaData
-					.findFactoryAnnotation(beanName, ConfigurationProperties.class);
+			ConfigurationProperties override = beanFactoryMetaData.findFactoryAnnotation(beanName,
+					ConfigurationProperties.class);
 			if (override != null) {
 				// The @Bean-level @ConfigurationProperties overrides the one at type
 				// level when binding. Arguably we should render them both, but this one
@@ -273,14 +265,13 @@ public class ConfigurationPropertiesReportEndpoint
 	 * properties.
 	 */
 	@SuppressWarnings("serial")
-	private static class CglibAnnotationIntrospector
-			extends JacksonAnnotationIntrospector {
+	private static class ConfigurationPropertiesAnnotationIntrospector extends JacksonAnnotationIntrospector {
 
 		@Override
 		public Object findFilterId(Annotated a) {
 			Object id = super.findFilterId(a);
 			if (id == null) {
-				id = CGLIB_FILTER_ID;
+				id = CONFIGURATION_PROPERTIES_FILTER_ID;
 			}
 			return id;
 		}
@@ -288,10 +279,18 @@ public class ConfigurationPropertiesReportEndpoint
 	}
 
 	/**
-	 * {@link SimpleBeanPropertyFilter} to filter out all bean properties whose names
-	 * start with '$$'.
+	 * {@link SimpleBeanPropertyFilter} for serialization of
+	 * {@link ConfigurationProperties} beans. The filter hides:
+	 *
+	 * <ul>
+	 * <li>Properties that have a name starting with '$$'.
+	 * <li>Properties that are self-referential.
+	 * <li>Properties that throw an exception when retrieving their value.
+	 * </ul>
 	 */
-	private static class CglibBeanPropertyFilter extends SimpleBeanPropertyFilter {
+	private static class ConfigurationPropertiesPropertyFilter extends SimpleBeanPropertyFilter {
+
+		private static final Log logger = LogFactory.getLog(ConfigurationPropertiesPropertyFilter.class);
 
 		@Override
 		protected boolean include(BeanPropertyWriter writer) {
@@ -307,6 +306,30 @@ public class ConfigurationPropertiesReportEndpoint
 			return !name.startsWith("$$");
 		}
 
+		@Override
+		public void serializeAsField(Object pojo, JsonGenerator jgen, SerializerProvider provider,
+				PropertyWriter writer) throws Exception {
+			if (writer instanceof BeanPropertyWriter) {
+				try {
+					if (pojo == ((BeanPropertyWriter) writer).get(pojo)) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Skipping '" + writer.getFullName() + "' on '" + pojo.getClass().getName()
+									+ "' as it is self-referential");
+						}
+						return;
+					}
+				}
+				catch (Exception ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Skipping '" + writer.getFullName() + "' on '" + pojo.getClass().getName()
+								+ "' as an exception " + "was thrown when retrieving its value", ex);
+					}
+					return;
+				}
+			}
+			super.serializeAsField(pojo, jgen, provider, writer);
+		}
+
 	}
 
 	/**
@@ -315,8 +338,8 @@ public class ConfigurationPropertiesReportEndpoint
 	protected static class GenericSerializerModifier extends BeanSerializerModifier {
 
 		@Override
-		public List<BeanPropertyWriter> changeProperties(SerializationConfig config,
-				BeanDescription beanDesc, List<BeanPropertyWriter> beanProperties) {
+		public List<BeanPropertyWriter> changeProperties(SerializationConfig config, BeanDescription beanDesc,
+				List<BeanPropertyWriter> beanProperties) {
 			List<BeanPropertyWriter> result = new ArrayList<BeanPropertyWriter>();
 			for (BeanPropertyWriter writer : beanProperties) {
 				boolean readable = isReadable(beanDesc, writer);
@@ -334,14 +357,14 @@ public class ConfigurationPropertiesReportEndpoint
 			// If there's a setter, we assume it's OK to report on the value,
 			// similarly, if there's no setter but the package names match, we assume
 			// that its a nested class used solely for binding to config props, so it
-			// should be kosher. This filter is not used if there is JSON metadata for
-			// the property, so it's mainly for user-defined beans.
-			return (setter != null) || ClassUtils.getPackageName(parentType)
-					.equals(ClassUtils.getPackageName(type));
+			// should be kosher. Lists and Maps are also auto-detected by default since
+			// that's what the metadata generator does. This filter is not used if there
+			// is JSON metadata for the property, so it's mainly for user-defined beans.
+			return (setter != null) || ClassUtils.getPackageName(parentType).equals(ClassUtils.getPackageName(type))
+					|| Map.class.isAssignableFrom(type) || Collection.class.isAssignableFrom(type);
 		}
 
-		private AnnotatedMethod findSetter(BeanDescription beanDesc,
-				BeanPropertyWriter writer) {
+		private AnnotatedMethod findSetter(BeanDescription beanDesc, BeanPropertyWriter writer) {
 			String name = "set" + StringUtils.capitalize(writer.getName());
 			Class<?> type = writer.getType().getRawClass();
 			AnnotatedMethod setter = beanDesc.findMethod(name, new Class<?>[] { type });

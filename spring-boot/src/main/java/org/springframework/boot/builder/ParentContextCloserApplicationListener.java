@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,10 +35,10 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Dave Syer
  * @author Eric Bottard
+ * @since 1.0.0
  */
 public class ParentContextCloserApplicationListener
-		implements ApplicationListener<ParentContextAvailableEvent>,
-		ApplicationContextAware, Ordered {
+		implements ApplicationListener<ParentContextAvailableEvent>, ApplicationContextAware, Ordered {
 
 	private int order = Ordered.LOWEST_PRECEDENCE - 10;
 
@@ -62,8 +62,7 @@ public class ParentContextCloserApplicationListener
 	private void maybeInstallListenerInParent(ConfigurableApplicationContext child) {
 		if (child == this.context) {
 			if (child.getParent() instanceof ConfigurableApplicationContext) {
-				ConfigurableApplicationContext parent = (ConfigurableApplicationContext) child
-						.getParent();
+				ConfigurableApplicationContext parent = (ConfigurableApplicationContext) child.getParent();
 				parent.addApplicationListener(createContextCloserListener(child));
 			}
 		}
@@ -75,37 +74,27 @@ public class ParentContextCloserApplicationListener
 	 * @param child the child context
 	 * @return the {@link ContextCloserListener} to use
 	 */
-	protected ContextCloserListener createContextCloserListener(
-			ConfigurableApplicationContext child) {
+	protected ContextCloserListener createContextCloserListener(ConfigurableApplicationContext child) {
 		return new ContextCloserListener(child);
 	}
 
 	/**
 	 * {@link ApplicationListener} to close the context.
 	 */
-	protected static class ContextCloserListener
-			implements ApplicationListener<ContextClosedEvent> {
+	protected static class ContextCloserListener implements ApplicationListener<ContextClosedEvent> {
 
 		private WeakReference<ConfigurableApplicationContext> childContext;
 
 		public ContextCloserListener(ConfigurableApplicationContext childContext) {
-			this.childContext = new WeakReference<ConfigurableApplicationContext>(
-					childContext);
+			this.childContext = new WeakReference<ConfigurableApplicationContext>(childContext);
 		}
 
 		@Override
 		public void onApplicationEvent(ContextClosedEvent event) {
 			ConfigurableApplicationContext context = this.childContext.get();
-			if ((context != null)
-					&& (event.getApplicationContext() == context.getParent())
-					&& context.isActive()) {
+			if ((context != null) && (event.getApplicationContext() == context.getParent()) && context.isActive()) {
 				context.close();
 			}
-		}
-
-		@Override
-		public int hashCode() {
-			return ObjectUtils.nullSafeHashCode(this.childContext.get());
 		}
 
 		@Override
@@ -118,10 +107,14 @@ public class ParentContextCloserApplicationListener
 			}
 			if (obj instanceof ContextCloserListener) {
 				ContextCloserListener other = (ContextCloserListener) obj;
-				return ObjectUtils.nullSafeEquals(this.childContext.get(),
-						other.childContext.get());
+				return ObjectUtils.nullSafeEquals(this.childContext.get(), other.childContext.get());
 			}
 			return super.equals(obj);
+		}
+
+		@Override
+		public int hashCode() {
+			return ObjectUtils.nullSafeHashCode(this.childContext.get());
 		}
 
 	}

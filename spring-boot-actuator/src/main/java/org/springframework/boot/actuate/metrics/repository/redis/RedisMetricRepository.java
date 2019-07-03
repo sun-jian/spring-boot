@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
  * metrics).
  *
  * @author Dave Syer
+ * @since 1.0.0
  */
 public class RedisMetricRepository implements MetricRepository {
 
@@ -72,8 +73,7 @@ public class RedisMetricRepository implements MetricRepository {
 	 * @param redisConnectionFactory the redis connection factory
 	 * @param prefix the prefix to set for all metrics keys
 	 */
-	public RedisMetricRepository(RedisConnectionFactory redisConnectionFactory,
-			String prefix) {
+	public RedisMetricRepository(RedisConnectionFactory redisConnectionFactory, String prefix) {
 		this(redisConnectionFactory, prefix, null);
 	}
 
@@ -86,8 +86,7 @@ public class RedisMetricRepository implements MetricRepository {
 	 * @param prefix the prefix to set for all metrics keys
 	 * @param key the key to set
 	 */
-	public RedisMetricRepository(RedisConnectionFactory redisConnectionFactory,
-			String prefix, String key) {
+	public RedisMetricRepository(RedisConnectionFactory redisConnectionFactory, String prefix, String key) {
 		if (prefix == null) {
 			prefix = DEFAULT_METRICS_PREFIX;
 			if (key == null) {
@@ -147,8 +146,7 @@ public class RedisMetricRepository implements MetricRepository {
 		String name = delta.getName();
 		String key = keyFor(name);
 		trackMembership(key);
-		double value = this.zSetOperations.incrementScore(key,
-				delta.getValue().doubleValue());
+		double value = this.zSetOperations.incrementScore(key, delta.getValue().doubleValue());
 		String raw = serialize(new Metric<Double>(name, value, delta.getTimestamp()));
 		this.redisOperations.opsForValue().set(key, raw);
 	}

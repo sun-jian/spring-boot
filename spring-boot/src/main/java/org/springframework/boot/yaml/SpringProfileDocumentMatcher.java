@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,6 +47,7 @@ import org.springframework.util.StringUtils;
  * @author Matt Benson
  * @author Phillip Webb
  * @author Andy Wilkinson
+ * @since 1.0.0
  */
 public class SpringProfileDocumentMatcher implements DocumentMatcher {
 
@@ -60,8 +61,7 @@ public class SpringProfileDocumentMatcher implements DocumentMatcher {
 	}
 
 	public void addActiveProfiles(String... profiles) {
-		LinkedHashSet<String> set = new LinkedHashSet<String>(
-				Arrays.asList(this.activeProfiles));
+		LinkedHashSet<String> set = new LinkedHashSet<String>(Arrays.asList(this.activeProfiles));
 		Collections.addAll(set, profiles);
 		this.activeProfiles = set.toArray(new String[set.size()]);
 	}
@@ -87,17 +87,16 @@ public class SpringProfileDocumentMatcher implements DocumentMatcher {
 		SpringProperties springProperties = new SpringProperties();
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new PropertiesPropertySource("profiles", properties));
-		PropertyValues propertyValues = new PropertySourcesPropertyValues(
-				propertySources);
+		PropertyValues propertyValues = new PropertySourcesPropertyValues(propertySources);
 		new RelaxedDataBinder(springProperties, "spring").bind(propertyValues);
 		List<String> profiles = springProperties.getProfiles();
 		return profiles;
 	}
 
 	private ProfilesMatcher getProfilesMatcher() {
-		return this.activeProfiles.length == 0 ? new EmptyProfilesMatcher()
-				: new ActiveProfilesMatcher(
-						new HashSet<String>(Arrays.asList(this.activeProfiles)));
+		return (this.activeProfiles.length != 0)
+				? new ActiveProfilesMatcher(new HashSet<String>(Arrays.asList(this.activeProfiles)))
+				: new EmptyProfilesMatcher();
 	}
 
 	private Set<String> extractProfiles(List<String> profiles, ProfileType type) {
@@ -111,8 +110,7 @@ public class SpringProfileDocumentMatcher implements DocumentMatcher {
 				candidateType = ProfileType.NEGATIVE;
 			}
 			if (candidateType == type) {
-				extractedProfiles.add(type == ProfileType.POSITIVE ? candidate
-						: candidate.substring(1));
+				extractedProfiles.add((type != ProfileType.POSITIVE) ? candidate.substring(1) : candidate);
 			}
 		}
 		return extractedProfiles;
@@ -130,7 +128,7 @@ public class SpringProfileDocumentMatcher implements DocumentMatcher {
 	/**
 	 * Base class for profile matchers.
 	 */
-	private static abstract class ProfilesMatcher {
+	private abstract static class ProfilesMatcher {
 
 		public final MatchStatus matches(Set<String> profiles) {
 			if (CollectionUtils.isEmpty(profiles)) {

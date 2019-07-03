@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -60,12 +60,11 @@ import org.springframework.util.StringUtils;
  *
  * @author Dave Syer
  * @author Jean-Pierre Bergamin
+ * @since 1.0.0
  */
-public class JobLauncherCommandLineRunner
-		implements CommandLineRunner, ApplicationEventPublisherAware {
+public class JobLauncherCommandLineRunner implements CommandLineRunner, ApplicationEventPublisherAware {
 
-	private static final Log logger = LogFactory
-			.getLog(JobLauncherCommandLineRunner.class);
+	private static final Log logger = LogFactory.getLog(JobLauncherCommandLineRunner.class);
 
 	private JobParametersConverter converter = new DefaultJobParametersConverter();
 
@@ -81,8 +80,7 @@ public class JobLauncherCommandLineRunner
 
 	private ApplicationEventPublisher publisher;
 
-	public JobLauncherCommandLineRunner(JobLauncher jobLauncher,
-			JobExplorer jobExplorer) {
+	public JobLauncherCommandLineRunner(JobLauncher jobLauncher, JobExplorer jobExplorer) {
 		this.jobLauncher = jobLauncher;
 		this.jobExplorer = jobExplorer;
 	}
@@ -117,15 +115,13 @@ public class JobLauncherCommandLineRunner
 		launchJobFromProperties(StringUtils.splitArrayElementsIntoProperties(args, "="));
 	}
 
-	protected void launchJobFromProperties(Properties properties)
-			throws JobExecutionException {
+	protected void launchJobFromProperties(Properties properties) throws JobExecutionException {
 		JobParameters jobParameters = this.converter.getJobParameters(properties);
 		executeLocalJobs(jobParameters);
 		executeRegisteredJobs(jobParameters);
 	}
 
-	private JobParameters getNextJobParameters(Job job,
-			JobParameters additionalParameters) {
+	private JobParameters getNextJobParameters(Job job, JobParameters additionalParameters) {
 		String name = job.getName();
 		JobParameters parameters = new JobParameters();
 		List<JobInstance> lastInstances = this.jobExplorer.getJobInstances(name, 0, 1);
@@ -138,8 +134,7 @@ public class JobLauncherCommandLineRunner
 			}
 		}
 		else {
-			List<JobExecution> previousExecutions = this.jobExplorer
-					.getJobExecutions(lastInstances.get(0));
+			List<JobExecution> previousExecutions = this.jobExplorer.getJobExecutions(lastInstances.get(0));
 			JobExecution previousExecution = previousExecutions.get(0);
 			if (previousExecution == null) {
 				// Normally this will not happen - an instance exists with no executions
@@ -167,8 +162,7 @@ public class JobLauncherCommandLineRunner
 	}
 
 	private void removeNonIdentifying(Map<String, JobParameter> parameters) {
-		HashMap<String, JobParameter> copy = new HashMap<String, JobParameter>(
-				parameters);
+		HashMap<String, JobParameter> copy = new HashMap<String, JobParameter>(parameters);
 		for (Map.Entry<String, JobParameter> parameter : copy.entrySet()) {
 			if (!parameter.getValue().isIdentifying()) {
 				parameters.remove(parameter.getKey());
@@ -176,17 +170,14 @@ public class JobLauncherCommandLineRunner
 		}
 	}
 
-	private JobParameters merge(JobParameters parameters,
-			Map<String, JobParameter> additionals) {
+	private JobParameters merge(JobParameters parameters, Map<String, JobParameter> additionals) {
 		Map<String, JobParameter> merged = new HashMap<String, JobParameter>();
 		merged.putAll(parameters.getParameters());
 		merged.putAll(additionals);
-		parameters = new JobParameters(merged);
-		return parameters;
+		return new JobParameters(merged);
 	}
 
-	private void executeRegisteredJobs(JobParameters jobParameters)
-			throws JobExecutionException {
+	private void executeRegisteredJobs(JobParameters jobParameters) throws JobExecutionException {
 		if (this.jobRegistry != null && StringUtils.hasText(this.jobNames)) {
 			String[] jobsToRun = this.jobNames.split(",");
 			for (String jobName : jobsToRun) {
@@ -199,27 +190,22 @@ public class JobLauncherCommandLineRunner
 				}
 				catch (NoSuchJobException ex) {
 					logger.debug("No job found in registry for job name: " + jobName);
-					continue;
 				}
 			}
 		}
 	}
 
 	protected void execute(Job job, JobParameters jobParameters)
-			throws JobExecutionAlreadyRunningException, JobRestartException,
-			JobInstanceAlreadyCompleteException, JobParametersInvalidException,
-			JobParametersNotFoundException {
+			throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
+			JobParametersInvalidException, JobParametersNotFoundException {
 		JobParameters nextParameters = getNextJobParameters(job, jobParameters);
-		if (nextParameters != null) {
-			JobExecution execution = this.jobLauncher.run(job, nextParameters);
-			if (this.publisher != null) {
-				this.publisher.publishEvent(new JobExecutionEvent(execution));
-			}
+		JobExecution execution = this.jobLauncher.run(job, nextParameters);
+		if (this.publisher != null) {
+			this.publisher.publishEvent(new JobExecutionEvent(execution));
 		}
 	}
 
-	private void executeLocalJobs(JobParameters jobParameters)
-			throws JobExecutionException {
+	private void executeLocalJobs(JobParameters jobParameters) throws JobExecutionException {
 		for (Job job : this.jobs) {
 			if (StringUtils.hasText(this.jobNames)) {
 				String[] jobsToRun = this.jobNames.split(",");

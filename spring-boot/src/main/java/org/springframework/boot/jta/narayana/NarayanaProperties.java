@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -91,22 +91,22 @@ public class NarayanaProperties {
 	/**
 	 * Comma-separated list of orphan filters.
 	 */
-	private List<String> xaResourceOrphanFilters = new ArrayList<String>(Arrays.asList(
-			"com.arjuna.ats.internal.jta.recovery.arjunacore.JTATransactionLogXAResourceOrphanFilter",
-			"com.arjuna.ats.internal.jta.recovery.arjunacore.JTANodeNameXAResourceOrphanFilter"));
+	private List<String> xaResourceOrphanFilters = new ArrayList<String>(
+			Arrays.asList("com.arjuna.ats.internal.jta.recovery.arjunacore.JTATransactionLogXAResourceOrphanFilter",
+					"com.arjuna.ats.internal.jta.recovery.arjunacore.JTANodeNameXAResourceOrphanFilter"));
 
 	/**
 	 * Comma-separated list of recovery modules.
 	 */
-	private List<String> recoveryModules = new ArrayList<String>(Arrays.asList(
-			"com.arjuna.ats.internal.arjuna.recovery.AtomicActionRecoveryModule",
-			"com.arjuna.ats.internal.jta.recovery.arjunacore.XARecoveryModule"));
+	private List<String> recoveryModules = new ArrayList<String>(
+			Arrays.asList("com.arjuna.ats.internal.arjuna.recovery.AtomicActionRecoveryModule",
+					"com.arjuna.ats.internal.jta.recovery.arjunacore.XARecoveryModule"));
 
 	/**
 	 * Comma-separated list of expiry scanners.
 	 */
-	private List<String> expiryScanners = new ArrayList<String>(Collections.singletonList(
-			"com.arjuna.ats.internal.arjuna.recovery.ExpiredTransactionStatusManagerScanner"));
+	private List<String> expiryScanners = new ArrayList<String>(Collections
+			.singletonList("com.arjuna.ats.internal.arjuna.recovery.ExpiredTransactionStatusManagerScanner"));
 
 	public String getLogDir() {
 		return this.logDir;

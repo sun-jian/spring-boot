@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -87,8 +87,7 @@ public class HeapdumpMvcEndpointTests {
 	}
 
 	@Test
-	public void invokeWhenNotAvailableShouldReturnServiceUnavailableStatus()
-			throws Exception {
+	public void invokeWhenNotAvailableShouldReturnServiceUnavailableStatus() throws Exception {
 		this.endpoint.setAvailable(false);
 		this.mvc.perform(get("/heapdump")).andExpect(status().isServiceUnavailable());
 	}
@@ -102,8 +101,7 @@ public class HeapdumpMvcEndpointTests {
 
 	@Test
 	public void invokeShouldReturnGzipContent() throws Exception {
-		MvcResult result = this.mvc.perform(get("/heapdump")).andExpect(status().isOk())
-				.andReturn();
+		MvcResult result = this.mvc.perform(get("/heapdump")).andExpect(status().isOk()).andReturn();
 		byte[] bytes = result.getResponse().getContentAsByteArray();
 		GZIPInputStream stream = new GZIPInputStream(new ByteArrayInputStream(bytes));
 		byte[] uncompressed = FileCopyUtils.copyToByteArray(stream);
@@ -116,9 +114,8 @@ public class HeapdumpMvcEndpointTests {
 	}
 
 	@Import({ JacksonAutoConfiguration.class, AuditAutoConfiguration.class,
-			HttpMessageConvertersAutoConfiguration.class,
-			EndpointWebMvcAutoConfiguration.class, WebMvcAutoConfiguration.class,
-			ManagementServerPropertiesAutoConfiguration.class })
+			HttpMessageConvertersAutoConfiguration.class, EndpointWebMvcAutoConfiguration.class,
+			WebMvcAutoConfiguration.class, ManagementServerPropertiesAutoConfiguration.class })
 	@Configuration
 	public static class TestConfiguration {
 
@@ -153,8 +150,7 @@ public class HeapdumpMvcEndpointTests {
 			return new HeapDumper() {
 
 				@Override
-				public void dumpHeap(File file, boolean live)
-						throws IOException, InterruptedException {
+				public void dumpHeap(File file, boolean live) throws IOException, InterruptedException {
 					if (!TestHeapdumpMvcEndpoint.this.available) {
 						throw new HeapDumperUnavailableException("Not available", null);
 					}
@@ -164,8 +160,7 @@ public class HeapdumpMvcEndpointTests {
 					if (file.exists()) {
 						throw new IOException("File exists");
 					}
-					FileCopyUtils.copy(TestHeapdumpMvcEndpoint.this.heapDump.getBytes(),
-							file);
+					FileCopyUtils.copy(TestHeapdumpMvcEndpoint.this.heapDump.getBytes(), file);
 				}
 
 			};

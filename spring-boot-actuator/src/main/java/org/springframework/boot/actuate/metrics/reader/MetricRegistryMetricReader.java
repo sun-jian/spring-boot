@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,6 +52,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Dave Syer
  * @author Andy Wilkinson
+ * @since 1.0.0
  */
 public class MetricRegistryMetricReader implements MetricReader, MetricRegistryListener {
 
@@ -92,8 +93,7 @@ public class MetricRegistryMetricReader implements MetricReader, MetricRegistryL
 				return new Metric<Number>(metricName, (Number) value);
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Ignoring gauge '" + name + "' (" + metric
-						+ ") as its value is not a Number");
+				logger.debug("Ignoring gauge '" + name + "' (" + metric + ") as its value is not a Number");
 			}
 			return null;
 		}
@@ -102,8 +102,7 @@ public class MetricRegistryMetricReader implements MetricReader, MetricRegistryL
 				Number value = getMetric(((Sampling) metric).getSnapshot(), metricName);
 				if (metric instanceof Timer) {
 					// convert back to MILLISEC
-					value = TimeUnit.MILLISECONDS.convert(value.longValue(),
-							TimeUnit.NANOSECONDS);
+					value = TimeUnit.MILLISECONDS.convert(value.longValue(), TimeUnit.NANOSECONDS);
 				}
 				return new Metric<Number>(metricName, value);
 			}
@@ -239,8 +238,7 @@ public class MetricRegistryMetricReader implements MetricReader, MetricRegistryL
 			result = new HashSet<String>();
 		}
 		if (result.isEmpty()) {
-			for (PropertyDescriptor descriptor : BeanUtils
-					.getPropertyDescriptors(metric.getClass())) {
+			for (PropertyDescriptor descriptor : BeanUtils.getPropertyDescriptors(metric.getClass())) {
 				if (ClassUtils.isAssignable(Number.class, descriptor.getPropertyType())) {
 					result.add(descriptor.getName());
 				}

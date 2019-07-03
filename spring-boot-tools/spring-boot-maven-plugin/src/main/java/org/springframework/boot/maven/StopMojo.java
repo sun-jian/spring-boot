@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,7 +52,7 @@ public class StopMojo extends AbstractMojo {
 	 * Flag to indicate if process to stop was forked. By default, the value is inherited
 	 * from the {@link MavenProject}. If it is set, it must match the value used to
 	 * {@link StartMojo start} the process.
-	 * @since 1.3
+	 * @since 1.3.0
 	 */
 	@Parameter(property = "fork")
 	private Boolean fork;
@@ -103,13 +103,11 @@ public class StopMojo extends AbstractMojo {
 		if (this.fork != null) {
 			return this.fork;
 		}
-		String property = this.project.getProperties()
-				.getProperty("_spring.boot.fork.enabled");
+		String property = this.project.getProperties().getProperty("_spring.boot.fork.enabled");
 		return Boolean.valueOf(property);
 	}
 
-	private void stopForkedProcess()
-			throws IOException, MojoFailureException, MojoExecutionException {
+	private void stopForkedProcess() throws IOException, MojoFailureException, MojoExecutionException {
 		JMXConnector connector = SpringApplicationAdminClient.connect(this.jmxPort);
 		try {
 			MBeanServerConnection connection = connector.getMBeanServerConnection();
@@ -124,16 +122,13 @@ public class StopMojo extends AbstractMojo {
 		doStop(ManagementFactory.getPlatformMBeanServer());
 	}
 
-	private void doStop(MBeanServerConnection connection)
-			throws IOException, MojoExecutionException {
+	private void doStop(MBeanServerConnection connection) throws IOException, MojoExecutionException {
 		try {
 			new SpringApplicationAdminClient(connection, this.jmxName).stop();
 		}
 		catch (InstanceNotFoundException ex) {
-			throw new MojoExecutionException(
-					"Spring application lifecycle JMX bean not found (fork is " + ""
-							+ this.fork + "). Could not stop application gracefully",
-					ex);
+			throw new MojoExecutionException("Spring application lifecycle JMX bean not found (fork is " + ""
+					+ this.fork + "). Could not stop application gracefully", ex);
 		}
 	}
 

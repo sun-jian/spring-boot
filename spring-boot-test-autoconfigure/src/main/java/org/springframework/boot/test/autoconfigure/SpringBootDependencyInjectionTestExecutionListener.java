@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,8 +35,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
  * @author Phillip Webb
  * @since 1.4.1
  */
-public class SpringBootDependencyInjectionTestExecutionListener
-		extends DependencyInjectionTestExecutionListener {
+public class SpringBootDependencyInjectionTestExecutionListener extends DependencyInjectionTestExecutionListener {
 
 	@Override
 	public void prepareTestInstance(TestContext testContext) throws Exception {
@@ -44,13 +43,22 @@ public class SpringBootDependencyInjectionTestExecutionListener
 			super.prepareTestInstance(testContext);
 		}
 		catch (Exception ex) {
+			outputConditionEvaluationReport(testContext);
+			throw ex;
+		}
+	}
+
+	private void outputConditionEvaluationReport(TestContext testContext) {
+		try {
 			ApplicationContext context = testContext.getApplicationContext();
 			if (context instanceof ConfigurableApplicationContext) {
 				ConditionEvaluationReport report = ConditionEvaluationReport
 						.get(((ConfigurableApplicationContext) context).getBeanFactory());
 				System.err.println(new ConditionEvaluationReportMessage(report));
 			}
-			throw ex;
+		}
+		catch (Exception ex) {
+			// Allow original failure to be reported
 		}
 	}
 
@@ -62,10 +70,8 @@ public class SpringBootDependencyInjectionTestExecutionListener
 			Set<Class<? extends TestExecutionListener>> updated = new LinkedHashSet<Class<? extends TestExecutionListener>>(
 					listeners.size());
 			for (Class<? extends TestExecutionListener> listener : listeners) {
-				updated.add(
-						listener.equals(DependencyInjectionTestExecutionListener.class)
-								? SpringBootDependencyInjectionTestExecutionListener.class
-								: listener);
+				updated.add(listener.equals(DependencyInjectionTestExecutionListener.class)
+						? SpringBootDependencyInjectionTestExecutionListener.class : listener);
 			}
 			return updated;
 		}

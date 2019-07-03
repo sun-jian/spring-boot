@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -82,8 +82,7 @@ public class SpringApplicationAdminMXBeanRegistrarTests {
 					assertThat(isApplicationReady(objectName)).isFalse();
 				}
 				catch (Exception ex) {
-					throw new IllegalStateException(
-							"Could not contact spring application admin bean", ex);
+					throw new IllegalStateException("Could not contact spring application admin bean", ex);
 				}
 			}
 		});
@@ -93,16 +92,13 @@ public class SpringApplicationAdminMXBeanRegistrarTests {
 
 	@Test
 	public void eventsFromOtherContextsAreIgnored() throws MalformedObjectNameException {
-		SpringApplicationAdminMXBeanRegistrar registrar = new SpringApplicationAdminMXBeanRegistrar(
-				OBJECT_NAME);
-		ConfigurableApplicationContext context = mock(
-				ConfigurableApplicationContext.class);
+		SpringApplicationAdminMXBeanRegistrar registrar = new SpringApplicationAdminMXBeanRegistrar(OBJECT_NAME);
+		ConfigurableApplicationContext context = mock(ConfigurableApplicationContext.class);
 		registrar.setApplicationContext(context);
-		registrar.onApplicationEvent(new ApplicationReadyEvent(new SpringApplication(),
-				null, mock(ConfigurableApplicationContext.class)));
-		assertThat(isApplicationReady(registrar)).isFalse();
 		registrar.onApplicationEvent(
-				new ApplicationReadyEvent(new SpringApplication(), null, context));
+				new ApplicationReadyEvent(new SpringApplication(), null, mock(ConfigurableApplicationContext.class)));
+		assertThat(isApplicationReady(registrar)).isFalse();
+		registrar.onApplicationEvent(new ApplicationReadyEvent(new SpringApplication(), null, context));
 		assertThat(isApplicationReady(registrar)).isTrue();
 	}
 
@@ -145,8 +141,8 @@ public class SpringApplicationAdminMXBeanRegistrarTests {
 
 	private String getProperty(ObjectName objectName, String key) {
 		try {
-			return (String) this.mBeanServer.invoke(objectName, "getProperty",
-					new Object[] { key }, new String[] { String.class.getName() });
+			return (String) this.mBeanServer.invoke(objectName, "getProperty", new Object[] { key },
+					new String[] { String.class.getName() });
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(ex.getMessage(), ex);
@@ -177,8 +173,8 @@ public class SpringApplicationAdminMXBeanRegistrarTests {
 		try {
 			return new ObjectName(jmxName);
 		}
-		catch (MalformedObjectNameException e) {
-			throw new IllegalStateException("Invalid jmx name " + jmxName, e);
+		catch (MalformedObjectNameException ex) {
+			throw new IllegalStateException("Invalid jmx name " + jmxName, ex);
 		}
 	}
 

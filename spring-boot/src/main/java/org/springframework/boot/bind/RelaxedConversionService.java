@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.boot.bind;
 
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.Set;
 
 import org.springframework.core.convert.ConversionFailedException;
@@ -34,7 +35,6 @@ import org.springframework.util.Assert;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
- * @since 1.1.0
  */
 class RelaxedConversionService implements ConversionService {
 
@@ -50,22 +50,19 @@ class RelaxedConversionService implements ConversionService {
 		this.conversionService = conversionService;
 		this.additionalConverters = new GenericConversionService();
 		DefaultConversionService.addCollectionConverters(this.additionalConverters);
-		this.additionalConverters
-				.addConverterFactory(new StringToEnumIgnoringCaseConverterFactory());
+		this.additionalConverters.addConverterFactory(new StringToEnumIgnoringCaseConverterFactory());
 		this.additionalConverters.addConverter(new StringToCharArrayConverter());
 	}
 
 	@Override
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
-		return (this.conversionService != null
-				&& this.conversionService.canConvert(sourceType, targetType))
+		return (this.conversionService != null && this.conversionService.canConvert(sourceType, targetType))
 				|| this.additionalConverters.canConvert(sourceType, targetType);
 	}
 
 	@Override
 	public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return (this.conversionService != null
-				&& this.conversionService.canConvert(sourceType, targetType))
+		return (this.conversionService != null && this.conversionService.canConvert(sourceType, targetType))
 				|| this.additionalConverters.canConvert(sourceType, targetType);
 	}
 
@@ -73,13 +70,11 @@ class RelaxedConversionService implements ConversionService {
 	@SuppressWarnings("unchecked")
 	public <T> T convert(Object source, Class<T> targetType) {
 		Assert.notNull(targetType, "The targetType to convert to cannot be null");
-		return (T) convert(source, TypeDescriptor.forObject(source),
-				TypeDescriptor.valueOf(targetType));
+		return (T) convert(source, TypeDescriptor.forObject(source), TypeDescriptor.valueOf(targetType));
 	}
 
 	@Override
-	public Object convert(Object source, TypeDescriptor sourceType,
-			TypeDescriptor targetType) {
+	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (this.conversionService != null) {
 			try {
 				return this.conversionService.convert(source, sourceType, targetType);
@@ -96,8 +91,7 @@ class RelaxedConversionService implements ConversionService {
 	 * case of the source.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static class StringToEnumIgnoringCaseConverterFactory
-			implements ConverterFactory<String, Enum> {
+	private static class StringToEnumIgnoringCaseConverterFactory implements ConverterFactory<String, Enum> {
 
 		@Override
 		public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
@@ -105,8 +99,7 @@ class RelaxedConversionService implements ConversionService {
 			while (enumType != null && !enumType.isEnum()) {
 				enumType = enumType.getSuperclass();
 			}
-			Assert.notNull(enumType, "The target type " + targetType.getName()
-					+ " does not refer to an enum");
+			Assert.notNull(enumType, "The target type " + targetType.getName() + " does not refer to an enum");
 			return new StringToEnum(enumType);
 		}
 
@@ -127,7 +120,7 @@ class RelaxedConversionService implements ConversionService {
 				source = source.trim();
 				for (T candidate : (Set<T>) EnumSet.allOf(this.enumType)) {
 					RelaxedNames names = new RelaxedNames(
-							candidate.name().replace('_', '-').toLowerCase());
+							candidate.name().replace('_', '-').toLowerCase(Locale.ENGLISH));
 					for (String name : names) {
 						if (name.equals(source)) {
 							return candidate;
@@ -137,8 +130,8 @@ class RelaxedConversionService implements ConversionService {
 						return candidate;
 					}
 				}
-				throw new IllegalArgumentException("No enum constant "
-						+ this.enumType.getCanonicalName() + "." + source);
+				throw new IllegalArgumentException(
+						"No enum constant " + this.enumType.getCanonicalName() + "." + source);
 			}
 
 		}

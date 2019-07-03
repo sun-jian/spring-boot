@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,8 +36,7 @@ public class SamplePropertiesValidator implements Validator {
 		ValidationUtils.rejectIfEmpty(errors, "host", "host.empty");
 		ValidationUtils.rejectIfEmpty(errors, "port", "port.empty");
 		SampleProperties properties = (SampleProperties) o;
-		if (properties.getHost() != null
-				&& !this.pattern.matcher(properties.getHost()).matches()) {
+		if (properties.getHost() != null && !this.pattern.matcher(properties.getHost()).matches()) {
 			errors.rejectValue("host", "Invalid host");
 		}
 	}

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,10 +39,8 @@ public class ExampleControllerAdvice {
 
 	@ExceptionHandler(NoHandlerFoundException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ResponseEntity<String> noHandlerFoundHandler(
-			NoHandlerFoundException exception) {
-		return ResponseEntity.badRequest()
-				.body("Invalid request: " + exception.getRequestURL());
+	public ResponseEntity<String> noHandlerFoundHandler(NoHandlerFoundException exception) {
+		return ResponseEntity.badRequest().body("Invalid request: " + exception.getRequestURL());
 	}
 
 }

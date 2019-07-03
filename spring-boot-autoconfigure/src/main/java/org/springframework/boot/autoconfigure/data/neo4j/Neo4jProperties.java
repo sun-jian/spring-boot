@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -137,8 +137,7 @@ public class Neo4jProperties implements ApplicationContextAware {
 		}
 	}
 
-	private void configureDriverFromUri(DriverConfiguration driverConfiguration,
-			String uri) {
+	private void configureDriverFromUri(DriverConfiguration driverConfiguration, String uri) {
 		driverConfiguration.setDriverClassName(deduceDriverFromUri());
 		driverConfiguration.setURI(uri);
 	}
@@ -150,24 +149,21 @@ public class Neo4jProperties implements ApplicationContextAware {
 			if (scheme == null || scheme.equals("file")) {
 				return EMBEDDED_DRIVER;
 			}
-			if ("http".equals(scheme)) {
+			if ("http".equals(scheme) || "https".equals(scheme)) {
 				return HTTP_DRIVER;
 			}
 			if ("bolt".equals(scheme)) {
 				return BOLT_DRIVER;
 			}
-			throw new IllegalArgumentException(
-					"Could not deduce driver to use based on URI '" + uri + "'");
+			throw new IllegalArgumentException("Could not deduce driver to use based on URI '" + uri + "'");
 		}
 		catch (URISyntaxException ex) {
-			throw new IllegalArgumentException(
-					"Invalid URI for spring.data.neo4j.uri '" + this.uri + "'", ex);
+			throw new IllegalArgumentException("Invalid URI for spring.data.neo4j.uri '" + this.uri + "'", ex);
 		}
 	}
 
 	private void configureDriverWithDefaults(DriverConfiguration driverConfiguration) {
-		if (getEmbedded().isEnabled()
-				&& ClassUtils.isPresent(EMBEDDED_DRIVER, this.classLoader)) {
+		if (getEmbedded().isEnabled() && ClassUtils.isPresent(EMBEDDED_DRIVER, this.classLoader)) {
 			driverConfiguration.setDriverClassName(EMBEDDED_DRIVER);
 			return;
 		}

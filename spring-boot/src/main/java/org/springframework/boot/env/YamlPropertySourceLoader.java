@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,6 +42,7 @@ import org.springframework.util.ClassUtils;
  * @author Dave Syer
  * @author Phillip Webb
  * @author Andy Wilkinson
+ * @since 1.0.0
  */
 public class YamlPropertySourceLoader implements PropertySourceLoader {
 
@@ -51,8 +52,7 @@ public class YamlPropertySourceLoader implements PropertySourceLoader {
 	}
 
 	@Override
-	public PropertySource<?> load(String name, Resource resource, String profile)
-			throws IOException {
+	public PropertySource<?> load(String name, Resource resource, String profile) throws IOException {
 		if (ClassUtils.isPresent("org.yaml.snakeyaml.Yaml", null)) {
 			Processor processor = new Processor(resource, profile);
 			Map<String, Object> source = processor.process();
@@ -83,17 +83,15 @@ public class YamlPropertySourceLoader implements PropertySourceLoader {
 
 		@Override
 		protected Yaml createYaml() {
-			return new Yaml(new StrictMapAppenderConstructor(), new Representer(),
-					new DumperOptions(), new Resolver() {
-						@Override
-						public void addImplicitResolver(Tag tag, Pattern regexp,
-								String first) {
-							if (tag == Tag.TIMESTAMP) {
-								return;
-							}
-							super.addImplicitResolver(tag, regexp, first);
-						}
-					});
+			return new Yaml(new StrictMapAppenderConstructor(), new Representer(), new DumperOptions(), new Resolver() {
+				@Override
+				public void addImplicitResolver(Tag tag, Pattern regexp, String first) {
+					if (tag == Tag.TIMESTAMP) {
+						return;
+					}
+					super.addImplicitResolver(tag, regexp, first);
+				}
+			});
 		}
 
 		public Map<String, Object> process() {

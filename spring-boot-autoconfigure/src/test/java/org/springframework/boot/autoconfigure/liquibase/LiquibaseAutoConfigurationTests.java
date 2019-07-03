@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,9 +30,11 @@ import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
+import org.springframework.boot.context.event.ApplicationStartingEvent;
 import org.springframework.boot.liquibase.CommonsLoggingLiquibaseLogger;
 import org.springframework.boot.liquibase.LiquibaseServiceLocatorApplicationListener;
 import org.springframework.boot.test.rule.OutputCapture;
@@ -68,9 +70,9 @@ public class LiquibaseAutoConfigurationTests {
 
 	@Before
 	public void init() {
-		EnvironmentTestUtils.addEnvironment(this.context,
-				"spring.datasource.name:liquibasetest");
-		new LiquibaseServiceLocatorApplicationListener().onApplicationEvent(null);
+		EnvironmentTestUtils.addEnvironment(this.context, "spring.datasource.name:liquibasetest");
+		new LiquibaseServiceLocatorApplicationListener()
+				.onApplicationEvent(new ApplicationStartingEvent(new SpringApplication(Object.class), new String[0]));
 	}
 
 	@After
@@ -82,22 +84,18 @@ public class LiquibaseAutoConfigurationTests {
 
 	@Test
 	public void testNoDataSource() throws Exception {
-		this.context.register(LiquibaseAutoConfiguration.class,
-				PropertyPlaceholderAutoConfiguration.class);
+		this.context.register(LiquibaseAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
-		assertThat(this.context.getBeanNamesForType(SpringLiquibase.class).length)
-				.isEqualTo(0);
+		assertThat(this.context.getBeanNamesForType(SpringLiquibase.class).length).isEqualTo(0);
 	}
 
 	@Test
 	public void testDefaultSpringLiquibase() throws Exception {
-		this.context.register(EmbeddedDataSourceConfiguration.class,
-				LiquibaseAutoConfiguration.class,
+		this.context.register(EmbeddedDataSourceConfiguration.class, LiquibaseAutoConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
 		SpringLiquibase liquibase = this.context.getBean(SpringLiquibase.class);
-		assertThat(liquibase.getChangeLog())
-				.isEqualTo("classpath:/db/changelog/db.changelog-master.yaml");
+		assertThat(liquibase.getChangeLog()).isEqualTo("classpath:/db/changelog/db.changelog-master.yaml");
 		assertThat(liquibase.getContexts()).isNull();
 		assertThat(liquibase.getDefaultSchema()).isNull();
 		assertThat(liquibase.isDropFirst()).isFalse();
@@ -107,47 +105,39 @@ public class LiquibaseAutoConfigurationTests {
 	public void testXmlChangeLog() throws Exception {
 		EnvironmentTestUtils.addEnvironment(this.context,
 				"liquibase.change-log:classpath:/db/changelog/db.changelog-override.xml");
-		this.context.register(EmbeddedDataSourceConfiguration.class,
-				LiquibaseAutoConfiguration.class,
+		this.context.register(EmbeddedDataSourceConfiguration.class, LiquibaseAutoConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
 		SpringLiquibase liquibase = this.context.getBean(SpringLiquibase.class);
-		assertThat(liquibase.getChangeLog())
-				.isEqualTo("classpath:/db/changelog/db.changelog-override.xml");
+		assertThat(liquibase.getChangeLog()).isEqualTo("classpath:/db/changelog/db.changelog-override.xml");
 	}
 
 	@Test
 	public void testJsonChangeLog() throws Exception {
 		EnvironmentTestUtils.addEnvironment(this.context,
 				"liquibase.change-log:classpath:/db/changelog/db.changelog-override.json");
-		this.context.register(EmbeddedDataSourceConfiguration.class,
-				LiquibaseAutoConfiguration.class,
+		this.context.register(EmbeddedDataSourceConfiguration.class, LiquibaseAutoConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
 		SpringLiquibase liquibase = this.context.getBean(SpringLiquibase.class);
-		assertThat(liquibase.getChangeLog())
-				.isEqualTo("classpath:/db/changelog/db.changelog-override.json");
+		assertThat(liquibase.getChangeLog()).isEqualTo("classpath:/db/changelog/db.changelog-override.json");
 	}
 
 	@Test
 	public void testSqlChangeLog() throws Exception {
 		EnvironmentTestUtils.addEnvironment(this.context,
 				"liquibase.change-log:classpath:/db/changelog/db.changelog-override.sql");
-		this.context.register(EmbeddedDataSourceConfiguration.class,
-				LiquibaseAutoConfiguration.class,
+		this.context.register(EmbeddedDataSourceConfiguration.class, LiquibaseAutoConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
 		SpringLiquibase liquibase = this.context.getBean(SpringLiquibase.class);
-		assertThat(liquibase.getChangeLog())
-				.isEqualTo("classpath:/db/changelog/db.changelog-override.sql");
+		assertThat(liquibase.getChangeLog()).isEqualTo("classpath:/db/changelog/db.changelog-override.sql");
 	}
 
 	@Test
 	public void testOverrideContexts() throws Exception {
-		EnvironmentTestUtils.addEnvironment(this.context,
-				"liquibase.contexts:test, production");
-		this.context.register(EmbeddedDataSourceConfiguration.class,
-				LiquibaseAutoConfiguration.class,
+		EnvironmentTestUtils.addEnvironment(this.context, "liquibase.contexts:test, production");
+		this.context.register(EmbeddedDataSourceConfiguration.class, LiquibaseAutoConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
 		SpringLiquibase liquibase = this.context.getBean(SpringLiquibase.class);
@@ -156,10 +146,8 @@ public class LiquibaseAutoConfigurationTests {
 
 	@Test
 	public void testOverrideDefaultSchema() throws Exception {
-		EnvironmentTestUtils.addEnvironment(this.context,
-				"liquibase.default-schema:public");
-		this.context.register(EmbeddedDataSourceConfiguration.class,
-				LiquibaseAutoConfiguration.class,
+		EnvironmentTestUtils.addEnvironment(this.context, "liquibase.default-schema:public");
+		this.context.register(EmbeddedDataSourceConfiguration.class, LiquibaseAutoConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
 		SpringLiquibase liquibase = this.context.getBean(SpringLiquibase.class);
@@ -169,8 +157,7 @@ public class LiquibaseAutoConfigurationTests {
 	@Test
 	public void testOverrideDropFirst() throws Exception {
 		EnvironmentTestUtils.addEnvironment(this.context, "liquibase.drop-first:true");
-		this.context.register(EmbeddedDataSourceConfiguration.class,
-				LiquibaseAutoConfiguration.class,
+		this.context.register(EmbeddedDataSourceConfiguration.class, LiquibaseAutoConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
 		SpringLiquibase liquibase = this.context.getBean(SpringLiquibase.class);
@@ -179,31 +166,28 @@ public class LiquibaseAutoConfigurationTests {
 
 	@Test
 	public void testOverrideDataSource() throws Exception {
-		EnvironmentTestUtils.addEnvironment(this.context,
-				"liquibase.url:jdbc:hsqldb:mem:liquibase", "liquibase.user:sa");
-		this.context.register(EmbeddedDataSourceConfiguration.class,
-				LiquibaseAutoConfiguration.class,
+		EnvironmentTestUtils.addEnvironment(this.context, "liquibase.url:jdbc:hsqldb:mem:liquibase",
+				"liquibase.user:sa");
+		this.context.register(EmbeddedDataSourceConfiguration.class, LiquibaseAutoConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
 		SpringLiquibase liquibase = this.context.getBean(SpringLiquibase.class);
-		assertThat(liquibase.getDataSource().getConnection().getMetaData().getURL())
-				.isEqualTo("jdbc:hsqldb:mem:liquibase");
+		DataSource dataSource = liquibase.getDataSource();
+		assertThat(ReflectionTestUtils.getField(dataSource, "pool")).isNull();
+		assertThat(dataSource.getConnection().getMetaData().getURL()).isEqualTo("jdbc:hsqldb:mem:liquibase");
 	}
 
 	@Test(expected = BeanCreationException.class)
 	public void testChangeLogDoesNotExist() throws Exception {
-		EnvironmentTestUtils.addEnvironment(this.context,
-				"liquibase.change-log:classpath:/no-such-changelog.yaml");
-		this.context.register(EmbeddedDataSourceConfiguration.class,
-				LiquibaseAutoConfiguration.class,
+		EnvironmentTestUtils.addEnvironment(this.context, "liquibase.change-log:classpath:/no-such-changelog.yaml");
+		this.context.register(EmbeddedDataSourceConfiguration.class, LiquibaseAutoConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
 	}
 
 	@Test
 	public void testLogger() throws Exception {
-		this.context.register(EmbeddedDataSourceConfiguration.class,
-				LiquibaseAutoConfiguration.class,
+		this.context.register(EmbeddedDataSourceConfiguration.class, LiquibaseAutoConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
 		SpringLiquibase liquibase = this.context.getBean(SpringLiquibase.class);
@@ -214,10 +198,8 @@ public class LiquibaseAutoConfigurationTests {
 
 	@Test
 	public void testOverrideLabels() throws Exception {
-		EnvironmentTestUtils.addEnvironment(this.context,
-				"liquibase.labels:test, production");
-		this.context.register(EmbeddedDataSourceConfiguration.class,
-				LiquibaseAutoConfiguration.class,
+		EnvironmentTestUtils.addEnvironment(this.context, "liquibase.labels:test, production");
+		this.context.register(EmbeddedDataSourceConfiguration.class, LiquibaseAutoConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
 		SpringLiquibase liquibase = this.context.getBean(SpringLiquibase.class);
@@ -228,13 +210,11 @@ public class LiquibaseAutoConfigurationTests {
 	@SuppressWarnings("unchecked")
 	public void testOverrideParameters() throws Exception {
 		EnvironmentTestUtils.addEnvironment(this.context, "liquibase.parameters.foo:bar");
-		this.context.register(EmbeddedDataSourceConfiguration.class,
-				LiquibaseAutoConfiguration.class,
+		this.context.register(EmbeddedDataSourceConfiguration.class, LiquibaseAutoConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
 		SpringLiquibase liquibase = this.context.getBean(SpringLiquibase.class);
-		Map<String, String> parameters = (Map<String, String>) ReflectionTestUtils
-				.getField(liquibase, "parameters");
+		Map<String, String> parameters = (Map<String, String>) ReflectionTestUtils.getField(liquibase, "parameters");
 		assertThat(parameters.containsKey("foo")).isTrue();
 		assertThat(parameters.get("foo")).isEqualTo("bar");
 	}
@@ -242,10 +222,8 @@ public class LiquibaseAutoConfigurationTests {
 	@Test
 	public void testRollbackFile() throws Exception {
 		File file = this.temp.newFile("rollback-file.sql");
-		EnvironmentTestUtils.addEnvironment(this.context,
-				"liquibase.rollbackFile:" + file.getAbsolutePath());
-		this.context.register(EmbeddedDataSourceConfiguration.class,
-				LiquibaseAutoConfiguration.class,
+		EnvironmentTestUtils.addEnvironment(this.context, "liquibase.rollbackFile:" + file.getAbsolutePath());
+		this.context.register(EmbeddedDataSourceConfiguration.class, LiquibaseAutoConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
 		SpringLiquibase liquibase = this.context.getBean(SpringLiquibase.class);
@@ -257,13 +235,11 @@ public class LiquibaseAutoConfigurationTests {
 
 	@Test
 	public void testLiquibaseDataSource() {
-		this.context.register(LiquibaseDataSourceConfiguration.class,
-				EmbeddedDataSourceConfiguration.class, LiquibaseAutoConfiguration.class,
-				PropertyPlaceholderAutoConfiguration.class);
+		this.context.register(LiquibaseDataSourceConfiguration.class, EmbeddedDataSourceConfiguration.class,
+				LiquibaseAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class);
 		this.context.refresh();
 		SpringLiquibase liquibase = this.context.getBean(SpringLiquibase.class);
-		assertThat(liquibase.getDataSource())
-				.isEqualTo(this.context.getBean("liquibaseDataSource"));
+		assertThat(liquibase.getDataSource()).isEqualTo(this.context.getBean("liquibaseDataSource"));
 	}
 
 	@Configuration
@@ -272,15 +248,13 @@ public class LiquibaseAutoConfigurationTests {
 		@Bean
 		@Primary
 		public DataSource normalDataSource() {
-			return DataSourceBuilder.create().url("jdbc:hsqldb:mem:normal").username("sa")
-					.build();
+			return DataSourceBuilder.create().url("jdbc:hsqldb:mem:normal").username("sa").build();
 		}
 
 		@LiquibaseDataSource
 		@Bean
 		public DataSource liquibaseDataSource() {
-			return DataSourceBuilder.create().url("jdbc:hsqldb:mem:liquibasetest")
-					.username("sa").build();
+			return DataSourceBuilder.create().url("jdbc:hsqldb:mem:liquibasetest").username("sa").build();
 		}
 
 	}

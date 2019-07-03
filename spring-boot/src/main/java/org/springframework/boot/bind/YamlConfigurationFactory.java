@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,9 +48,9 @@ import org.springframework.validation.Validator;
  * @param <T> the configuration type
  * @author Luke Taylor
  * @author Dave Syer
+ * @since 1.0.0
  */
-public class YamlConfigurationFactory<T>
-		implements FactoryBean<T>, MessageSourceAware, InitializingBean {
+public class YamlConfigurationFactory<T> implements FactoryBean<T>, MessageSourceAware, InitializingBean {
 
 	private static final Log logger = LogFactory.getLog(YamlConfigurationFactory.class);
 
@@ -94,8 +94,7 @@ public class YamlConfigurationFactory<T>
 	 * @param propertyAliases the property aliases
 	 */
 	public void setPropertyAliases(Map<Class<?>, Map<String, String>> propertyAliases) {
-		this.propertyAliases = new HashMap<Class<?>, Map<String, String>>(
-				propertyAliases);
+		this.propertyAliases = new HashMap<Class<?>, Map<String, String>>(propertyAliases);
 	}
 
 	/**
@@ -139,17 +138,15 @@ public class YamlConfigurationFactory<T>
 	public void afterPropertiesSet() throws Exception {
 		if (this.yaml == null) {
 			Assert.state(this.resource != null, "Resource should not be null");
-			this.yaml = StreamUtils.copyToString(this.resource.getInputStream(),
-					Charset.defaultCharset());
+			this.yaml = StreamUtils.copyToString(this.resource.getInputStream(), Charset.defaultCharset());
 		}
-		Assert.state(this.yaml != null, "Yaml document should not be null: "
-				+ "either set it directly or set the resource to load it from");
+		Assert.state(this.yaml != null,
+				"Yaml document should not be null: " + "either set it directly or set the resource to load it from");
 		try {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Yaml document is %n%s", this.yaml));
 			}
-			Constructor constructor = new YamlJavaBeanPropertyConstructor(this.type,
-					this.propertyAliases);
+			Constructor constructor = new YamlJavaBeanPropertyConstructor(this.type, this.propertyAliases);
 			this.configuration = (T) (new Yaml(constructor)).load(this.yaml);
 			if (this.validator != null) {
 				validate();
@@ -159,14 +156,12 @@ public class YamlConfigurationFactory<T>
 			if (this.exceptionIfInvalid) {
 				throw ex;
 			}
-			logger.error("Failed to load YAML validation bean. "
-					+ "Your YAML file may be invalid.", ex);
+			logger.error("Failed to load YAML validation bean. " + "Your YAML file may be invalid.", ex);
 		}
 	}
 
 	private void validate() throws BindException {
-		BindingResult errors = new BeanPropertyBindingResult(this.configuration,
-				"configuration");
+		BindingResult errors = new BeanPropertyBindingResult(this.configuration, "configuration");
 		this.validator.validate(this.configuration, errors);
 		if (errors.hasErrors()) {
 			logger.error("YAML configuration failed validation");

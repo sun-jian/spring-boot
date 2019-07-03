@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -56,7 +56,7 @@ public class ApplicationHome {
 	 * @param sourceClass the source class or {@code null}
 	 */
 	public ApplicationHome(Class<?> sourceClass) {
-		this.source = findSource(sourceClass == null ? getStartClass() : sourceClass);
+		this.source = findSource((sourceClass != null) ? sourceClass : getStartClass());
 		this.dir = findHomeDir(this.source);
 	}
 
@@ -76,11 +76,9 @@ public class ApplicationHome {
 				InputStream inputStream = manifestResources.nextElement().openStream();
 				try {
 					Manifest manifest = new Manifest(inputStream);
-					String startClass = manifest.getMainAttributes()
-							.getValue("Start-Class");
+					String startClass = manifest.getMainAttributes().getValue("Start-Class");
 					if (startClass != null) {
-						return ClassUtils.forName(startClass,
-								getClass().getClassLoader());
+						return ClassUtils.forName(startClass, getClass().getClassLoader());
 					}
 				}
 				finally {
@@ -95,11 +93,10 @@ public class ApplicationHome {
 
 	private File findSource(Class<?> sourceClass) {
 		try {
-			ProtectionDomain domain = (sourceClass == null ? null
-					: sourceClass.getProtectionDomain());
-			CodeSource codeSource = (domain == null ? null : domain.getCodeSource());
-			URL location = (codeSource == null ? null : codeSource.getLocation());
-			File source = (location == null ? null : findSource(location));
+			ProtectionDomain domain = (sourceClass != null) ? sourceClass.getProtectionDomain() : null;
+			CodeSource codeSource = (domain != null) ? domain.getCodeSource() : null;
+			URL location = (codeSource != null) ? codeSource.getLocation() : null;
+			File source = (location != null) ? findSource(location) : null;
 			if (source != null && source.exists() && !isUnitTest()) {
 				return source.getAbsoluteFile();
 			}
@@ -142,7 +139,7 @@ public class ApplicationHome {
 
 	private File findHomeDir(File source) {
 		File homeDir = source;
-		homeDir = (homeDir == null ? findDefaultHomeDir() : homeDir);
+		homeDir = (homeDir != null) ? homeDir : findDefaultHomeDir();
 		if (homeDir.isFile()) {
 			homeDir = homeDir.getParentFile();
 		}

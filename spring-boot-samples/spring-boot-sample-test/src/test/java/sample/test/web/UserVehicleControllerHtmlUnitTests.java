@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,8 +47,7 @@ public class UserVehicleControllerHtmlUnitTests {
 
 	@Test
 	public void getVehicleWhenRequestingTextShouldReturnMakeAndModel() throws Exception {
-		given(this.userVehicleService.getVehicleDetails("sboot"))
-				.willReturn(new VehicleDetails("Honda", "Civic"));
+		given(this.userVehicleService.getVehicleDetails("sboot")).willReturn(new VehicleDetails("Honda", "Civic"));
 		HtmlPage page = this.webClient.getPage("/sboot/vehicle.html");
 		assertThat(page.getBody().getTextContent()).isEqualTo("Honda Civic");
 	}

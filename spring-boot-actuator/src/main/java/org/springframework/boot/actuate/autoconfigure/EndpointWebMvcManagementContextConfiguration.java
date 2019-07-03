@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -67,8 +67,7 @@ import org.springframework.web.cors.CorsConfiguration;
  * @since 1.3.0
  */
 @ManagementContextConfiguration
-@EnableConfigurationProperties({ HealthMvcEndpointProperties.class,
-		EndpointCorsProperties.class })
+@EnableConfigurationProperties({ HealthMvcEndpointProperties.class, EndpointCorsProperties.class })
 public class EndpointWebMvcManagementContextConfiguration {
 
 	private final HealthMvcEndpointProperties healthMvcEndpointProperties;
@@ -79,19 +78,15 @@ public class EndpointWebMvcManagementContextConfiguration {
 
 	private final List<EndpointHandlerMappingCustomizer> mappingCustomizers;
 
-	public EndpointWebMvcManagementContextConfiguration(
-			HealthMvcEndpointProperties healthMvcEndpointProperties,
-			ManagementServerProperties managementServerProperties,
-			EndpointCorsProperties corsProperties,
+	public EndpointWebMvcManagementContextConfiguration(HealthMvcEndpointProperties healthMvcEndpointProperties,
+			ManagementServerProperties managementServerProperties, EndpointCorsProperties corsProperties,
 			ObjectProvider<List<EndpointHandlerMappingCustomizer>> mappingCustomizers) {
 		this.healthMvcEndpointProperties = healthMvcEndpointProperties;
 		this.managementServerProperties = managementServerProperties;
 		this.corsProperties = corsProperties;
-		List<EndpointHandlerMappingCustomizer> providedCustomizers = mappingCustomizers
-				.getIfAvailable();
-		this.mappingCustomizers = providedCustomizers == null
-				? Collections.<EndpointHandlerMappingCustomizer>emptyList()
-				: providedCustomizers;
+		List<EndpointHandlerMappingCustomizer> providedCustomizers = mappingCustomizers.getIfAvailable();
+		this.mappingCustomizers = (providedCustomizers != null) ? providedCustomizers
+				: Collections.<EndpointHandlerMappingCustomizer>emptyList();
 	}
 
 	@Bean
@@ -99,8 +94,7 @@ public class EndpointWebMvcManagementContextConfiguration {
 	public EndpointHandlerMapping endpointHandlerMapping() {
 		Set<MvcEndpoint> endpoints = mvcEndpoints().getEndpoints();
 		CorsConfiguration corsConfiguration = getCorsConfiguration(this.corsProperties);
-		EndpointHandlerMapping mapping = new EndpointHandlerMapping(endpoints,
-				corsConfiguration);
+		EndpointHandlerMapping mapping = new EndpointHandlerMapping(endpoints, corsConfiguration);
 		mapping.setPrefix(this.managementServerProperties.getContextPath());
 		MvcEndpointSecurityInterceptor securityInterceptor = new MvcEndpointSecurityInterceptor(
 				this.managementServerProperties.getSecurity().isEnabled(),
@@ -143,6 +137,7 @@ public class EndpointWebMvcManagementContextConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	@ConditionalOnBean(EnvironmentEndpoint.class)
 	@ConditionalOnEnabledEndpoint("env")
 	public EnvironmentMvcEndpoint environmentMvcEndpoint(EnvironmentEndpoint delegate) {
@@ -166,13 +161,13 @@ public class EndpointWebMvcManagementContextConfiguration {
 				this.managementServerProperties.getSecurity().isEnabled(),
 				managementServerProperties.getSecurity().getRoles());
 		if (this.healthMvcEndpointProperties.getMapping() != null) {
-			healthMvcEndpoint
-					.addStatusMapping(this.healthMvcEndpointProperties.getMapping());
+			healthMvcEndpoint.addStatusMapping(this.healthMvcEndpointProperties.getMapping());
 		}
 		return healthMvcEndpoint;
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	@ConditionalOnBean(LoggersEndpoint.class)
 	@ConditionalOnEnabledEndpoint("loggers")
 	public LoggersMvcEndpoint loggersMvcEndpoint(LoggersEndpoint delegate) {
@@ -180,6 +175,7 @@ public class EndpointWebMvcManagementContextConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	@ConditionalOnBean(MetricsEndpoint.class)
 	@ConditionalOnEnabledEndpoint("metrics")
 	public MetricsMvcEndpoint metricsMvcEndpoint(MetricsEndpoint delegate) {
@@ -187,6 +183,7 @@ public class EndpointWebMvcManagementContextConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	@ConditionalOnEnabledEndpoint("logfile")
 	@Conditional(LogFileCondition.class)
 	public LogFileMvcEndpoint logfileMvcEndpoint() {
@@ -194,6 +191,7 @@ public class EndpointWebMvcManagementContextConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	@ConditionalOnBean(ShutdownEndpoint.class)
 	@ConditionalOnEnabledEndpoint(value = "shutdown", enabledByDefault = false)
 	public ShutdownMvcEndpoint shutdownMvcEndpoint(ShutdownEndpoint delegate) {
@@ -201,35 +199,30 @@ public class EndpointWebMvcManagementContextConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	@ConditionalOnBean(AuditEventRepository.class)
 	@ConditionalOnEnabledEndpoint("auditevents")
-	public AuditEventsMvcEndpoint auditEventMvcEndpoint(
-			AuditEventRepository auditEventRepository) {
+	public AuditEventsMvcEndpoint auditEventMvcEndpoint(AuditEventRepository auditEventRepository) {
 		return new AuditEventsMvcEndpoint(auditEventRepository);
 	}
 
 	private static class LogFileCondition extends SpringBootCondition {
 
 		@Override
-		public ConditionOutcome getMatchOutcome(ConditionContext context,
-				AnnotatedTypeMetadata metadata) {
+		public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			Environment environment = context.getEnvironment();
 			String config = environment.resolvePlaceholders("${logging.file:}");
 			ConditionMessage.Builder message = ConditionMessage.forCondition("Log File");
 			if (StringUtils.hasText(config)) {
-				return ConditionOutcome
-						.match(message.found("logging.file").items(config));
+				return ConditionOutcome.match(message.found("logging.file").items(config));
 			}
 			config = environment.resolvePlaceholders("${logging.path:}");
 			if (StringUtils.hasText(config)) {
-				return ConditionOutcome
-						.match(message.found("logging.path").items(config));
+				return ConditionOutcome.match(message.found("logging.path").items(config));
 			}
-			config = new RelaxedPropertyResolver(environment, "endpoints.logfile.")
-					.getProperty("external-file");
+			config = new RelaxedPropertyResolver(environment, "endpoints.logfile.").getProperty("external-file");
 			if (StringUtils.hasText(config)) {
-				return ConditionOutcome.match(
-						message.found("endpoints.logfile.external-file").items(config));
+				return ConditionOutcome.match(message.found("endpoints.logfile.external-file").items(config));
 			}
 			return ConditionOutcome.noMatch(message.didNotFind("logging file").atAll());
 		}

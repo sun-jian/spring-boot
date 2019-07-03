@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,6 +39,7 @@ import org.springframework.util.StringUtils;
  * @author Stephane Nicoll
  * @author Vedran Pavic
  * @see ServerProperties
+ * @since 1.0.0
  */
 @ConfigurationProperties(prefix = "management", ignoreUnknownFields = true)
 public class ManagementServerProperties implements SecurityPrerequisite {
@@ -60,8 +61,7 @@ public class ManagementServerProperties implements SecurityPrerequisite {
 	 * security for the rest of the application, use
 	 * {@code SecurityProperties.ACCESS_OVERRIDE_ORDER} instead.
 	 */
-	public static final int ACCESS_OVERRIDE_ORDER = ManagementServerProperties.BASIC_AUTH_ORDER
-			- 1;
+	public static final int ACCESS_OVERRIDE_ORDER = ManagementServerProperties.BASIC_AUTH_ORDER - 1;
 
 	/**
 	 * Management endpoint HTTP port. Use the same port as the application by default.
@@ -100,7 +100,8 @@ public class ManagementServerProperties implements SecurityPrerequisite {
 
 	/**
 	 * Sets the port of the management server, use {@code null} if the
-	 * {@link ServerProperties#getPort() server port} should be used. To disable use 0.
+	 * {@link ServerProperties#getPort() server port} should be used. Set to 0 to use a
+	 * random port or set to -1 to disable.
 	 * @param port the port
 	 */
 	public void setPort(Integer port) {
@@ -169,8 +170,7 @@ public class ManagementServerProperties implements SecurityPrerequisite {
 		/**
 		 * Comma-separated list of roles that can access the management endpoint.
 		 */
-		private List<String> roles = new ArrayList<String>(
-				Collections.singletonList("ACTUATOR"));
+		private List<String> roles = new ArrayList<String>(Collections.singletonList("ACTUATOR"));
 
 		/**
 		 * Session creating policy for security use (always, never, if_required,

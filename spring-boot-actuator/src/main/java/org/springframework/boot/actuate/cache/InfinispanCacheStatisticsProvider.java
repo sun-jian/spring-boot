@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,15 +30,12 @@ import org.infinispan.spring.provider.SpringCache;
  * @author Stephane Nicoll
  * @since 1.3.0
  */
-public class InfinispanCacheStatisticsProvider
-		extends AbstractJmxCacheStatisticsProvider<SpringCache> {
+public class InfinispanCacheStatisticsProvider extends AbstractJmxCacheStatisticsProvider<SpringCache> {
 
 	@Override
-	protected ObjectName getObjectName(SpringCache cache)
-			throws MalformedObjectNameException {
+	protected ObjectName getObjectName(SpringCache cache) throws MalformedObjectNameException {
 		ObjectName name = new ObjectName(
-				"org.infinispan:component=Statistics,type=Cache,name=\"" + cache.getName()
-						+ "(local)\",*");
+				"org.infinispan:component=Statistics,type=Cache,name=\"" + cache.getName() + "(local)\",*");
 		Set<ObjectInstance> instances = getMBeanServer().queryMBeans(name, null);
 		if (instances.size() == 1) {
 			return instances.iterator().next().getObjectName();
@@ -61,8 +58,7 @@ public class InfinispanCacheStatisticsProvider
 		return statistics;
 	}
 
-	private void initializeStats(ObjectName objectName,
-			DefaultCacheStatistics statistics) {
+	private void initializeStats(ObjectName objectName, DefaultCacheStatistics statistics) {
 		Double hitRatio = getAttribute(objectName, "hitRatio", Double.class);
 		if ((hitRatio != null)) {
 			statistics.setHitRatio(hitRatio);

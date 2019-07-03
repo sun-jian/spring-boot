@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -35,7 +36,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 /**
  * Series of automated integration tests to verify proper behavior of auto-configured,
@@ -57,15 +57,14 @@ public class SampleSecureOAuth2ActuatorApplicationTests {
 
 	@Before
 	public void setUp() {
-		this.mvc = webAppContextSetup(this.context).addFilters(this.filterChain).build();
+		this.mvc = MockMvcBuilders.webAppContextSetup(this.context).addFilters(this.filterChain).build();
 		SecurityContextHolder.clearContext();
 	}
 
 	@Test
 	public void homePageSecuredByDefault() throws Exception {
 		this.mvc.perform(get("/")).andExpect(status().isUnauthorized())
-				.andExpect(header().string("WWW-Authenticate", containsString("Bearer")))
-				.andDo(print());
+				.andExpect(header().string("WWW-Authenticate", containsString("Bearer"))).andDo(print());
 	}
 
 	@Test
@@ -76,14 +75,13 @@ public class SampleSecureOAuth2ActuatorApplicationTests {
 	@Test
 	public void envSecuredWithBasic() throws Exception {
 		this.mvc.perform(get("/env")).andExpect(status().isUnauthorized())
-				.andExpect(header().string("WWW-Authenticate", containsString("Basic")))
-				.andDo(print());
+				.andExpect(header().string("WWW-Authenticate", containsString("Basic"))).andDo(print());
 	}
 
 	@Test
 	public void envWithPassword() throws Exception {
-		this.mvc.perform(get("/env").header("Authorization",
-				"Basic " + Base64Utils.encodeToString("user:password".getBytes())))
+		this.mvc.perform(
+				get("/env").header("Authorization", "Basic " + Base64Utils.encodeToString("user:password".getBytes())))
 				.andExpect(status().isOk()).andDo(print());
 	}
 

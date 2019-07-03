@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -65,8 +65,7 @@ public class SpringBootMockServletContextTests implements ServletContextAware {
 		testResource("/inpublic", "/public");
 	}
 
-	private void testResource(String path, String expectedLocation)
-			throws MalformedURLException {
+	private void testResource(String path, String expectedLocation) throws MalformedURLException {
 		URL resource = this.servletContext.getResource(path);
 		assertThat(resource).isNotNull();
 		assertThat(resource.getPath()).contains(expectedLocation);
@@ -75,8 +74,7 @@ public class SpringBootMockServletContextTests implements ServletContextAware {
 	// gh-2654
 	@Test
 	public void getRootUrlExistsAndIsEmpty() throws Exception {
-		SpringBootMockServletContext context = new SpringBootMockServletContext(
-				"src/test/doesntexist") {
+		SpringBootMockServletContext context = new SpringBootMockServletContext("src/test/doesntexist") {
 			@Override
 			protected String getResourceLocation(String path) {
 				// Don't include the Spring Boot defaults for this test

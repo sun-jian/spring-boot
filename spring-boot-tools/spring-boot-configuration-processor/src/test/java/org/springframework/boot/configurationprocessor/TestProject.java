@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -65,8 +65,7 @@ public class TestProject {
 
 	private Set<File> sourceFiles = new LinkedHashSet<File>();
 
-	public TestProject(TemporaryFolder tempFolder, Class<?>... classes)
-			throws IOException {
+	public TestProject(TemporaryFolder tempFolder, Class<?>... classes) throws IOException {
 		this.sourceFolder = tempFolder.newFolder();
 		this.compiler = new TestCompiler(tempFolder) {
 			@Override
@@ -135,15 +134,12 @@ public class TestProject {
 	 * @param snippetStream the snippet stream
 	 * @throws Exception if the source cannot be added
 	 */
-	public void addSourceCode(Class<?> target, InputStream snippetStream)
-			throws Exception {
+	public void addSourceCode(Class<?> target, InputStream snippetStream) throws Exception {
 		File targetFile = getSourceFile(target);
 		String contents = getContents(targetFile);
 		int insertAt = contents.lastIndexOf('}');
-		String additionalSource = FileCopyUtils
-				.copyToString(new InputStreamReader(snippetStream));
-		contents = contents.substring(0, insertAt) + additionalSource
-				+ contents.substring(insertAt);
+		String additionalSource = FileCopyUtils.copyToString(new InputStreamReader(snippetStream));
+		contents = contents.substring(0, insertAt) + additionalSource + contents.substring(insertAt);
 		putContents(targetFile, contents);
 	}
 

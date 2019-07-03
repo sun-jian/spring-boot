@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,18 +30,11 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -50,38 +43,28 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.validation.DelegatingValidator;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.ResourceProperties.Strategy;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.filter.OrderedHiddenHttpMethodFilter;
 import org.springframework.boot.web.filter.OrderedHttpPutFormContentFilter;
 import org.springframework.boot.web.filter.OrderedRequestContextFilter;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ConfigurationCondition;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.Resource;
-import org.springframework.core.type.AnnotatedTypeMetadata;
-import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.datetime.DateFormatter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DefaultMessageCodesResolver;
 import org.springframework.validation.MessageCodesResolver;
@@ -138,15 +121,14 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * @author Sébastien Deleuze
  * @author Eddú Meléndez
  * @author Stephane Nicoll
+ * @since 1.0.0
  */
 @Configuration
 @ConditionalOnWebApplication
-@ConditionalOnClass({ Servlet.class, DispatcherServlet.class,
-		WebMvcConfigurerAdapter.class })
+@ConditionalOnClass({ Servlet.class, DispatcherServlet.class, WebMvcConfigurerAdapter.class })
 @ConditionalOnMissingBean(WebMvcConfigurationSupport.class)
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE + 10)
-@AutoConfigureAfter({ DispatcherServletAutoConfiguration.class,
-		ValidationAutoConfiguration.class })
+@AutoConfigureAfter({ DispatcherServletAutoConfiguration.class, ValidationAutoConfiguration.class })
 public class WebMvcAutoConfiguration {
 
 	public static final String DEFAULT_PREFIX = "";
@@ -169,12 +151,11 @@ public class WebMvcAutoConfiguration {
 	// Defined as a nested config to ensure WebMvcConfigurerAdapter is not read when not
 	// on the classpath
 	@Configuration
-	@Import({ EnableWebMvcConfiguration.class, MvcValidatorRegistrar.class })
+	@Import(EnableWebMvcConfiguration.class)
 	@EnableConfigurationProperties({ WebMvcProperties.class, ResourceProperties.class })
 	public static class WebMvcAutoConfigurationAdapter extends WebMvcConfigurerAdapter {
 
-		private static final Log logger = LogFactory
-				.getLog(WebMvcConfigurerAdapter.class);
+		private static final Log logger = LogFactory.getLog(WebMvcConfigurerAdapter.class);
 
 		private final ResourceProperties resourceProperties;
 
@@ -186,16 +167,14 @@ public class WebMvcAutoConfiguration {
 
 		final ResourceHandlerRegistrationCustomizer resourceHandlerRegistrationCustomizer;
 
-		public WebMvcAutoConfigurationAdapter(ResourceProperties resourceProperties,
-				WebMvcProperties mvcProperties, ListableBeanFactory beanFactory,
-				HttpMessageConverters messageConverters,
+		public WebMvcAutoConfigurationAdapter(ResourceProperties resourceProperties, WebMvcProperties mvcProperties,
+				ListableBeanFactory beanFactory, @Lazy HttpMessageConverters messageConverters,
 				ObjectProvider<ResourceHandlerRegistrationCustomizer> resourceHandlerRegistrationCustomizerProvider) {
 			this.resourceProperties = resourceProperties;
 			this.mvcProperties = mvcProperties;
 			this.beanFactory = beanFactory;
 			this.messageConverters = messageConverters;
-			this.resourceHandlerRegistrationCustomizer = resourceHandlerRegistrationCustomizerProvider
-					.getIfAvailable();
+			this.resourceHandlerRegistrationCustomizer = resourceHandlerRegistrationCustomizerProvider.getIfAvailable();
 		}
 
 		@Override
@@ -242,8 +221,7 @@ public class WebMvcAutoConfiguration {
 		@ConditionalOnMissingBean(name = "viewResolver", value = ContentNegotiatingViewResolver.class)
 		public ContentNegotiatingViewResolver viewResolver(BeanFactory beanFactory) {
 			ContentNegotiatingViewResolver resolver = new ContentNegotiatingViewResolver();
-			resolver.setContentNegotiationManager(
-					beanFactory.getBean(ContentNegotiationManager.class));
+			resolver.setContentNegotiationManager(beanFactory.getBean(ContentNegotiationManager.class));
 			// ContentNegotiatingViewResolver uses all the other view resolvers to locate
 			// a view so it should have a high precedence
 			resolver.setOrder(Ordered.HIGHEST_PRECEDENCE);
@@ -254,8 +232,7 @@ public class WebMvcAutoConfiguration {
 		@ConditionalOnMissingBean
 		@ConditionalOnProperty(prefix = "spring.mvc", name = "locale")
 		public LocaleResolver localeResolver() {
-			if (this.mvcProperties
-					.getLocaleResolver() == WebMvcProperties.LocaleResolver.FIXED) {
+			if (this.mvcProperties.getLocaleResolver() == WebMvcProperties.LocaleResolver.FIXED) {
 				return new FixedLocaleResolver(this.mvcProperties.getLocale());
 			}
 			AcceptHeaderLocaleResolver localeResolver = new AcceptHeaderLocaleResolver();
@@ -273,8 +250,7 @@ public class WebMvcAutoConfiguration {
 		public MessageCodesResolver getMessageCodesResolver() {
 			if (this.mvcProperties.getMessageCodesResolverFormat() != null) {
 				DefaultMessageCodesResolver resolver = new DefaultMessageCodesResolver();
-				resolver.setMessageCodeFormatter(
-						this.mvcProperties.getMessageCodesResolverFormat());
+				resolver.setMessageCodeFormatter(this.mvcProperties.getMessageCodesResolverFormat());
 				return resolver;
 			}
 			return null;
@@ -305,31 +281,24 @@ public class WebMvcAutoConfiguration {
 			}
 			Integer cachePeriod = this.resourceProperties.getCachePeriod();
 			if (!registry.hasMappingForPattern("/webjars/**")) {
-				customizeResourceHandlerRegistration(
-						registry.addResourceHandler("/webjars/**")
-								.addResourceLocations(
-										"classpath:/META-INF/resources/webjars/")
-						.setCachePeriod(cachePeriod));
+				customizeResourceHandlerRegistration(registry.addResourceHandler("/webjars/**")
+						.addResourceLocations("classpath:/META-INF/resources/webjars/").setCachePeriod(cachePeriod));
 			}
 			String staticPathPattern = this.mvcProperties.getStaticPathPattern();
 			if (!registry.hasMappingForPattern(staticPathPattern)) {
-				customizeResourceHandlerRegistration(
-						registry.addResourceHandler(staticPathPattern)
-								.addResourceLocations(
-										this.resourceProperties.getStaticLocations())
+				customizeResourceHandlerRegistration(registry.addResourceHandler(staticPathPattern)
+						.addResourceLocations(this.resourceProperties.getStaticLocations())
 						.setCachePeriod(cachePeriod));
 			}
 		}
 
 		@Bean
-		public WelcomePageHandlerMapping welcomePageHandlerMapping(
-				ResourceProperties resourceProperties) {
+		public WelcomePageHandlerMapping welcomePageHandlerMapping(ResourceProperties resourceProperties) {
 			return new WelcomePageHandlerMapping(resourceProperties.getWelcomePage(),
 					this.mvcProperties.getStaticPathPattern());
 		}
 
-		private void customizeResourceHandlerRegistration(
-				ResourceHandlerRegistration registration) {
+		private void customizeResourceHandlerRegistration(ResourceHandlerRegistration registration) {
 			if (this.resourceHandlerRegistrationCustomizer != null) {
 				this.resourceHandlerRegistrationCustomizer.customize(registration);
 			}
@@ -337,8 +306,7 @@ public class WebMvcAutoConfiguration {
 		}
 
 		@Bean
-		@ConditionalOnMissingBean({ RequestContextListener.class,
-				RequestContextFilter.class })
+		@ConditionalOnMissingBean({ RequestContextListener.class, RequestContextFilter.class })
 		public static RequestContextFilter requestContextFilter() {
 			return new OrderedRequestContextFilter();
 		}
@@ -357,16 +325,14 @@ public class WebMvcAutoConfiguration {
 			public SimpleUrlHandlerMapping faviconHandlerMapping() {
 				SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
 				mapping.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
-				mapping.setUrlMap(Collections.singletonMap("**/favicon.ico",
-						faviconRequestHandler()));
+				mapping.setUrlMap(Collections.singletonMap("**/favicon.ico", faviconRequestHandler()));
 				return mapping;
 			}
 
 			@Bean
 			public ResourceHttpRequestHandler faviconRequestHandler() {
 				ResourceHttpRequestHandler requestHandler = new ResourceHttpRequestHandler();
-				requestHandler
-						.setLocations(this.resourceProperties.getFaviconLocations());
+				requestHandler.setLocations(this.resourceProperties.getFaviconLocations());
 				return requestHandler;
 			}
 
@@ -378,37 +344,33 @@ public class WebMvcAutoConfiguration {
 	 * Configuration equivalent to {@code @EnableWebMvc}.
 	 */
 	@Configuration
-	public static class EnableWebMvcConfiguration extends DelegatingWebMvcConfiguration
-			implements InitializingBean {
+	public static class EnableWebMvcConfiguration extends DelegatingWebMvcConfiguration {
 
 		private final WebMvcProperties mvcProperties;
 
-		private final ApplicationContext context;
+		private final ListableBeanFactory beanFactory;
 
 		private final WebMvcRegistrations mvcRegistrations;
 
-		public EnableWebMvcConfiguration(
-				ObjectProvider<WebMvcProperties> mvcPropertiesProvider,
-				ObjectProvider<WebMvcRegistrations> mvcRegistrationsProvider,
-				ApplicationContext context) {
+		public EnableWebMvcConfiguration(ObjectProvider<WebMvcProperties> mvcPropertiesProvider,
+				ObjectProvider<WebMvcRegistrations> mvcRegistrationsProvider, ListableBeanFactory beanFactory) {
 			this.mvcProperties = mvcPropertiesProvider.getIfAvailable();
 			this.mvcRegistrations = mvcRegistrationsProvider.getIfUnique();
-			this.context = context;
+			this.beanFactory = beanFactory;
 		}
 
 		@Bean
 		@Override
 		public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
 			RequestMappingHandlerAdapter adapter = super.requestMappingHandlerAdapter();
-			adapter.setIgnoreDefaultModelOnRedirect(this.mvcProperties == null ? true
-					: this.mvcProperties.isIgnoreDefaultModelOnRedirect());
+			adapter.setIgnoreDefaultModelOnRedirect(
+					(this.mvcProperties != null) ? this.mvcProperties.isIgnoreDefaultModelOnRedirect() : true);
 			return adapter;
 		}
 
 		@Override
 		protected RequestMappingHandlerAdapter createRequestMappingHandlerAdapter() {
-			if (this.mvcRegistrations != null
-					&& this.mvcRegistrations.getRequestMappingHandlerAdapter() != null) {
+			if (this.mvcRegistrations != null && this.mvcRegistrations.getRequestMappingHandlerAdapter() != null) {
 				return this.mvcRegistrations.getRequestMappingHandlerAdapter();
 			}
 			return super.createRequestMappingHandlerAdapter();
@@ -424,15 +386,16 @@ public class WebMvcAutoConfiguration {
 
 		@Bean
 		@Override
-		@Conditional(DisableMvcValidatorCondition.class)
 		public Validator mvcValidator() {
-			return this.context.getBean("mvcValidator", Validator.class);
+			if (!ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
+				return super.mvcValidator();
+			}
+			return WebMvcValidator.get(getApplicationContext(), getValidator());
 		}
 
 		@Override
 		protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {
-			if (this.mvcRegistrations != null
-					&& this.mvcRegistrations.getRequestMappingHandlerMapping() != null) {
+			if (this.mvcRegistrations != null && this.mvcRegistrations.getRequestMappingHandlerMapping() != null) {
 				return this.mvcRegistrations.getRequestMappingHandlerMapping();
 			}
 			return super.createRequestMappingHandlerMapping();
@@ -441,7 +404,7 @@ public class WebMvcAutoConfiguration {
 		@Override
 		protected ConfigurableWebBindingInitializer getConfigurableWebBindingInitializer() {
 			try {
-				return this.context.getBean(ConfigurableWebBindingInitializer.class);
+				return this.beanFactory.getBean(ConfigurableWebBindingInitializer.class);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				return super.getConfigurableWebBindingInitializer();
@@ -450,16 +413,14 @@ public class WebMvcAutoConfiguration {
 
 		@Override
 		protected ExceptionHandlerExceptionResolver createExceptionHandlerExceptionResolver() {
-			if (this.mvcRegistrations != null && this.mvcRegistrations
-					.getExceptionHandlerExceptionResolver() != null) {
+			if (this.mvcRegistrations != null && this.mvcRegistrations.getExceptionHandlerExceptionResolver() != null) {
 				return this.mvcRegistrations.getExceptionHandlerExceptionResolver();
 			}
 			return super.createExceptionHandlerExceptionResolver();
 		}
 
 		@Override
-		protected void configureHandlerExceptionResolvers(
-				List<HandlerExceptionResolver> exceptionResolvers) {
+		protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 			super.configureHandlerExceptionResolvers(exceptionResolvers);
 			if (exceptionResolvers.isEmpty()) {
 				addDefaultHandlerExceptionResolvers(exceptionResolvers);
@@ -467,8 +428,7 @@ public class WebMvcAutoConfiguration {
 			if (this.mvcProperties.isLogResolvedException()) {
 				for (HandlerExceptionResolver resolver : exceptionResolvers) {
 					if (resolver instanceof AbstractHandlerExceptionResolver) {
-						((AbstractHandlerExceptionResolver) resolver)
-								.setWarnLogCategory(resolver.getClass().getName());
+						((AbstractHandlerExceptionResolver) resolver).setWarnLogCategory(resolver.getClass().getName());
 					}
 				}
 			}
@@ -483,20 +443,10 @@ public class WebMvcAutoConfiguration {
 			while (iterator.hasNext()) {
 				ContentNegotiationStrategy strategy = iterator.next();
 				if (strategy instanceof PathExtensionContentNegotiationStrategy) {
-					iterator.set(new OptionalPathExtensionContentNegotiationStrategy(
-							strategy));
+					iterator.set(new OptionalPathExtensionContentNegotiationStrategy(strategy));
 				}
 			}
 			return manager;
-		}
-
-		@Override
-		public void afterPropertiesSet() throws Exception {
-			Assert.state(getValidator() == null,
-					"Found unexpected validator configuration. A Spring Boot MVC "
-							+ "validator should be registered as bean named "
-							+ "'mvcValidator' and not returned from "
-							+ "WebMvcConfigurer.getValidator()");
 		}
 
 	}
@@ -527,12 +477,10 @@ public class WebMvcAutoConfiguration {
 		@Override
 		public void customize(ResourceHandlerRegistration registration) {
 			ResourceProperties.Chain properties = this.resourceProperties.getChain();
-			configureResourceChain(properties,
-					registration.resourceChain(properties.isCache()));
+			configureResourceChain(properties, registration.resourceChain(properties.isCache()));
 		}
 
-		private void configureResourceChain(ResourceProperties.Chain properties,
-				ResourceChainRegistration chain) {
+		private void configureResourceChain(ResourceProperties.Chain properties, ResourceChainRegistration chain) {
 			Strategy strategy = properties.getStrategy();
 			if (strategy.getFixed().isEnabled() || strategy.getContent().isEnabled()) {
 				chain.addResolver(getVersionResourceResolver(strategy));
@@ -545,8 +493,7 @@ public class WebMvcAutoConfiguration {
 			}
 		}
 
-		private ResourceResolver getVersionResourceResolver(
-				ResourceProperties.Strategy properties) {
+		private ResourceResolver getVersionResourceResolver(ResourceProperties.Strategy properties) {
 			VersionResourceResolver resolver = new VersionResourceResolver();
 			if (properties.getFixed().isEnabled()) {
 				String version = properties.getFixed().getVersion();
@@ -564,11 +511,9 @@ public class WebMvcAutoConfiguration {
 
 	static final class WelcomePageHandlerMapping extends AbstractUrlHandlerMapping {
 
-		private static final Log logger = LogFactory
-				.getLog(WelcomePageHandlerMapping.class);
+		private static final Log logger = LogFactory.getLog(WelcomePageHandlerMapping.class);
 
-		private WelcomePageHandlerMapping(Resource welcomePage,
-				String staticPathPattern) {
+		private WelcomePageHandlerMapping(Resource welcomePage, String staticPathPattern) {
 			if (welcomePage != null && "/**".equals(staticPathPattern)) {
 				logger.info("Adding welcome page: " + welcomePage);
 				ParameterizableViewController controller = new ParameterizableViewController();
@@ -590,8 +535,7 @@ public class WebMvcAutoConfiguration {
 
 		private List<MediaType> getAcceptedMediaTypes(HttpServletRequest request) {
 			String acceptHeader = request.getHeader(HttpHeaders.ACCEPT);
-			return MediaType.parseMediaTypes(
-					StringUtils.hasText(acceptHeader) ? acceptHeader : "*/*");
+			return MediaType.parseMediaTypes(StringUtils.hasText(acceptHeader) ? acceptHeader : "*/*");
 		}
 
 	}
@@ -600,154 +544,24 @@ public class WebMvcAutoConfiguration {
 	 * Decorator to make {@link PathExtensionContentNegotiationStrategy} optional
 	 * depending on a request attribute.
 	 */
-	static class OptionalPathExtensionContentNegotiationStrategy
-			implements ContentNegotiationStrategy {
+	static class OptionalPathExtensionContentNegotiationStrategy implements ContentNegotiationStrategy {
 
-		private static final String SKIP_ATTRIBUTE = PathExtensionContentNegotiationStrategy.class
-				.getName() + ".SKIP";
+		private static final String SKIP_ATTRIBUTE = PathExtensionContentNegotiationStrategy.class.getName() + ".SKIP";
 
 		private final ContentNegotiationStrategy delegate;
 
-		OptionalPathExtensionContentNegotiationStrategy(
-				ContentNegotiationStrategy delegate) {
+		OptionalPathExtensionContentNegotiationStrategy(ContentNegotiationStrategy delegate) {
 			this.delegate = delegate;
 		}
 
 		@Override
 		public List<MediaType> resolveMediaTypes(NativeWebRequest webRequest)
 				throws HttpMediaTypeNotAcceptableException {
-			Object skip = webRequest.getAttribute(SKIP_ATTRIBUTE,
-					RequestAttributes.SCOPE_REQUEST);
+			Object skip = webRequest.getAttribute(SKIP_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 			if (skip != null && Boolean.parseBoolean(skip.toString())) {
 				return Collections.emptyList();
 			}
 			return this.delegate.resolveMediaTypes(webRequest);
-		}
-
-	}
-
-	/**
-	 * Condition used to disable the default MVC validator registration. The
-	 * {@link MvcValidatorRegistrar} is actually used to register the {@code mvcValidator}
-	 * bean.
-	 */
-	static class DisableMvcValidatorCondition implements ConfigurationCondition {
-
-		@Override
-		public ConfigurationPhase getConfigurationPhase() {
-			return ConfigurationPhase.REGISTER_BEAN;
-		}
-
-		@Override
-		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-			return false;
-		}
-
-	}
-
-	/**
-	 * {@link ImportBeanDefinitionRegistrar} to deal with the MVC validator bean
-	 * registration. Applies the following rules:
-	 * <ul>
-	 * <li>With no validators - Uses standard
-	 * {@link WebMvcConfigurationSupport#mvcValidator()} logic.</li>
-	 * <li>With a single validator - Uses an alias.</li>
-	 * <li>With multiple validators - Registers a mvcValidator bean if not already
-	 * defined.</li>
-	 * </ul>
-	 */
-	static class MvcValidatorRegistrar
-			implements ImportBeanDefinitionRegistrar, BeanFactoryAware {
-
-		private static final String JSR303_VALIDATOR_CLASS = "javax.validation.Validator";
-
-		private BeanFactory beanFactory;
-
-		@Override
-		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-			this.beanFactory = beanFactory;
-		}
-
-		@Override
-		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
-				BeanDefinitionRegistry registry) {
-			if (this.beanFactory instanceof ListableBeanFactory) {
-				registerOrAliasMvcValidator(registry,
-						(ListableBeanFactory) this.beanFactory);
-			}
-		}
-
-		private void registerOrAliasMvcValidator(BeanDefinitionRegistry registry,
-				ListableBeanFactory beanFactory) {
-			String[] validatorBeans = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
-					beanFactory, Validator.class, false, false);
-			if (validatorBeans.length == 0) {
-				registerNewMvcValidator(registry, beanFactory);
-			}
-			else if (validatorBeans.length == 1) {
-				registry.registerAlias(validatorBeans[0], "mvcValidator");
-			}
-			else {
-				if (!ObjectUtils.containsElement(validatorBeans, "mvcValidator")) {
-					registerNewMvcValidator(registry, beanFactory);
-				}
-			}
-		}
-
-		private void registerNewMvcValidator(BeanDefinitionRegistry registry,
-				ListableBeanFactory beanFactory) {
-			RootBeanDefinition definition = new RootBeanDefinition();
-			definition.setBeanClass(getClass());
-			definition.setFactoryMethodName("mvcValidator");
-			registry.registerBeanDefinition("mvcValidator", definition);
-		}
-
-		static Validator mvcValidator() {
-			Validator validator = new WebMvcConfigurationSupport().mvcValidator();
-			try {
-				if (ClassUtils.forName(JSR303_VALIDATOR_CLASS, null)
-						.isInstance(validator)) {
-					return new DelegatingWebMvcValidator(validator);
-				}
-			}
-			catch (Exception ex) {
-			}
-			return validator;
-		}
-
-	}
-
-	/**
-	 * {@link DelegatingValidator} for the MVC validator.
-	 */
-	static class DelegatingWebMvcValidator extends DelegatingValidator
-			implements ApplicationContextAware, InitializingBean, DisposableBean {
-
-		DelegatingWebMvcValidator(Validator targetValidator) {
-			super(targetValidator);
-		}
-
-		@Override
-		public void setApplicationContext(ApplicationContext applicationContext)
-				throws BeansException {
-			if (getDelegate() instanceof ApplicationContextAware) {
-				((ApplicationContextAware) getDelegate())
-						.setApplicationContext(applicationContext);
-			}
-		}
-
-		@Override
-		public void afterPropertiesSet() throws Exception {
-			if (getDelegate() instanceof InitializingBean) {
-				((InitializingBean) getDelegate()).afterPropertiesSet();
-			}
-		}
-
-		@Override
-		public void destroy() throws Exception {
-			if (getDelegate() instanceof DisposableBean) {
-				((DisposableBean) getDelegate()).destroy();
-			}
 		}
 
 	}

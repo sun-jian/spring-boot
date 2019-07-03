@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,6 +46,7 @@ import org.springframework.boot.loader.tools.Layouts;
  * @author Dave Syer
  * @author Stephane Nicoll
  * @author Andy Wilkinson
+ * @since 1.2.7
  */
 public class SpringBootPluginExtension {
 
@@ -152,7 +153,7 @@ public class SpringBootPluginExtension {
 	 * @return the Layout to use or null if not explicitly set
 	 */
 	public Layout convertLayout() {
-		return (this.layout == null ? null : this.layout.layout);
+		return (this.layout != null) ? this.layout.layout : null;
 	}
 
 	public String getMainClass() {
@@ -271,8 +272,7 @@ public class SpringBootPluginExtension {
 		return this.embeddedLaunchScriptProperties;
 	}
 
-	public void setEmbeddedLaunchScriptProperties(
-			Map<String, String> embeddedLaunchScriptProperties) {
+	public void setEmbeddedLaunchScriptProperties(Map<String, String> embeddedLaunchScriptProperties) {
 		this.embeddedLaunchScriptProperties = embeddedLaunchScriptProperties;
 	}
 
@@ -281,10 +281,8 @@ public class SpringBootPluginExtension {
 	}
 
 	public void buildInfo(Closure<?> taskConfigurer) {
-		BuildInfo bootBuildInfo = this.project.getTasks().create("bootBuildInfo",
-				BuildInfo.class);
-		this.project.getTasks().getByName(JavaPlugin.CLASSES_TASK_NAME)
-				.dependsOn(bootBuildInfo);
+		BuildInfo bootBuildInfo = this.project.getTasks().create("bootBuildInfo", BuildInfo.class);
+		this.project.getTasks().getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(bootBuildInfo);
 		if (taskConfigurer != null) {
 			taskConfigurer.setDelegate(bootBuildInfo);
 			taskConfigurer.call();
@@ -294,22 +292,38 @@ public class SpringBootPluginExtension {
 	/**
 	 * Layout Types.
 	 */
-	enum LayoutType {
+	public enum LayoutType {
 
+		/**
+		 * Executable JAR layout.
+		 */
 		JAR(new Layouts.Jar()),
 
+		/**
+		 * Executable WAR layout.
+		 */
 		WAR(new Layouts.War()),
 
+		/**
+		 * Executable expanded archive layout.
+		 */
 		ZIP(new Layouts.Expanded()),
 
+		/**
+		 * Executable expanded archive layout.
+		 */
 		DIR(new Layouts.Expanded()),
 
 		/**
 		 * Module Layout.
 		 * @deprecated as of 1.5 in favor of a custom {@link LayoutFactory}
 		 */
-		@Deprecated MODULE(new Layouts.Module()),
+		@Deprecated
+		MODULE(new Layouts.Module()),
 
+		/**
+		 * No layout.
+		 */
 		NONE(new Layouts.None());
 
 		Layout layout;

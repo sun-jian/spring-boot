@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,34 +40,29 @@ public class TestTypeExcludeFilterTests {
 
 	@Test
 	public void matchesTestClass() throws Exception {
-		assertThat(this.filter.match(getMetadataReader(TestTypeExcludeFilterTests.class),
-				this.metadataReaderFactory)).isTrue();
+		assertThat(this.filter.match(getMetadataReader(TestTypeExcludeFilterTests.class), this.metadataReaderFactory))
+				.isTrue();
 	}
 
 	@Test
 	public void matchesNestedConfiguration() throws Exception {
-		assertThat(this.filter.match(getMetadataReader(NestedConfig.class),
-				this.metadataReaderFactory)).isTrue();
+		assertThat(this.filter.match(getMetadataReader(NestedConfig.class), this.metadataReaderFactory)).isTrue();
 	}
 
 	@Test
-	public void matchesNestedConfigurationClassWithoutTestMethodsIfItHasRunWith()
-			throws Exception {
-		assertThat(this.filter.match(
-				getMetadataReader(AbstractTestWithConfigAndRunWith.Config.class),
+	public void matchesNestedConfigurationClassWithoutTestMethodsIfItHasRunWith() throws Exception {
+		assertThat(this.filter.match(getMetadataReader(AbstractTestWithConfigAndRunWith.Config.class),
 				this.metadataReaderFactory)).isTrue();
 	}
 
 	@Test
 	public void matchesTestConfiguration() throws Exception {
-		assertThat(this.filter.match(getMetadataReader(SampleTestConfig.class),
-				this.metadataReaderFactory)).isTrue();
+		assertThat(this.filter.match(getMetadataReader(SampleTestConfig.class), this.metadataReaderFactory)).isTrue();
 	}
 
 	@Test
 	public void doesNotMatchRegularConfiguration() throws Exception {
-		assertThat(this.filter.match(getMetadataReader(SampleConfig.class),
-				this.metadataReaderFactory)).isFalse();
+		assertThat(this.filter.match(getMetadataReader(SampleConfig.class), this.metadataReaderFactory)).isFalse();
 	}
 
 	private MetadataReader getMetadataReader(Class<?> source) throws IOException {

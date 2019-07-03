@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -50,12 +50,11 @@ public class TestJarFile {
 		addClass(filename, classToCopy, null);
 	}
 
-	public void addClass(String filename, Class<?> classToCopy, Long time)
-			throws IOException {
+	public void addClass(String filename, Class<?> classToCopy, Long time) throws IOException {
 		File file = getFilePath(filename);
 		file.getParentFile().mkdirs();
-		InputStream inputStream = getClass().getResourceAsStream(
-				"/" + classToCopy.getName().replace('.', '/') + ".class");
+		InputStream inputStream = getClass()
+				.getResourceAsStream("/" + classToCopy.getName().replace('.', '/') + ".class");
 		copyToFile(inputStream, file);
 		if (time != null) {
 			file.setLastModified(time);
@@ -95,8 +94,7 @@ public class TestJarFile {
 		return file;
 	}
 
-	private void copyToFile(InputStream inputStream, File file)
-			throws FileNotFoundException, IOException {
+	private void copyToFile(InputStream inputStream, File file) throws FileNotFoundException, IOException {
 		OutputStream outputStream = new FileOutputStream(file);
 		try {
 			copy(inputStream, outputStream);
@@ -107,7 +105,7 @@ public class TestJarFile {
 	}
 
 	private void copy(InputStream in, OutputStream out) throws IOException {
-		int bytesRead = -1;
+		int bytesRead;
 		while ((bytesRead = in.read(this.buffer)) != -1) {
 			out.write(this.buffer, 0, bytesRead);
 		}

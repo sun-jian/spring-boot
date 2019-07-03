@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,6 +28,7 @@ import org.springframework.core.env.PropertySources;
  * Convenience class for manipulating PropertySources.
  *
  * @author Dave Syer
+ * @since 1.0.0
  * @see PropertySource
  * @see PropertySources
  */
@@ -41,8 +42,7 @@ public abstract class PropertySourceUtils {
 	 * @return a map of all sub properties starting with the specified key prefixes.
 	 * @see PropertySourceUtils#getSubProperties(PropertySources, String, String)
 	 */
-	public static Map<String, Object> getSubProperties(PropertySources propertySources,
-			String keyPrefix) {
+	public static Map<String, Object> getSubProperties(PropertySources propertySources, String keyPrefix) {
 		return PropertySourceUtils.getSubProperties(propertySources, null, keyPrefix);
 	}
 
@@ -56,16 +56,14 @@ public abstract class PropertySourceUtils {
 	 * @return a map of all sub properties starting with the specified key prefixes.
 	 * @see #getSubProperties(PropertySources, String, String)
 	 */
-	public static Map<String, Object> getSubProperties(PropertySources propertySources,
-			String rootPrefix, String keyPrefix) {
+	public static Map<String, Object> getSubProperties(PropertySources propertySources, String rootPrefix,
+			String keyPrefix) {
 		RelaxedNames keyPrefixes = new RelaxedNames(keyPrefix);
 		Map<String, Object> subProperties = new LinkedHashMap<String, Object>();
 		for (PropertySource<?> source : propertySources) {
 			if (source instanceof EnumerablePropertySource) {
-				for (String name : ((EnumerablePropertySource<?>) source)
-						.getPropertyNames()) {
-					String key = PropertySourceUtils.getSubKey(name, rootPrefix,
-							keyPrefixes);
+				for (String name : ((EnumerablePropertySource<?>) source).getPropertyNames()) {
+					String key = PropertySourceUtils.getSubKey(name, rootPrefix, keyPrefixes);
 					if (key != null && !subProperties.containsKey(key)) {
 						subProperties.put(key, source.getProperty(name));
 					}
@@ -75,9 +73,8 @@ public abstract class PropertySourceUtils {
 		return Collections.unmodifiableMap(subProperties);
 	}
 
-	private static String getSubKey(String name, String rootPrefixes,
-			RelaxedNames keyPrefix) {
-		rootPrefixes = (rootPrefixes == null ? "" : rootPrefixes);
+	private static String getSubKey(String name, String rootPrefixes, RelaxedNames keyPrefix) {
+		rootPrefixes = (rootPrefixes != null) ? rootPrefixes : "";
 		for (String rootPrefix : new RelaxedNames(rootPrefixes)) {
 			for (String candidateKeyPrefix : keyPrefix) {
 				if (name.startsWith(rootPrefix + candidateKeyPrefix)) {

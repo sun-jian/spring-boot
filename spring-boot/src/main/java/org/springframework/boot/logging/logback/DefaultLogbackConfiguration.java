@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,7 +44,6 @@ import org.springframework.util.ReflectionUtils;
  * and {@code file-appender.xml} files provided for classic {@code logback.xml} use.
  *
  * @author Phillip Webb
- * @since 1.1.2
  */
 class DefaultLogbackConfiguration {
 
@@ -62,8 +61,7 @@ class DefaultLogbackConfiguration {
 
 	private final LogFile logFile;
 
-	DefaultLogbackConfiguration(LoggingInitializationContext initializationContext,
-			LogFile logFile) {
+	DefaultLogbackConfiguration(LoggingInitializationContext initializationContext, LogFile logFile) {
 		this.patterns = getPatternsResolver(initializationContext.getEnvironment());
 		this.logFile = logFile;
 	}
@@ -72,8 +70,7 @@ class DefaultLogbackConfiguration {
 		if (environment == null) {
 			return new PropertySourcesPropertyResolver(null);
 		}
-		return RelaxedPropertyResolver.ignoringUnresolvableNestedPlaceholders(environment,
-				"logging.pattern.");
+		return RelaxedPropertyResolver.ignoringUnresolvableNestedPlaceholders(environment, "logging.pattern.");
 	}
 
 	public void apply(LogbackConfigurator config) {
@@ -81,8 +78,7 @@ class DefaultLogbackConfiguration {
 			base(config);
 			Appender<ILoggingEvent> consoleAppender = consoleAppender(config);
 			if (this.logFile != null) {
-				Appender<ILoggingEvent> fileAppender = fileAppender(config,
-						this.logFile.toString());
+				Appender<ILoggingEvent> fileAppender = fileAppender(config, this.logFile.toString());
 				config.root(Level.INFO, consoleAppender, fileAppender);
 			}
 			else {
@@ -95,8 +91,7 @@ class DefaultLogbackConfiguration {
 		config.conversionRule("clr", ColorConverter.class);
 		config.conversionRule("wex", WhitespaceThrowableProxyConverter.class);
 		config.conversionRule("wEx", ExtendedWhitespaceThrowableProxyConverter.class);
-		LevelRemappingAppender debugRemapAppender = new LevelRemappingAppender(
-				"org.springframework.boot");
+		LevelRemappingAppender debugRemapAppender = new LevelRemappingAppender("org.springframework.boot");
 		config.start(debugRemapAppender);
 		config.appender("DEBUG_LEVEL_REMAPPER", debugRemapAppender);
 		config.logger("org.apache.catalina.startup.DigesterFactory", Level.ERROR);
@@ -108,10 +103,8 @@ class DefaultLogbackConfiguration {
 		config.logger("org.crsh.ssh", Level.WARN);
 		config.logger("org.eclipse.jetty.util.component.AbstractLifeCycle", Level.ERROR);
 		config.logger("org.hibernate.validator.internal.util.Version", Level.WARN);
-		config.logger("org.springframework.boot.actuate.autoconfigure."
-				+ "CrshAutoConfiguration", Level.WARN);
-		config.logger("org.springframework.boot.actuate.endpoint.jmx", null, false,
-				debugRemapAppender);
+		config.logger("org.springframework.boot.actuate.autoconfigure." + "CrshAutoConfiguration", Level.WARN);
+		config.logger("org.springframework.boot.actuate.endpoint.jmx", null, false, debugRemapAppender);
 		config.logger("org.thymeleaf", null, false, debugRemapAppender);
 	}
 
@@ -127,8 +120,7 @@ class DefaultLogbackConfiguration {
 		return appender;
 	}
 
-	private Appender<ILoggingEvent> fileAppender(LogbackConfigurator config,
-			String logFile) {
+	private Appender<ILoggingEvent> fileAppender(LogbackConfigurator config, String logFile) {
 		RollingFileAppender<ILoggingEvent> appender = new RollingFileAppender<ILoggingEvent>();
 		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
 		String logPattern = this.patterns.getProperty("file", FILE_LOG_PATTERN);
@@ -142,8 +134,8 @@ class DefaultLogbackConfiguration {
 		return appender;
 	}
 
-	private void setRollingPolicy(RollingFileAppender<ILoggingEvent> appender,
-			LogbackConfigurator config, String logFile) {
+	private void setRollingPolicy(RollingFileAppender<ILoggingEvent> appender, LogbackConfigurator config,
+			String logFile) {
 		FixedWindowRollingPolicy rollingPolicy = new FixedWindowRollingPolicy();
 		rollingPolicy.setFileNamePattern(logFile + ".%i");
 		appender.setRollingPolicy(rollingPolicy);
@@ -151,16 +143,14 @@ class DefaultLogbackConfiguration {
 		config.start(rollingPolicy);
 	}
 
-	private void setMaxFileSize(RollingFileAppender<ILoggingEvent> appender,
-			LogbackConfigurator config) {
+	private void setMaxFileSize(RollingFileAppender<ILoggingEvent> appender, LogbackConfigurator config) {
 		SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<ILoggingEvent>();
 		try {
 			triggeringPolicy.setMaxFileSize(FileSize.valueOf("10MB"));
 		}
 		catch (NoSuchMethodError ex) {
 			// Logback < 1.1.8 used String configuration
-			Method method = ReflectionUtils.findMethod(SizeBasedTriggeringPolicy.class,
-					"setMaxFileSize", String.class);
+			Method method = ReflectionUtils.findMethod(SizeBasedTriggeringPolicy.class, "setMaxFileSize", String.class);
 			ReflectionUtils.invokeMethod(method, triggeringPolicy, "10MB");
 		}
 		appender.setTriggeringPolicy(triggeringPolicy);

@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,8 +35,7 @@ public class MultiApiAutoConfigurationTests extends AbstractSocialAutoConfigurat
 
 	@Test
 	public void expectTwitterConfigurationOnly() throws Exception {
-		setupContext("spring.social.twitter.appId:12345",
-				"spring.social.twitter.appSecret:secret");
+		setupContext("spring.social.twitter.appId:12345", "spring.social.twitter.appSecret:secret");
 		assertConnectionFrameworkBeans();
 		assertThat(this.context.getBean(Twitter.class)).isNotNull();
 		assertMissingBean(Facebook.class);
@@ -45,8 +44,7 @@ public class MultiApiAutoConfigurationTests extends AbstractSocialAutoConfigurat
 
 	@Test
 	public void expectFacebookConfigurationOnly() throws Exception {
-		setupContext("spring.social.facebook.appId:12345",
-				"spring.social.facebook.appSecret:secret");
+		setupContext("spring.social.facebook.appId:12345", "spring.social.facebook.appSecret:secret");
 		assertConnectionFrameworkBeans();
 		assertThat(this.context.getBean(Facebook.class)).isNotNull();
 		assertMissingBean(Twitter.class);
@@ -55,8 +53,7 @@ public class MultiApiAutoConfigurationTests extends AbstractSocialAutoConfigurat
 
 	@Test
 	public void expectLinkedInConfigurationOnly() throws Exception {
-		setupContext("spring.social.linkedin.appId:12345",
-				"spring.social.linkedin.appSecret:secret");
+		setupContext("spring.social.linkedin.appId:12345", "spring.social.linkedin.appSecret:secret");
 		assertConnectionFrameworkBeans();
 		assertThat(this.context.getBean(LinkedIn.class)).isNotNull();
 		assertMissingBean(Twitter.class);
@@ -65,10 +62,8 @@ public class MultiApiAutoConfigurationTests extends AbstractSocialAutoConfigurat
 
 	@Test
 	public void expectFacebookAndLinkedInConfigurationOnly() throws Exception {
-		setupContext("spring.social.facebook.appId:54321",
-				"spring.social.facebook.appSecret:shhhhh",
-				"spring.social.linkedin.appId:12345",
-				"spring.social.linkedin.appSecret:secret");
+		setupContext("spring.social.facebook.appId:54321", "spring.social.facebook.appSecret:shhhhh",
+				"spring.social.linkedin.appId:12345", "spring.social.linkedin.appSecret:secret");
 		assertConnectionFrameworkBeans();
 		assertThat(this.context.getBean(Facebook.class)).isNotNull();
 		assertThat(this.context.getBean(LinkedIn.class)).isNotNull();
@@ -77,10 +72,8 @@ public class MultiApiAutoConfigurationTests extends AbstractSocialAutoConfigurat
 
 	@Test
 	public void expectFacebookAndTwitterConfigurationOnly() throws Exception {
-		setupContext("spring.social.facebook.appId:54321",
-				"spring.social.facebook.appSecret:shhhhh",
-				"spring.social.twitter.appId:12345",
-				"spring.social.twitter.appSecret:secret");
+		setupContext("spring.social.facebook.appId:54321", "spring.social.facebook.appSecret:shhhhh",
+				"spring.social.twitter.appId:12345", "spring.social.twitter.appSecret:secret");
 		assertConnectionFrameworkBeans();
 		assertThat(this.context.getBean(Facebook.class)).isNotNull();
 		assertThat(this.context.getBean(Twitter.class)).isNotNull();
@@ -89,10 +82,8 @@ public class MultiApiAutoConfigurationTests extends AbstractSocialAutoConfigurat
 
 	@Test
 	public void expectLinkedInAndTwitterConfigurationOnly() throws Exception {
-		setupContext("spring.social.linkedin.appId:54321",
-				"spring.social.linkedin.appSecret:shhhhh",
-				"spring.social.twitter.appId:12345",
-				"spring.social.twitter.appSecret:secret");
+		setupContext("spring.social.linkedin.appId:54321", "spring.social.linkedin.appSecret:shhhhh",
+				"spring.social.twitter.appId:12345", "spring.social.twitter.appSecret:secret");
 		assertConnectionFrameworkBeans();
 		assertThat(this.context.getBean(LinkedIn.class)).isNotNull();
 		assertThat(this.context.getBean(Twitter.class)).isNotNull();

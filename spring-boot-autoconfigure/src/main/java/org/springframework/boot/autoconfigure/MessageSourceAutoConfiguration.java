@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,7 @@ import org.springframework.core.type.AnnotationMetadata;
  * @author Dave Syer
  * @author Phillip Webb
  * @author Eddú Meléndez
+ * @since 1.0.0
  * @deprecated as of 1.5 in favor of
  * {@link org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration}
  */
@@ -39,8 +40,7 @@ import org.springframework.core.type.AnnotationMetadata;
 public class MessageSourceAutoConfiguration {
 
 	private static final String[] REPLACEMENT = {
-			"org.springframework.boot.autoconfigure.context."
-					+ "MessageSourceAutoConfiguration" };
+			"org.springframework.boot.autoconfigure.context." + "MessageSourceAutoConfiguration" };
 
 	static class Selector implements ImportSelector {
 

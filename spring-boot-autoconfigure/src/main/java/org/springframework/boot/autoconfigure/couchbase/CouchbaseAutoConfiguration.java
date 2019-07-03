@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,7 +49,8 @@ import org.springframework.context.annotation.Primary;
 public class CouchbaseAutoConfiguration {
 
 	@Configuration
-	@ConditionalOnMissingBean(value = CouchbaseConfiguration.class, type = "org.springframework.data.couchbase.config.CouchbaseConfigurer")
+	@ConditionalOnMissingBean(value = CouchbaseConfiguration.class,
+			type = "org.springframework.data.couchbase.config.CouchbaseConfigurer")
 	public static class CouchbaseConfiguration {
 
 		private final CouchbaseProperties properties;
@@ -67,8 +68,7 @@ public class CouchbaseAutoConfiguration {
 		@Bean
 		@Primary
 		public Cluster couchbaseCluster() throws Exception {
-			return CouchbaseCluster.create(couchbaseEnvironment(),
-					this.properties.getBootstrapHosts());
+			return CouchbaseCluster.create(couchbaseEnvironment(), this.properties.getBootstrapHosts());
 		}
 
 		@Bean
@@ -76,8 +76,7 @@ public class CouchbaseAutoConfiguration {
 		@DependsOn("couchbaseClient")
 		public ClusterInfo couchbaseClusterInfo() throws Exception {
 			return couchbaseCluster()
-					.clusterManager(this.properties.getBucket().getName(),
-							this.properties.getBucket().getPassword())
+					.clusterManager(this.properties.getBucket().getName(), this.properties.getBucket().getPassword())
 					.info();
 		}
 
@@ -93,18 +92,14 @@ public class CouchbaseAutoConfiguration {
 		 * @param properties the couchbase properties to use
 		 * @return the {@link DefaultCouchbaseEnvironment} builder.
 		 */
-		protected DefaultCouchbaseEnvironment.Builder initializeEnvironmentBuilder(
-				CouchbaseProperties properties) {
+		protected DefaultCouchbaseEnvironment.Builder initializeEnvironmentBuilder(CouchbaseProperties properties) {
 			CouchbaseProperties.Endpoints endpoints = properties.getEnv().getEndpoints();
 			CouchbaseProperties.Timeouts timeouts = properties.getEnv().getTimeouts();
-			DefaultCouchbaseEnvironment.Builder builder = DefaultCouchbaseEnvironment
-					.builder().connectTimeout(timeouts.getConnect())
-					.kvEndpoints(endpoints.getKeyValue())
-					.kvTimeout(timeouts.getKeyValue())
-					.queryEndpoints(endpoints.getQuery())
+			DefaultCouchbaseEnvironment.Builder builder = DefaultCouchbaseEnvironment.builder()
+					.connectTimeout(timeouts.getConnect()).kvEndpoints(endpoints.getKeyValue())
+					.kvTimeout(timeouts.getKeyValue()).queryEndpoints(endpoints.getQuery())
 					.queryTimeout(timeouts.getQuery()).viewEndpoints(endpoints.getView())
-					.socketConnectTimeout(timeouts.getSocketConnect())
-					.viewTimeout(timeouts.getView());
+					.socketConnectTimeout(timeouts.getSocketConnect()).viewTimeout(timeouts.getView());
 			CouchbaseProperties.Ssl ssl = properties.getEnv().getSsl();
 			if (ssl.getEnabled()) {
 				builder.sslEnabled(true);

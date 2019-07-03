@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -83,6 +83,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Dave Syer
  * @author Andy Wilkinson
+ * @since 1.0.0
  */
 @Configuration
 @EnableConfigurationProperties
@@ -92,8 +93,8 @@ import org.springframework.util.StringUtils;
 @EnableWebSecurity
 public class SpringBootWebSecurityConfiguration {
 
-	private static List<String> DEFAULT_IGNORED = Arrays.asList("/css/**", "/js/**",
-			"/images/**", "/webjars/**", "/**/favicon.ico");
+	private static List<String> DEFAULT_IGNORED = Arrays.asList("/css/**", "/js/**", "/images/**", "/webjars/**",
+			"/**/favicon.ico");
 
 	@Bean
 	@ConditionalOnMissingBean({ IgnoredPathsWebSecurityConfigurerAdapter.class })
@@ -103,15 +104,13 @@ public class SpringBootWebSecurityConfiguration {
 	}
 
 	@Bean
-	public IgnoredRequestCustomizer defaultIgnoredRequestsCustomizer(
-			ServerProperties server, SecurityProperties security,
-			ObjectProvider<ErrorController> errorController) {
-		return new DefaultIgnoredRequestCustomizer(server, security,
-				errorController.getIfAvailable());
+	public IgnoredRequestCustomizer defaultIgnoredRequestsCustomizer(ServerProperties server,
+			SecurityProperties security, ObjectProvider<ErrorController> errorController) {
+		return new DefaultIgnoredRequestCustomizer(server, security, errorController.getIfAvailable());
 	}
 
-	public static void configureHeaders(HeadersConfigurer<?> configurer,
-			SecurityProperties.Headers headers) throws Exception {
+	public static void configureHeaders(HeadersConfigurer<?> configurer, SecurityProperties.Headers headers)
+			throws Exception {
 		if (headers.getHsts() != Headers.HSTS.NONE) {
 			boolean includeSubDomains = headers.getHsts() == Headers.HSTS.ALL;
 			HstsHeaderWriter writer = new HstsHeaderWriter(includeSubDomains);
@@ -144,13 +143,11 @@ public class SpringBootWebSecurityConfiguration {
 
 	// Get the ignored paths in early
 	@Order(SecurityProperties.IGNORED_ORDER)
-	private static class IgnoredPathsWebSecurityConfigurerAdapter
-			implements WebSecurityConfigurer<WebSecurity> {
+	private static class IgnoredPathsWebSecurityConfigurerAdapter implements WebSecurityConfigurer<WebSecurity> {
 
 		private final List<IgnoredRequestCustomizer> customizers;
 
-		IgnoredPathsWebSecurityConfigurerAdapter(
-				List<IgnoredRequestCustomizer> customizers) {
+		IgnoredPathsWebSecurityConfigurerAdapter(List<IgnoredRequestCustomizer> customizers) {
 			this.customizers = customizers;
 		}
 
@@ -175,8 +172,8 @@ public class SpringBootWebSecurityConfiguration {
 
 		private final ErrorController errorController;
 
-		DefaultIgnoredRequestCustomizer(ServerProperties server,
-				SecurityProperties security, ErrorController errorController) {
+		DefaultIgnoredRequestCustomizer(ServerProperties server, SecurityProperties security,
+				ErrorController errorController) {
 			this.server = server;
 			this.security = security;
 			this.errorController = errorController;
@@ -224,8 +221,7 @@ public class SpringBootWebSecurityConfiguration {
 	@Configuration
 	@ConditionalOnProperty(prefix = "security.basic", name = "enabled", havingValue = "false")
 	@Order(SecurityProperties.BASIC_AUTH_ORDER)
-	protected static class ApplicationNoWebSecurityConfigurerAdapter
-			extends WebSecurityConfigurerAdapter {
+	protected static class ApplicationNoWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
@@ -242,8 +238,7 @@ public class SpringBootWebSecurityConfiguration {
 	@Configuration
 	@ConditionalOnProperty(prefix = "security.basic", name = "enabled", matchIfMissing = true)
 	@Order(SecurityProperties.BASIC_AUTH_ORDER)
-	protected static class ApplicationWebSecurityConfigurerAdapter
-			extends WebSecurityConfigurerAdapter {
+	protected static class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
 		private SecurityProperties security;
 
@@ -261,8 +256,7 @@ public class SpringBootWebSecurityConfiguration {
 			}
 			// No cookies for application endpoints by default
 			http.sessionManagement().sessionCreationPolicy(this.security.getSessions());
-			SpringBootWebSecurityConfiguration.configureHeaders(http.headers(),
-					this.security.getHeaders());
+			SpringBootWebSecurityConfiguration.configureHeaders(http.headers(), this.security.getHeaders());
 			String[] paths = getSecureApplicationPaths();
 			if (paths.length > 0) {
 				AuthenticationEntryPoint entryPoint = entryPoint();
@@ -283,7 +277,7 @@ public class SpringBootWebSecurityConfiguration {
 		private String[] getSecureApplicationPaths() {
 			List<String> list = new ArrayList<String>();
 			for (String path : this.security.getBasic().getPath()) {
-				path = (path == null ? "" : path.trim());
+				path = (path != null) ? path.trim() : "";
 				if (path.equals("/**")) {
 					return new String[] { path };
 				}

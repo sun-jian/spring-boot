@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,6 +47,7 @@ import org.springframework.util.StringUtils;
  * @author Dave Syer
  * @author Phillip Webb
  * @author Eddú Meléndez
+ * @since 1.5.0
  */
 @Configuration
 @ConditionalOnMissingBean(value = MessageSource.class, search = SearchStrategy.CURRENT)
@@ -59,9 +60,10 @@ public class MessageSourceAutoConfiguration {
 	private static final Resource[] NO_RESOURCES = {};
 
 	/**
-	 * Comma-separated list of basenames, each following the ResourceBundle convention.
-	 * Essentially a fully-qualified classpath location. If it doesn't contain a package
-	 * qualifier (such as "org.mypackage"), it will be resolved from the classpath root.
+	 * Comma-separated list of basenames (essentially a fully-qualified classpath
+	 * location), each following the ResourceBundle convention with relaxed support for
+	 * slash based locations. If it doesn't contain a package qualifier (such as
+	 * "org.mypackage"), it will be resolved from the classpath root.
 	 */
 	private String basename = "messages";
 
@@ -93,8 +95,8 @@ public class MessageSourceAutoConfiguration {
 	public MessageSource messageSource() {
 		ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
 		if (StringUtils.hasText(this.basename)) {
-			messageSource.setBasenames(StringUtils.commaDelimitedListToStringArray(
-					StringUtils.trimAllWhitespace(this.basename)));
+			messageSource.setBasenames(
+					StringUtils.commaDelimitedListToStringArray(StringUtils.trimAllWhitespace(this.basename)));
 		}
 		if (this.encoding != null) {
 			messageSource.setDefaultEncoding(this.encoding.name());
@@ -150,10 +152,8 @@ public class MessageSourceAutoConfiguration {
 		private static ConcurrentReferenceHashMap<String, ConditionOutcome> cache = new ConcurrentReferenceHashMap<String, ConditionOutcome>();
 
 		@Override
-		public ConditionOutcome getMatchOutcome(ConditionContext context,
-				AnnotatedTypeMetadata metadata) {
-			String basename = context.getEnvironment()
-					.getProperty("spring.messages.basename", "messages");
+		public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			String basename = context.getEnvironment().getProperty("spring.messages.basename", "messages");
 			ConditionOutcome outcome = cache.get(basename);
 			if (outcome == null) {
 				outcome = getMatchOutcomeForBasename(context, basename);
@@ -162,27 +162,23 @@ public class MessageSourceAutoConfiguration {
 			return outcome;
 		}
 
-		private ConditionOutcome getMatchOutcomeForBasename(ConditionContext context,
-				String basename) {
-			ConditionMessage.Builder message = ConditionMessage
-					.forCondition("ResourceBundle");
-			for (String name : StringUtils.commaDelimitedListToStringArray(
-					StringUtils.trimAllWhitespace(basename))) {
+		private ConditionOutcome getMatchOutcomeForBasename(ConditionContext context, String basename) {
+			ConditionMessage.Builder message = ConditionMessage.forCondition("ResourceBundle");
+			for (String name : StringUtils.commaDelimitedListToStringArray(StringUtils.trimAllWhitespace(basename))) {
 				for (Resource resource : getResources(context.getClassLoader(), name)) {
 					if (resource.exists()) {
-						return ConditionOutcome
-								.match(message.found("bundle").items(resource));
+						return ConditionOutcome.match(message.found("bundle").items(resource));
 					}
 				}
 			}
-			return ConditionOutcome.noMatch(
-					message.didNotFind("bundle with basename " + basename).atAll());
+			return ConditionOutcome.noMatch(message.didNotFind("bundle with basename " + basename).atAll());
 		}
 
 		private Resource[] getResources(ClassLoader classLoader, String name) {
+			String target = name.replace('.', '/');
 			try {
 				return new PathMatchingResourcePatternResolver(classLoader)
-						.getResources("classpath*:" + name + ".properties");
+						.getResources("classpath*:" + target + ".properties");
 			}
 			catch (Exception ex) {
 				return NO_RESOURCES;

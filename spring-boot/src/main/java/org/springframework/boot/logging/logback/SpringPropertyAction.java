@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,15 +47,13 @@ class SpringPropertyAction extends Action {
 	}
 
 	@Override
-	public void begin(InterpretationContext ic, String elementName, Attributes attributes)
-			throws ActionException {
+	public void begin(InterpretationContext ic, String elementName, Attributes attributes) throws ActionException {
 		String name = attributes.getValue(NAME_ATTRIBUTE);
 		String source = attributes.getValue(SOURCE_ATTRIBUTE);
 		Scope scope = ActionUtil.stringToScope(attributes.getValue(SCOPE_ATTRIBUTE));
 		String defaultValue = attributes.getValue(DEFAULT_VALUE_ATTRIBUTE);
 		if (OptionHelper.isEmpty(name) || OptionHelper.isEmpty(source)) {
-			addError(
-					"The \"name\" and \"source\" attributes of <springProperty> must be set");
+			addError("The \"name\" and \"source\" attributes of <springProperty> must be set");
 		}
 		ActionUtil.setProperty(ic, name, getValue(source, defaultValue), scope);
 	}
@@ -72,8 +70,7 @@ class SpringPropertyAction extends Action {
 		int lastDot = source.lastIndexOf(".");
 		if (lastDot > 0) {
 			String prefix = source.substring(0, lastDot + 1);
-			RelaxedPropertyResolver resolver = new RelaxedPropertyResolver(
-					this.environment, prefix);
+			RelaxedPropertyResolver resolver = new RelaxedPropertyResolver(this.environment, prefix);
 			return resolver.getProperty(source.substring(lastDot + 1), defaultValue);
 		}
 		return defaultValue;

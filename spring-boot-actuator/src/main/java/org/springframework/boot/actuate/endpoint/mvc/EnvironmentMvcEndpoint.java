@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,10 +35,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * @author Dave Syer
  * @author Christian Dupuis
  * @author Andy Wilkinson
+ * @since 1.0.0
  */
 @ConfigurationProperties(prefix = "endpoints.env")
-public class EnvironmentMvcEndpoint extends EndpointMvcAdapter
-		implements EnvironmentAware {
+public class EnvironmentMvcEndpoint extends EndpointMvcAdapter implements EnvironmentAware {
 
 	private Environment environment;
 
@@ -75,8 +75,7 @@ public class EnvironmentMvcEndpoint extends EndpointMvcAdapter
 		@Override
 		protected void getNames(Environment source, NameCallback callback) {
 			if (source instanceof ConfigurableEnvironment) {
-				getNames(((ConfigurableEnvironment) source).getPropertySources(),
-						callback);
+				getNames(((ConfigurableEnvironment) source).getPropertySources(), callback);
 			}
 		}
 
@@ -93,7 +92,7 @@ public class EnvironmentMvcEndpoint extends EndpointMvcAdapter
 
 		@Override
 		protected Object getOptionalValue(Environment source, String name) {
-			Object result = ((EnvironmentEndpoint) getDelegate()).getResolver().getProperty(name);
+			Object result = getValue(name);
 			if (result != null) {
 				result = ((EnvironmentEndpoint) getDelegate()).sanitize(name, result);
 			}
@@ -102,11 +101,15 @@ public class EnvironmentMvcEndpoint extends EndpointMvcAdapter
 
 		@Override
 		protected Object getValue(Environment source, String name) {
-			String result = source.getProperty(name);
+			Object result = getValue(name);
 			if (result == null) {
 				throw new NoSuchPropertyException("No such property: " + name);
 			}
 			return ((EnvironmentEndpoint) getDelegate()).sanitize(name, result);
+		}
+
+		private Object getValue(String name) {
+			return ((EnvironmentEndpoint) getDelegate()).getResolver().getProperty(name, Object.class);
 		}
 
 	}

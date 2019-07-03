@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -67,14 +67,12 @@ public class SpringBootContextLoaderMockMvcTests {
 
 	@Test
 	public void testMockHttpEndpoint() throws Exception {
-		this.mvc.perform(get("/")).andExpect(status().isOk())
-				.andExpect(content().string("Hello World"));
+		this.mvc.perform(get("/")).andExpect(status().isOk()).andExpect(content().string("Hello World"));
 	}
 
 	@Test
 	public void validateWebApplicationContextIsSet() {
-		assertThat(this.context).isSameAs(
-				WebApplicationContextUtils.getWebApplicationContext(this.servletContext));
+		assertThat(this.context).isSameAs(WebApplicationContextUtils.getWebApplicationContext(this.servletContext));
 	}
 
 	@Configuration

@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,16 +16,20 @@
 
 package org.springframework.boot.autoconfigure.kafka;
 
+import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
+import org.junit.Assume;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
 import org.springframework.boot.test.util.EnvironmentTestUtils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -44,10 +48,14 @@ public class KafkaAutoConfigurationIntegrationTests {
 	private static final String TEST_TOPIC = "testTopic";
 
 	@ClassRule
-	public static final KafkaEmbedded kafkaEmbedded = new KafkaEmbedded(1, true,
-			TEST_TOPIC);
+	public static final KafkaEmbedded kafkaEmbedded = new KafkaEmbedded(1, true, TEST_TOPIC);
 
 	private AnnotationConfigApplicationContext context;
+
+	@Before
+	public void doNotRunOnWindows() {
+		Assume.assumeFalse(isWindows());
+	}
 
 	@After
 	public void close() {
@@ -58,13 +66,10 @@ public class KafkaAutoConfigurationIntegrationTests {
 
 	@Test
 	public void testEndToEnd() throws Exception {
-		load(KafkaConfig.class,
-				"spring.kafka.bootstrap-servers:" + kafkaEmbedded.getBrokersAsString(),
-				"spring.kafka.consumer.group-id=testGroup",
-				"spring.kafka.consumer.auto-offset-reset=earliest");
+		load(KafkaConfig.class, "spring.kafka.bootstrap-servers:" + kafkaEmbedded.getBrokersAsString(),
+				"spring.kafka.consumer.group-id=testGroup", "spring.kafka.consumer.auto-offset-reset=earliest");
 		@SuppressWarnings("unchecked")
-		KafkaTemplate<String, String> template = this.context
-				.getBean(KafkaTemplate.class);
+		KafkaTemplate<String, String> template = this.context.getBean(KafkaTemplate.class);
 		template.send(TEST_TOPIC, "foo", "bar");
 		Listener listener = this.context.getBean(Listener.class);
 		assertThat(listener.latch.await(30, TimeUnit.SECONDS)).isTrue();
@@ -76,8 +81,7 @@ public class KafkaAutoConfigurationIntegrationTests {
 		this.context = doLoad(new Class<?>[] { config }, environment);
 	}
 
-	private AnnotationConfigApplicationContext doLoad(Class<?>[] configs,
-			String... environment) {
+	private AnnotationConfigApplicationContext doLoad(Class<?>[] configs, String... environment) {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 		applicationContext.register(configs);
 		applicationContext.register(KafkaAutoConfiguration.class);
@@ -86,6 +90,11 @@ public class KafkaAutoConfigurationIntegrationTests {
 		return applicationContext;
 	}
 
+	private boolean isWindows() {
+		return File.separatorChar == '\\';
+	}
+
+	@Configuration
 	public static class KafkaConfig {
 
 		@Bean
@@ -104,8 +113,7 @@ public class KafkaAutoConfigurationIntegrationTests {
 		private volatile String key;
 
 		@KafkaListener(topics = TEST_TOPIC)
-		public void listen(String foo,
-				@Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String key) {
+		public void listen(String foo, @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String key) {
 			this.received = foo;
 			this.key = key;
 			this.latch.countDown();

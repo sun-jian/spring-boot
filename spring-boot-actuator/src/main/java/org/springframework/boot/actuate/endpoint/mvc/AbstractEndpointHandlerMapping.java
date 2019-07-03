@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -55,14 +55,14 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * MVC on the classpath). Note that any endpoints having method signatures will break in a
  * non-servlet environment.
  *
- * @param <E> The endpoint type
+ * @param <E> the endpoint type
  * @author Phillip Webb
  * @author Christian Dupuis
  * @author Dave Syer
  * @author Madhura Bhave
+ * @since 1.5.0
  */
-public abstract class AbstractEndpointHandlerMapping<E extends MvcEndpoint>
-		extends RequestMappingHandlerMapping {
+public abstract class AbstractEndpointHandlerMapping<E extends MvcEndpoint> extends RequestMappingHandlerMapping {
 
 	private final Set<E> endpoints;
 
@@ -92,8 +92,7 @@ public abstract class AbstractEndpointHandlerMapping<E extends MvcEndpoint>
 	 * @param corsConfiguration the CORS configuration for the endpoints
 	 * @since 1.3.0
 	 */
-	public AbstractEndpointHandlerMapping(Collection<? extends E> endpoints,
-			CorsConfiguration corsConfiguration) {
+	public AbstractEndpointHandlerMapping(Collection<? extends E> endpoints, CorsConfiguration corsConfiguration) {
 		this.endpoints = new HashSet<E>(endpoints);
 		postProcessEndpoints(this.endpoints);
 		this.corsConfiguration = corsConfiguration;
@@ -132,15 +131,13 @@ public abstract class AbstractEndpointHandlerMapping<E extends MvcEndpoint>
 
 	@Override
 	@Deprecated
-	protected void registerHandlerMethod(Object handler, Method method,
-			RequestMappingInfo mapping) {
+	protected void registerHandlerMethod(Object handler, Method method, RequestMappingInfo mapping) {
 		if (mapping == null) {
 			return;
 		}
 		String[] patterns = getPatterns(handler, mapping);
 		if (!ObjectUtils.isEmpty(patterns)) {
-			super.registerHandlerMethod(handler, method,
-					withNewPatterns(mapping, patterns));
+			super.registerHandlerMethod(handler, method, withNewPatterns(mapping, patterns));
 		}
 	}
 
@@ -150,7 +147,7 @@ public abstract class AbstractEndpointHandlerMapping<E extends MvcEndpoint>
 		}
 		Assert.state(handler instanceof MvcEndpoint, "Only MvcEndpoints are supported");
 		String path = getPath((MvcEndpoint) handler);
-		return (path == null ? null : getEndpointPatterns(path, mapping));
+		return (path != null) ? getEndpointPatterns(path, mapping) : null;
 	}
 
 	/**
@@ -163,8 +160,7 @@ public abstract class AbstractEndpointHandlerMapping<E extends MvcEndpoint>
 	}
 
 	private String[] getEndpointPatterns(String path, RequestMappingInfo mapping) {
-		String patternPrefix = StringUtils.hasText(this.prefix) ? this.prefix + path
-				: path;
+		String patternPrefix = (StringUtils.hasText(this.prefix) ? this.prefix + path : path);
 		Set<String> defaultPatterns = mapping.getPatternsCondition().getPatterns();
 		if (defaultPatterns.isEmpty()) {
 			return new String[] { patternPrefix, patternPrefix + ".json" };
@@ -176,19 +172,16 @@ public abstract class AbstractEndpointHandlerMapping<E extends MvcEndpoint>
 		return patterns.toArray(new String[patterns.size()]);
 	}
 
-	private RequestMappingInfo withNewPatterns(RequestMappingInfo mapping,
-			String[] patternStrings) {
-		PatternsRequestCondition patterns = new PatternsRequestCondition(patternStrings,
-				null, null, useSuffixPatternMatch(), useTrailingSlashMatch(), null);
-		return new RequestMappingInfo(patterns, mapping.getMethodsCondition(),
-				mapping.getParamsCondition(), mapping.getHeadersCondition(),
-				mapping.getConsumesCondition(), mapping.getProducesCondition(),
+	private RequestMappingInfo withNewPatterns(RequestMappingInfo mapping, String[] patternStrings) {
+		PatternsRequestCondition patterns = new PatternsRequestCondition(patternStrings, null, null,
+				useSuffixPatternMatch(), useTrailingSlashMatch(), null);
+		return new RequestMappingInfo(patterns, mapping.getMethodsCondition(), mapping.getParamsCondition(),
+				mapping.getHeadersCondition(), mapping.getConsumesCondition(), mapping.getProducesCondition(),
 				mapping.getCustomCondition());
 	}
 
 	@Override
-	protected HandlerExecutionChain getHandlerExecutionChain(Object handler,
-			HttpServletRequest request) {
+	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
 		HandlerExecutionChain chain = super.getHandlerExecutionChain(handler, request);
 		if (this.securityInterceptor == null || CorsUtils.isCorsRequest(request)) {
 			return chain;
@@ -197,9 +190,8 @@ public abstract class AbstractEndpointHandlerMapping<E extends MvcEndpoint>
 	}
 
 	@Override
-	protected HandlerExecutionChain getCorsHandlerExecutionChain(
-			HttpServletRequest request, HandlerExecutionChain chain,
-			CorsConfiguration config) {
+	protected HandlerExecutionChain getCorsHandlerExecutionChain(HttpServletRequest request,
+			HandlerExecutionChain chain, CorsConfiguration config) {
 		chain = super.getCorsHandlerExecutionChain(request, chain, config);
 		if (this.securityInterceptor == null) {
 			return chain;
@@ -235,8 +227,7 @@ public abstract class AbstractEndpointHandlerMapping<E extends MvcEndpoint>
 	 * @param prefix the prefix
 	 */
 	public void setPrefix(String prefix) {
-		Assert.isTrue("".equals(prefix) || StringUtils.startsWithIgnoreCase(prefix, "/"),
-				"prefix must start with '/'");
+		Assert.isTrue("".equals(prefix) || StringUtils.startsWithIgnoreCase(prefix, "/"), "prefix must start with '/'");
 		this.prefix = prefix;
 	}
 
@@ -282,8 +273,7 @@ public abstract class AbstractEndpointHandlerMapping<E extends MvcEndpoint>
 	}
 
 	@Override
-	protected CorsConfiguration initCorsConfiguration(Object handler, Method method,
-			RequestMappingInfo mappingInfo) {
+	protected CorsConfiguration initCorsConfiguration(Object handler, Method method, RequestMappingInfo mappingInfo) {
 		return this.corsConfiguration;
 	}
 
@@ -291,15 +281,13 @@ public abstract class AbstractEndpointHandlerMapping<E extends MvcEndpoint>
 	 * {@link HandlerInterceptorAdapter} to ensure that
 	 * {@link PathExtensionContentNegotiationStrategy} is skipped for actuator endpoints.
 	 */
-	private static final class SkipPathExtensionContentNegotiation
-			extends HandlerInterceptorAdapter {
+	private static final class SkipPathExtensionContentNegotiation extends HandlerInterceptorAdapter {
 
-		private static final String SKIP_ATTRIBUTE = PathExtensionContentNegotiationStrategy.class
-				.getName() + ".SKIP";
+		private static final String SKIP_ATTRIBUTE = PathExtensionContentNegotiationStrategy.class.getName() + ".SKIP";
 
 		@Override
-		public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
-				Object handler) throws Exception {
+		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+				throws Exception {
 			request.setAttribute(SKIP_ATTRIBUTE, Boolean.TRUE);
 			return true;
 		}

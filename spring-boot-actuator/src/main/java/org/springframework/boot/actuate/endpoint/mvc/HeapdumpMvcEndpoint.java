@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -74,9 +74,8 @@ public class HeapdumpMvcEndpoint extends AbstractNamedMvcEndpoint {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-	public void invoke(@RequestParam(defaultValue = "true") boolean live,
-			HttpServletRequest request, HttpServletResponse response)
-					throws IOException, ServletException {
+	public void invoke(@RequestParam(defaultValue = "true") boolean live, HttpServletRequest request,
+			HttpServletResponse response) throws IOException, ServletException {
 		if (!isEnabled()) {
 			response.setStatus(HttpStatus.NOT_FOUND.value());
 			return;
@@ -98,9 +97,8 @@ public class HeapdumpMvcEndpoint extends AbstractNamedMvcEndpoint {
 		response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
 	}
 
-	private void dumpHeap(boolean live, HttpServletRequest request,
-			HttpServletResponse response)
-					throws IOException, ServletException, InterruptedException {
+	private void dumpHeap(boolean live, HttpServletRequest request, HttpServletResponse response)
+			throws IOException, ServletException, InterruptedException {
 		if (this.heapDumper == null) {
 			this.heapDumper = createHeapDumper();
 		}
@@ -116,8 +114,7 @@ public class HeapdumpMvcEndpoint extends AbstractNamedMvcEndpoint {
 
 	private File createTempFile(boolean live) throws IOException {
 		String date = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(new Date());
-		File file = File.createTempFile("heapdump" + date + (live ? "-live" : ""),
-				".hprof");
+		File file = File.createTempFile("heapdump" + date + (live ? "-live" : ""), ".hprof");
 		file.delete();
 		return file;
 	}
@@ -140,11 +137,10 @@ public class HeapdumpMvcEndpoint extends AbstractNamedMvcEndpoint {
 	 * @throws ServletException on servlet error
 	 * @throws IOException on IO error
 	 */
-	protected void handle(File heapDumpFile, HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
+	protected void handle(File heapDumpFile, HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		response.setContentType("application/octet-stream");
-		response.setHeader("Content-Disposition",
-				"attachment; filename=\"" + (heapDumpFile.getName() + ".gz") + "\"");
+		response.setHeader("Content-Disposition", "attachment; filename=\"" + (heapDumpFile.getName() + ".gz") + "\"");
 		try {
 			InputStream in = new FileInputStream(heapDumpFile);
 			try {
@@ -197,23 +193,21 @@ public class HeapdumpMvcEndpoint extends AbstractNamedMvcEndpoint {
 		@SuppressWarnings("unchecked")
 		protected HotSpotDiagnosticMXBeanHeapDumper() {
 			try {
-				Class<?> diagnosticMXBeanClass = ClassUtils.resolveClassName(
-						"com.sun.management.HotSpotDiagnosticMXBean", null);
-				this.diagnosticMXBean = ManagementFactory.getPlatformMXBean(
-						(Class<PlatformManagedObject>) diagnosticMXBeanClass);
-				this.dumpHeapMethod = ReflectionUtils.findMethod(diagnosticMXBeanClass,
-						"dumpHeap", String.class, Boolean.TYPE);
+				Class<?> diagnosticMXBeanClass = ClassUtils
+						.resolveClassName("com.sun.management.HotSpotDiagnosticMXBean", null);
+				this.diagnosticMXBean = ManagementFactory
+						.getPlatformMXBean((Class<PlatformManagedObject>) diagnosticMXBeanClass);
+				this.dumpHeapMethod = ReflectionUtils.findMethod(diagnosticMXBeanClass, "dumpHeap", String.class,
+						Boolean.TYPE);
 			}
 			catch (Throwable ex) {
-				throw new HeapDumperUnavailableException(
-						"Unable to locate HotSpotDiagnosticMXBean", ex);
+				throw new HeapDumperUnavailableException("Unable to locate HotSpotDiagnosticMXBean", ex);
 			}
 		}
 
 		@Override
 		public void dumpHeap(File file, boolean live) {
-			ReflectionUtils.invokeMethod(this.dumpHeapMethod, this.diagnosticMXBean,
-					file.getAbsolutePath(), live);
+			ReflectionUtils.invokeMethod(this.dumpHeapMethod, this.diagnosticMXBean, file.getAbsolutePath(), live);
 		}
 
 	}

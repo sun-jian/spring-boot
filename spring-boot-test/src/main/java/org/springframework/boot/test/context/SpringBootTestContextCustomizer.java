@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,8 +45,8 @@ class SpringBootTestContextCustomizer implements ContextCustomizer {
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context,
 			MergedContextConfiguration mergedContextConfiguration) {
-		SpringBootTest annotation = AnnotatedElementUtils.getMergedAnnotation(
-				mergedContextConfiguration.getTestClass(), SpringBootTest.class);
+		SpringBootTest annotation = AnnotatedElementUtils.getMergedAnnotation(mergedContextConfiguration.getTestClass(),
+				SpringBootTest.class);
 		if (annotation.webEnvironment().isEmbedded()) {
 			registerTestRestTemplate(context);
 		}
@@ -60,15 +60,9 @@ class SpringBootTestContextCustomizer implements ContextCustomizer {
 
 	}
 
-	private void registerTestRestTemplate(ConfigurableApplicationContext context,
-			BeanDefinitionRegistry registry) {
+	private void registerTestRestTemplate(ConfigurableApplicationContext context, BeanDefinitionRegistry registry) {
 		registry.registerBeanDefinition(TestRestTemplate.class.getName(),
 				new RootBeanDefinition(TestRestTemplateFactory.class));
-	}
-
-	@Override
-	public int hashCode() {
-		return getClass().hashCode();
 	}
 
 	@Override
@@ -79,11 +73,15 @@ class SpringBootTestContextCustomizer implements ContextCustomizer {
 		return true;
 	}
 
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
+
 	/**
 	 * {@link FactoryBean} used to create and configure a {@link TestRestTemplate}.
 	 */
-	public static class TestRestTemplateFactory
-			implements FactoryBean<TestRestTemplate>, ApplicationContextAware {
+	public static class TestRestTemplateFactory implements FactoryBean<TestRestTemplate>, ApplicationContextAware {
 
 		private static final HttpClientOption[] DEFAULT_OPTIONS = {};
 
@@ -92,14 +90,13 @@ class SpringBootTestContextCustomizer implements ContextCustomizer {
 		private TestRestTemplate object;
 
 		@Override
-		public void setApplicationContext(ApplicationContext applicationContext)
-				throws BeansException {
+		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 			RestTemplateBuilder builder = getRestTemplateBuilder(applicationContext);
 			boolean sslEnabled = isSslEnabled(applicationContext);
 			TestRestTemplate template = new TestRestTemplate(builder.build(), null, null,
 					sslEnabled ? SSL_OPTIONS : DEFAULT_OPTIONS);
-			LocalHostUriTemplateHandler handler = new LocalHostUriTemplateHandler(
-					applicationContext.getEnvironment(), sslEnabled ? "https" : "http");
+			LocalHostUriTemplateHandler handler = new LocalHostUriTemplateHandler(applicationContext.getEnvironment(),
+					sslEnabled ? "https" : "http");
 			template.setUriTemplateHandler(handler);
 			this.object = template;
 		}
@@ -115,8 +112,7 @@ class SpringBootTestContextCustomizer implements ContextCustomizer {
 			}
 		}
 
-		private RestTemplateBuilder getRestTemplateBuilder(
-				ApplicationContext applicationContext) {
+		private RestTemplateBuilder getRestTemplateBuilder(ApplicationContext applicationContext) {
 			try {
 				return applicationContext.getBean(RestTemplateBuilder.class);
 			}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -90,8 +90,7 @@ public class ServletRegistrationBean extends RegistrationBean {
 	 * @param alwaysMapUrl if omitted URL mappings should be replaced with '/*'
 	 * @param urlMappings the URLs being mapped
 	 */
-	public ServletRegistrationBean(Servlet servlet, boolean alwaysMapUrl,
-			String... urlMappings) {
+	public ServletRegistrationBean(Servlet servlet, boolean alwaysMapUrl, String... urlMappings) {
 		Assert.notNull(servlet, "Servlet must not be null");
 		Assert.notNull(urlMappings, "UrlMappings must not be null");
 		this.servlet = servlet;
@@ -128,7 +127,8 @@ public class ServletRegistrationBean extends RegistrationBean {
 	}
 
 	/**
-	 * Return a mutable collection of the URL mappings for the servlet.
+	 * Return a mutable collection of the URL mappings, as defined in the Servlet
+	 * specification, for the servlet.
 	 * @return the urlMappings
 	 */
 	public Collection<String> getUrlMappings() {
@@ -136,7 +136,7 @@ public class ServletRegistrationBean extends RegistrationBean {
 	}
 
 	/**
-	 * Add URL mappings for the servlet.
+	 * Add URL mappings, as defined in the Servlet specification, for the servlet.
 	 * @param urlMappings the mappings to add
 	 * @see #setUrlMappings(Collection)
 	 */
@@ -190,8 +190,7 @@ public class ServletRegistrationBean extends RegistrationBean {
 		logger.info("Mapping servlet: '" + name + "' to " + this.urlMappings);
 		Dynamic added = servletContext.addServlet(name, this.servlet);
 		if (added == null) {
-			logger.info("Servlet " + name + " was not registered "
-					+ "(possibly already registered?)");
+			logger.info("Servlet " + name + " was not registered " + "(possibly already registered?)");
 			return;
 		}
 		configure(added);
@@ -204,8 +203,7 @@ public class ServletRegistrationBean extends RegistrationBean {
 	 */
 	protected void configure(ServletRegistration.Dynamic registration) {
 		super.configure(registration);
-		String[] urlMapping = this.urlMappings
-				.toArray(new String[this.urlMappings.size()]);
+		String[] urlMapping = this.urlMappings.toArray(new String[this.urlMappings.size()]);
 		if (urlMapping.length == 0 && this.alwaysMapUrl) {
 			urlMapping = DEFAULT_MAPPINGS;
 		}

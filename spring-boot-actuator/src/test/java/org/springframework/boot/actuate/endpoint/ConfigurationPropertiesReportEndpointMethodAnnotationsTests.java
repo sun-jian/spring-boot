@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -56,14 +56,12 @@ public class ConfigurationPropertiesReportEndpointMethodAnnotationsTests {
 	@SuppressWarnings("unchecked")
 	public void testNaming() throws Exception {
 		this.context.register(Config.class);
-		EnvironmentTestUtils.addEnvironment(this.context, "other.name:foo",
-				"first.name:bar");
+		EnvironmentTestUtils.addEnvironment(this.context, "other.name:foo", "first.name:bar");
 		this.context.refresh();
 		ConfigurationPropertiesReportEndpoint report = this.context
 				.getBean(ConfigurationPropertiesReportEndpoint.class);
 		Map<String, Object> properties = report.invoke();
-		Map<String, Object> nestedProperties = (Map<String, Object>) properties
-				.get("other");
+		Map<String, Object> nestedProperties = (Map<String, Object>) properties.get("other");
 		assertThat(nestedProperties).isNotNull();
 		assertThat(nestedProperties.get("prefix")).isEqualTo("other");
 		assertThat(nestedProperties.get("properties")).isNotNull();
@@ -78,8 +76,7 @@ public class ConfigurationPropertiesReportEndpointMethodAnnotationsTests {
 		ConfigurationPropertiesReportEndpoint report = this.context
 				.getBean(ConfigurationPropertiesReportEndpoint.class);
 		Map<String, Object> properties = report.invoke();
-		Map<String, Object> nestedProperties = (Map<String, Object>) properties
-				.get("bar");
+		Map<String, Object> nestedProperties = (Map<String, Object>) properties.get("bar");
 		assertThat(nestedProperties).isNotNull();
 		assertThat(nestedProperties.get("prefix")).isEqualTo("other");
 		assertThat(nestedProperties.get("properties")).isNotNull();

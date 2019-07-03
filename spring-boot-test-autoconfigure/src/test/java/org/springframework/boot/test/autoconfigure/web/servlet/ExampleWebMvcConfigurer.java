@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,8 +36,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 public class ExampleWebMvcConfigurer extends WebMvcConfigurerAdapter {
 
 	@Override
-	public void addArgumentResolvers(
-			List<HandlerMethodArgumentResolver> argumentResolvers) {
+	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		argumentResolvers.add(new HandlerMethodArgumentResolver() {
 
 			@Override
@@ -46,9 +45,8 @@ public class ExampleWebMvcConfigurer extends WebMvcConfigurerAdapter {
 			}
 
 			@Override
-			public Object resolveArgument(MethodParameter parameter,
-					ModelAndViewContainer mavContainer, NativeWebRequest webRequest,
-					WebDataBinderFactory binderFactory) throws Exception {
+			public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+					NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 				return new ExampleArgument("hello");
 			}
 

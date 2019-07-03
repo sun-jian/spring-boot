@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,6 +40,7 @@ import org.springframework.boot.gradle.SpringBootPluginExtension;
  *
  * @author Dave Syer
  * @author Phillip Webb
+ * @since 1.2.7
  */
 public class AgentTasksEnhancer implements Action<Project> {
 
@@ -61,8 +62,7 @@ public class AgentTasksEnhancer implements Action<Project> {
 
 	private void setup(Project project) {
 		project.getLogger().info("Configuring agent");
-		SpringBootPluginExtension extension = project.getExtensions()
-				.getByType(SpringBootPluginExtension.class);
+		SpringBootPluginExtension extension = project.getExtensions().getByType(SpringBootPluginExtension.class);
 		this.noverify = extension.getNoverify();
 		this.agent = getAgent(project, extension);
 		if (this.agent == null) {
@@ -116,8 +116,7 @@ public class AgentTasksEnhancer implements Action<Project> {
 			if (this.noverify != null && this.noverify) {
 				exec.jvmArgs("-noverify");
 			}
-			Iterable<?> defaultJvmArgs = exec.getConventionMapping()
-					.getConventionValue(null, "jvmArgs", false);
+			Iterable<?> defaultJvmArgs = exec.getConventionMapping().getConventionValue(null, "jvmArgs", false);
 			if (defaultJvmArgs != null) {
 				exec.jvmArgs(defaultJvmArgs);
 			}

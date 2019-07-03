@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,13 +44,11 @@ public class ExampleRepository {
 
 	@Transactional
 	public void save(ExampleEntity entity) {
-		this.jdbcTemplate.update("insert into example (id, name) values (?, ?)",
-				entity.getId(), entity.getName());
+		this.jdbcTemplate.update("insert into example (id, name) values (?, ?)", entity.getId(), entity.getName());
 	}
 
 	public ExampleEntity findById(int id) {
-		return this.jdbcTemplate.queryForObject(
-				"select id, name from example where id =?", new Object[] { id },
+		return this.jdbcTemplate.queryForObject("select id, name from example where id =?", new Object[] { id },
 				ROW_MAPPER);
 	}
 

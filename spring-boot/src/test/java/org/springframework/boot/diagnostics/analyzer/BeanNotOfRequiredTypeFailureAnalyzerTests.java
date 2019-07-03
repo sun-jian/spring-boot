@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,10 +44,8 @@ public class BeanNotOfRequiredTypeFailureAnalyzerTests {
 	public void jdkProxyCausesInjectionFailure() {
 		FailureAnalysis analysis = performAnalysis(JdkProxyConfiguration.class);
 		assertThat(analysis.getDescription()).startsWith("The bean 'asyncBean'");
-		assertThat(analysis.getDescription())
-				.contains("'" + AsyncBean.class.getName() + "'");
-		assertThat(analysis.getDescription())
-				.endsWith(String.format("%s%n", SomeInterface.class.getName()));
+		assertThat(analysis.getDescription()).contains("'" + AsyncBean.class.getName() + "'");
+		assertThat(analysis.getDescription()).endsWith(String.format("%s%n", SomeInterface.class.getName()));
 	}
 
 	private FailureAnalysis performAnalysis(Class<?> configuration) {

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,14 +29,12 @@ import javax.annotation.processing.SupportedAnnotationTypes;
  *
  * @author Madhura Bhave
  */
-@SupportedAnnotationTypes({
-		"org.springframework.boot.autoconfigureprocessor.TestConfiguration",
+@SupportedAnnotationTypes({ "org.springframework.boot.autoconfigureprocessor.TestConfiguration",
 		"org.springframework.boot.autoconfigureprocessor.TestConditionalOnClass",
 		"org.springframework.boot.autoconfigureprocessor.TestAutoConfigureBefore",
 		"org.springframework.boot.autoconfigureprocessor.TestAutoConfigureAfter",
 		"org.springframework.boot.autoconfigureprocessor.TestAutoConfigureOrder" })
-public class TestConditionMetadataAnnotationProcessor
-		extends AutoConfigureAnnotationProcessor {
+public class TestConditionMetadataAnnotationProcessor extends AutoConfigureAnnotationProcessor {
 
 	private final File outputLocation;
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,20 +49,17 @@ public class SampleBitronixApplicationTests {
 
 	@Test
 	public void testExposesXaAndNonXa() throws Exception {
-		ApplicationContext context = SpringApplication
-				.run(SampleBitronixApplication.class);
+		ApplicationContext context = SpringApplication.run(SampleBitronixApplication.class);
 		Object jmsConnectionFactory = context.getBean("jmsConnectionFactory");
 		Object xaJmsConnectionFactory = context.getBean("xaJmsConnectionFactory");
 		Object nonXaJmsConnectionFactory = context.getBean("nonXaJmsConnectionFactory");
 		assertThat(jmsConnectionFactory).isSameAs(xaJmsConnectionFactory);
 		assertThat(jmsConnectionFactory).isInstanceOf(PoolingConnectionFactory.class);
-		assertThat(nonXaJmsConnectionFactory)
-				.isNotInstanceOf(PoolingConnectionFactory.class);
+		assertThat(nonXaJmsConnectionFactory).isNotInstanceOf(PoolingConnectionFactory.class);
 	}
 
 	private Condition<String> substring(final int times, final String substring) {
-		return new Condition<String>(
-				"containing '" + substring + "' " + times + " times") {
+		return new Condition<String>("containing '" + substring + "' " + times + " times") {
 
 			@Override
 			public boolean matches(String value) {

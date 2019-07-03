@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -59,8 +59,7 @@ public class ConditionalOnPropertyTests {
 
 	@Test
 	public void allPropertiesAreDefined() {
-		load(MultiplePropertiesRequiredConfiguration.class, "property1=value1",
-				"property2=value2");
+		load(MultiplePropertiesRequiredConfiguration.class, "property1=value1", "property2=value2");
 		assertThat(this.context.containsBean("foo")).isTrue();
 	}
 
@@ -72,36 +71,31 @@ public class ConditionalOnPropertyTests {
 
 	@Test
 	public void propertyValueEqualsFalse() {
-		load(MultiplePropertiesRequiredConfiguration.class, "property1=false",
-				"property2=value2");
+		load(MultiplePropertiesRequiredConfiguration.class, "property1=false", "property2=value2");
 		assertThat(this.context.containsBean("foo")).isFalse();
 	}
 
 	@Test
 	public void propertyValueEqualsFALSE() {
-		load(MultiplePropertiesRequiredConfiguration.class, "property1=FALSE",
-				"property2=value2");
+		load(MultiplePropertiesRequiredConfiguration.class, "property1=FALSE", "property2=value2");
 		assertThat(this.context.containsBean("foo")).isFalse();
 	}
 
 	@Test
 	public void relaxedName() {
-		load(RelaxedPropertiesRequiredConfiguration.class,
-				"spring.theRelaxedProperty=value1");
+		load(RelaxedPropertiesRequiredConfiguration.class, "spring.theRelaxedProperty=value1");
 		assertThat(this.context.containsBean("foo")).isTrue();
 	}
 
 	@Test
 	public void prefixWithoutPeriod() throws Exception {
-		load(RelaxedPropertiesRequiredConfigurationWithShortPrefix.class,
-				"spring.property=value1");
+		load(RelaxedPropertiesRequiredConfigurationWithShortPrefix.class, "spring.property=value1");
 		assertThat(this.context.containsBean("foo")).isTrue();
 	}
 
 	@Test
 	public void nonRelaxedName() throws Exception {
-		load(NonRelaxedPropertiesRequiredConfiguration.class,
-				"theRelaxedProperty=value1");
+		load(NonRelaxedPropertiesRequiredConfiguration.class, "theRelaxedProperty=value1");
 		assertThat(this.context.containsBean("foo")).isFalse();
 	}
 
@@ -199,8 +193,7 @@ public class ConditionalOnPropertyTests {
 
 	@Test
 	public void multiValuesAllSet() {
-		load(MultiValuesConfig.class, "simple.my-property:bar",
-				"simple.my-another-property:bar");
+		load(MultiValuesConfig.class, "simple.my-property:bar", "simple.my-another-property:bar");
 		assertThat(this.context.containsBean("foo")).isTrue();
 	}
 
@@ -219,16 +212,16 @@ public class ConditionalOnPropertyTests {
 	@Test
 	public void nameOrValueMustBeSpecified() throws Exception {
 		this.thrown.expect(IllegalStateException.class);
-		this.thrown.expectCause(hasMessage(containsString("The name or "
-				+ "value attribute of @ConditionalOnProperty must be specified")));
+		this.thrown.expectCause(hasMessage(
+				containsString("The name or " + "value attribute of @ConditionalOnProperty must be specified")));
 		load(NoNameOrValueAttribute.class, "some.property");
 	}
 
 	@Test
 	public void nameAndValueMustNotBeSpecified() throws Exception {
 		this.thrown.expect(IllegalStateException.class);
-		this.thrown.expectCause(hasMessage(containsString("The name and "
-				+ "value attributes of @ConditionalOnProperty are exclusive")));
+		this.thrown.expectCause(hasMessage(
+				containsString("The name and " + "value attributes of @ConditionalOnProperty are exclusive")));
 		load(NameAndValueAttribute.class, "some.property");
 	}
 
@@ -239,8 +232,7 @@ public class ConditionalOnPropertyTests {
 	}
 
 	@Test
-	public void metaAnnotationConditionDoesNotMatchWhenPropertyIsNotSet()
-			throws Exception {
+	public void metaAnnotationConditionDoesNotMatchWhenPropertyIsNotSet() throws Exception {
 		load(MetaAnnotation.class);
 		assertThat(this.context.containsBean("foo")).isFalse();
 	}
@@ -265,8 +257,7 @@ public class ConditionalOnPropertyTests {
 
 	@Test
 	public void metaAndDirectAnnotationConditionMatchesWhenBothPropertiesAreSet() {
-		load(MetaAnnotationAndDirectAnnotation.class, "my.feature.enabled=true",
-				"my.other.feature.enabled=true");
+		load(MetaAnnotationAndDirectAnnotation.class, "my.feature.enabled=true", "my.other.feature.enabled=true");
 		assertThat(this.context.containsBean("foo")).isTrue();
 	}
 
@@ -390,8 +381,7 @@ public class ConditionalOnPropertyTests {
 	}
 
 	@Configuration
-	@ConditionalOnProperty(prefix = "simple", name = { "my-property",
-			"my-another-property" }, havingValue = "bar")
+	@ConditionalOnProperty(prefix = "simple", name = { "my-property", "my-another-property" }, havingValue = "bar")
 	static class MultiValuesConfig {
 
 		@Bean
@@ -434,6 +424,7 @@ public class ConditionalOnPropertyTests {
 
 	}
 
+	@Configuration
 	@ConditionalOnMyFeature
 	protected static class MetaAnnotation {
 
@@ -444,6 +435,7 @@ public class ConditionalOnPropertyTests {
 
 	}
 
+	@Configuration
 	@ConditionalOnMyFeature
 	@ConditionalOnProperty(prefix = "my.other.feature", name = "enabled", havingValue = "true", matchIfMissing = false)
 	protected static class MetaAnnotationAndDirectAnnotation {

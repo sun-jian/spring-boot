@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,8 +28,9 @@ import org.springframework.util.StringUtils;
  * The JSON web token provided with each request that originates from Cloud Foundry.
  *
  * @author Madhura Bhave
+ * @since 1.5.22
  */
-class Token {
+public class Token {
 
 	private static final Charset UTF_8 = Charset.forName("UTF-8");
 
@@ -46,16 +47,14 @@ class Token {
 		int firstPeriod = encoded.indexOf('.');
 		int lastPeriod = encoded.lastIndexOf('.');
 		if (firstPeriod <= 0 || lastPeriod <= firstPeriod) {
-			throw new CloudFoundryAuthorizationException(
-					CloudFoundryAuthorizationException.Reason.INVALID_TOKEN,
+			throw new CloudFoundryAuthorizationException(CloudFoundryAuthorizationException.Reason.INVALID_TOKEN,
 					"JWT must have header, body and signature");
 		}
 		this.header = parseJson(encoded.substring(0, firstPeriod));
 		this.claims = parseJson(encoded.substring(firstPeriod + 1, lastPeriod));
 		this.signature = encoded.substring(lastPeriod + 1);
 		if (!StringUtils.hasLength(this.signature)) {
-			throw new CloudFoundryAuthorizationException(
-					CloudFoundryAuthorizationException.Reason.INVALID_TOKEN,
+			throw new CloudFoundryAuthorizationException(CloudFoundryAuthorizationException.Reason.INVALID_TOKEN,
 					"Token must have non-empty crypto segment");
 		}
 	}
@@ -66,8 +65,7 @@ class Token {
 			return JsonParserFactory.getJsonParser().parseMap(new String(bytes, UTF_8));
 		}
 		catch (RuntimeException ex) {
-			throw new CloudFoundryAuthorizationException(
-					CloudFoundryAuthorizationException.Reason.INVALID_TOKEN,
+			throw new CloudFoundryAuthorizationException(CloudFoundryAuthorizationException.Reason.INVALID_TOKEN,
 					"Token could not be parsed", ex);
 		}
 	}
@@ -105,13 +103,11 @@ class Token {
 	private <T> T getRequired(Map<String, Object> map, String key, Class<T> type) {
 		Object value = map.get(key);
 		if (value == null) {
-			throw new CloudFoundryAuthorizationException(
-					CloudFoundryAuthorizationException.Reason.INVALID_TOKEN,
+			throw new CloudFoundryAuthorizationException(CloudFoundryAuthorizationException.Reason.INVALID_TOKEN,
 					"Unable to get value from key " + key);
 		}
 		if (!type.isInstance(value)) {
-			throw new CloudFoundryAuthorizationException(
-					CloudFoundryAuthorizationException.Reason.INVALID_TOKEN,
+			throw new CloudFoundryAuthorizationException(CloudFoundryAuthorizationException.Reason.INVALID_TOKEN,
 					"Unexpected value type from key " + key + " value " + value);
 		}
 		return (T) value;

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -84,14 +84,12 @@ public abstract class AbstractFieldValuesProcessorTests {
 		assertThat(values.get("stringArrayNone")).isNull();
 		assertThat(values.get("stringEmptyArray")).isEqualTo(new Object[0]);
 		assertThat(values.get("stringArrayConst")).isEqualTo(new Object[] { "OK", "KO" });
-		assertThat(values.get("stringArrayConstElements"))
-				.isEqualTo(new Object[] { "c" });
+		assertThat(values.get("stringArrayConstElements")).isEqualTo(new Object[] { "c" });
 		assertThat(values.get("integerArray")).isEqualTo(new Object[] { 42, 24 });
 		assertThat(values.get("unknownArray")).isNull();
 	}
 
-	@SupportedAnnotationTypes({
-			"org.springframework.boot.configurationsample.ConfigurationProperties" })
+	@SupportedAnnotationTypes({ "org.springframework.boot.configurationsample.ConfigurationProperties" })
 	@SupportedSourceVersion(SourceVersion.RELEASE_6)
 	private class TestProcessor extends AbstractProcessor {
 
@@ -105,14 +103,12 @@ public abstract class AbstractFieldValuesProcessorTests {
 		}
 
 		@Override
-		public boolean process(Set<? extends TypeElement> annotations,
-				RoundEnvironment roundEnv) {
+		public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 			for (TypeElement annotation : annotations) {
 				for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
 					if (element instanceof TypeElement) {
 						try {
-							this.values.putAll(
-									this.processor.getFieldValues((TypeElement) element));
+							this.values.putAll(this.processor.getFieldValues((TypeElement) element));
 						}
 						catch (Exception ex) {
 							throw new IllegalStateException(ex);

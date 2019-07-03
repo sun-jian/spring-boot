@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,8 +33,8 @@ public class Compression {
 	/**
 	 * Comma-separated list of MIME types that should be compressed.
 	 */
-	private String[] mimeTypes = new String[] { "text/html", "text/xml", "text/plain",
-			"text/css", "text/javascript", "application/javascript" };
+	private String[] mimeTypes = new String[] { "text/html", "text/xml", "text/plain", "text/css", "text/javascript",
+			"application/javascript" };
 
 	/**
 	 * Comma-separated list of user agents for which responses should not be compressed.

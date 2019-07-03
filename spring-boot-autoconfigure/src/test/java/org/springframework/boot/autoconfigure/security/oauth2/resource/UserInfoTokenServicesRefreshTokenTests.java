@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -61,8 +61,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = {
-		"security.oauth2.resource.userInfoUri:http://example.com",
-		"security.oauth2.client.clientId=foo" })
+		"security.oauth2.resource.userInfoUri:https://example.com", "security.oauth2.client.clientId=foo" })
 @DirtiesContext
 public class UserInfoTokenServicesRefreshTokenTests {
 
@@ -76,8 +75,7 @@ public class UserInfoTokenServicesRefreshTokenTests {
 
 	@Before
 	public void init() {
-		this.services = new UserInfoTokenServices(
-				"http://localhost:" + this.port + "/user", "foo");
+		this.services = new UserInfoTokenServices("http://localhost:" + this.port + "/user", "foo");
 	}
 
 	@Test
@@ -96,8 +94,7 @@ public class UserInfoTokenServicesRefreshTokenTests {
 		assertThat(this.services.loadAuthentication("FOO").getName()).isEqualTo("me");
 		assertThat(context.getAccessToken().getValue()).isEqualTo("FOO");
 		// The refresh token is still intact
-		assertThat(context.getAccessToken().getRefreshToken())
-				.isEqualTo(token.getRefreshToken());
+		assertThat(context.getAccessToken().getRefreshToken()).isEqualTo(token.getRefreshToken());
 	}
 
 	@Test
@@ -111,11 +108,9 @@ public class UserInfoTokenServicesRefreshTokenTests {
 	}
 
 	@Configuration
-	@Import({ EmbeddedServletContainerAutoConfiguration.class,
-			DispatcherServletAutoConfiguration.class, WebMvcAutoConfiguration.class,
-			HttpMessageConvertersAutoConfiguration.class,
-			ServerPropertiesAutoConfiguration.class,
-			PropertyPlaceholderAutoConfiguration.class })
+	@Import({ EmbeddedServletContainerAutoConfiguration.class, DispatcherServletAutoConfiguration.class,
+			WebMvcAutoConfiguration.class, HttpMessageConvertersAutoConfiguration.class,
+			ServerPropertiesAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class })
 
 	@RestController
 	protected static class Application {

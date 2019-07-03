@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,8 @@
 package org.springframework.boot.autoconfigure.jms.activemq;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
@@ -30,7 +32,6 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @author Venil Noronha
- * @since 1.2.0
  */
 class ActiveMQConnectionFactoryFactory {
 
@@ -40,25 +41,30 @@ class ActiveMQConnectionFactoryFactory {
 
 	private final ActiveMQProperties properties;
 
-	ActiveMQConnectionFactoryFactory(ActiveMQProperties properties) {
+	private final List<ActiveMQConnectionFactoryCustomizer> factoryCustomizers;
+
+	ActiveMQConnectionFactoryFactory(ActiveMQProperties properties,
+			List<ActiveMQConnectionFactoryCustomizer> factoryCustomizers) {
 		Assert.notNull(properties, "Properties must not be null");
 		this.properties = properties;
+		this.factoryCustomizers = (factoryCustomizers != null) ? factoryCustomizers
+				: Collections.<ActiveMQConnectionFactoryCustomizer>emptyList();
 	}
 
-	public <T extends ActiveMQConnectionFactory> T createConnectionFactory(
-			Class<T> factoryClass) {
+	public <T extends ActiveMQConnectionFactory> T createConnectionFactory(Class<T> factoryClass) {
 		try {
 			return doCreateConnectionFactory(factoryClass);
 		}
 		catch (Exception ex) {
-			throw new IllegalStateException(
-					"Unable to create " + "ActiveMQConnectionFactory", ex);
+			throw new IllegalStateException("Unable to create " + "ActiveMQConnectionFactory", ex);
 		}
 	}
 
-	private <T extends ActiveMQConnectionFactory> T doCreateConnectionFactory(
-			Class<T> factoryClass) throws Exception {
+	private <T extends ActiveMQConnectionFactory> T doCreateConnectionFactory(Class<T> factoryClass) throws Exception {
 		T factory = createConnectionFactoryInstance(factoryClass);
+		factory.setCloseTimeout(this.properties.getCloseTimeout());
+		factory.setNonBlockingRedelivery(this.properties.isNonBlockingRedelivery());
+		factory.setSendTimeout(this.properties.getSendTimeout());
 		Packages packages = this.properties.getPackages();
 		if (packages.getTrustAll() != null) {
 			factory.setTrustAllPackages(packages.getTrustAll());
@@ -66,20 +72,26 @@ class ActiveMQConnectionFactoryFactory {
 		if (!packages.getTrusted().isEmpty()) {
 			factory.setTrustedPackages(packages.getTrusted());
 		}
+		customize(factory);
 		return factory;
 	}
 
-	private <T extends ActiveMQConnectionFactory> T createConnectionFactoryInstance(
-			Class<T> factoryClass) throws InstantiationException, IllegalAccessException,
-					InvocationTargetException, NoSuchMethodException {
+	private <T extends ActiveMQConnectionFactory> T createConnectionFactoryInstance(Class<T> factoryClass)
+			throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		String brokerUrl = determineBrokerUrl();
 		String user = this.properties.getUser();
 		String password = this.properties.getPassword();
 		if (StringUtils.hasLength(user) && StringUtils.hasLength(password)) {
-			return factoryClass.getConstructor(String.class, String.class, String.class)
-					.newInstance(user, password, brokerUrl);
+			return factoryClass.getConstructor(String.class, String.class, String.class).newInstance(user, password,
+					brokerUrl);
 		}
 		return factoryClass.getConstructor(String.class).newInstance(brokerUrl);
+	}
+
+	private void customize(ActiveMQConnectionFactory connectionFactory) {
+		for (ActiveMQConnectionFactoryCustomizer factoryCustomizer : this.factoryCustomizers) {
+			factoryCustomizer.customize(connectionFactory);
+		}
 	}
 
 	String determineBrokerUrl() {

@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,9 +20,8 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Map;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
+import org.springframework.boot.configurationprocessor.json.JSONArray;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.boot.configurationprocessor.metadata.ItemMetadata.ItemType;
 
 /**
@@ -33,8 +32,7 @@ import org.springframework.boot.configurationprocessor.metadata.ItemMetadata.Ite
  */
 class JsonConverter {
 
-	public JSONArray toJsonArray(ConfigurationMetadata metadata, ItemType itemType)
-			throws Exception {
+	public JSONArray toJsonArray(ConfigurationMetadata metadata, ItemType itemType) throws Exception {
 		JSONArray jsonArray = new JSONArray();
 		for (ItemMetadata item : metadata.getItems()) {
 			if (item.isOfItemType(itemType)) {
@@ -67,6 +65,9 @@ class JsonConverter {
 		if (deprecation != null) {
 			jsonObject.put("deprecated", true); // backward compatibility
 			JSONObject deprecationJsonObject = new JSONObject();
+			if (deprecation.getLevel() != null) {
+				deprecationJsonObject.put("level", deprecation.getLevel());
+			}
 			if (deprecation.getReason() != null) {
 				deprecationJsonObject.put("reason", deprecation.getReason());
 			}
@@ -113,8 +114,7 @@ class JsonConverter {
 		return providers;
 	}
 
-	private JSONObject getItemHintProvider(ItemHint.ValueProvider provider)
-			throws Exception {
+	private JSONObject getItemHintProvider(ItemHint.ValueProvider provider) throws Exception {
 		JSONObject result = new JSONOrderedObject();
 		result.put("name", provider.getName());
 		if (provider.getParameters() != null && !provider.getParameters().isEmpty()) {
@@ -127,8 +127,7 @@ class JsonConverter {
 		return result;
 	}
 
-	private void putIfPresent(JSONObject jsonObject, String name, Object value)
-			throws Exception {
+	private void putIfPresent(JSONObject jsonObject, String name, Object value) throws Exception {
 		if (value != null) {
 			jsonObject.put(name, value);
 		}

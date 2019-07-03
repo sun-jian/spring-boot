@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -105,9 +105,8 @@ public class ConfigurationWarningsApplicationContextInitializerTests {
 	@Test
 	public void logWarningIfScanningProblemPackages() throws Exception {
 		load(InRealButScanningProblemPackages.class);
-		assertThat(this.output.toString())
-				.contains("Your ApplicationContext is unlikely to start due to a "
-						+ "@ComponentScan of the default package, 'org.springframework'.");
+		assertThat(this.output.toString()).contains("Your ApplicationContext is unlikely to start due to a "
+				+ "@ComponentScan of the default package, 'org.springframework'.");
 
 	}
 
@@ -146,8 +145,7 @@ public class ConfigurationWarningsApplicationContextInitializerTests {
 	static class TestComponentScanPackageCheck extends ComponentScanPackageCheck {
 
 		@Override
-		protected Set<String> getComponentScanningPackages(
-				BeanDefinitionRegistry registry) {
+		protected Set<String> getComponentScanningPackages(BeanDefinitionRegistry registry) {
 			Set<String> scannedPackages = super.getComponentScanningPackages(registry);
 			Set<String> result = new LinkedHashSet<String>();
 			for (String scannedPackage : scannedPackages) {

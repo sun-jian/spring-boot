@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,6 +39,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for {@link RabbitTemplate}.
@@ -76,6 +77,7 @@ import org.springframework.retry.support.RetryTemplate;
  * @author Josh Long
  * @author Stephane Nicoll
  * @author Gary Russell
+ * @since 1.0.0
  */
 @Configuration
 @ConditionalOnClass({ RabbitTemplate.class, Channel.class })
@@ -87,9 +89,12 @@ public class RabbitAutoConfiguration {
 	@ConditionalOnMissingBean(ConnectionFactory.class)
 	protected static class RabbitConnectionFactoryCreator {
 
+		// Only available in rabbitmq-java-client 5.4.0 +
+		private static final boolean CAN_ENABLE_HOSTNAME_VERIFICATION = ReflectionUtils
+				.findMethod(com.rabbitmq.client.ConnectionFactory.class, "enableHostnameVerification") != null;
+
 		@Bean
-		public CachingConnectionFactory rabbitConnectionFactory(RabbitProperties config)
-				throws Exception {
+		public CachingConnectionFactory rabbitConnectionFactory(RabbitProperties config) throws Exception {
 			RabbitConnectionFactoryBean factory = new RabbitConnectionFactoryBean();
 			if (config.determineHost() != null) {
 				factory.setHost(config.determineHost());
@@ -117,31 +122,35 @@ public class RabbitAutoConfiguration {
 				factory.setKeyStorePassphrase(ssl.getKeyStorePassword());
 				factory.setTrustStore(ssl.getTrustStore());
 				factory.setTrustStorePassphrase(ssl.getTrustStorePassword());
+				factory.setSkipServerCertificateValidation(!ssl.isValidateServerCertificate());
+				if (ssl.getVerifyHostname() != null) {
+					factory.setEnableHostnameVerification(ssl.getVerifyHostname());
+				}
+				else {
+					if (CAN_ENABLE_HOSTNAME_VERIFICATION) {
+						factory.setEnableHostnameVerification(true);
+					}
+				}
 			}
 			if (config.getConnectionTimeout() != null) {
 				factory.setConnectionTimeout(config.getConnectionTimeout());
 			}
 			factory.afterPropertiesSet();
-			CachingConnectionFactory connectionFactory = new CachingConnectionFactory(
-					factory.getObject());
+			CachingConnectionFactory connectionFactory = new CachingConnectionFactory(factory.getObject());
 			connectionFactory.setAddresses(config.determineAddresses());
 			connectionFactory.setPublisherConfirms(config.isPublisherConfirms());
 			connectionFactory.setPublisherReturns(config.isPublisherReturns());
 			if (config.getCache().getChannel().getSize() != null) {
-				connectionFactory
-						.setChannelCacheSize(config.getCache().getChannel().getSize());
+				connectionFactory.setChannelCacheSize(config.getCache().getChannel().getSize());
 			}
 			if (config.getCache().getConnection().getMode() != null) {
-				connectionFactory
-						.setCacheMode(config.getCache().getConnection().getMode());
+				connectionFactory.setCacheMode(config.getCache().getConnection().getMode());
 			}
 			if (config.getCache().getConnection().getSize() != null) {
-				connectionFactory.setConnectionCacheSize(
-						config.getCache().getConnection().getSize());
+				connectionFactory.setConnectionCacheSize(config.getCache().getConnection().getSize());
 			}
 			if (config.getCache().getChannel().getCheckoutTimeout() != null) {
-				connectionFactory.setChannelCheckoutTimeout(
-						config.getCache().getChannel().getCheckoutTimeout());
+				connectionFactory.setChannelCheckoutTimeout(config.getCache().getChannel().getCheckoutTimeout());
 			}
 			return connectionFactory;
 		}
@@ -156,8 +165,7 @@ public class RabbitAutoConfiguration {
 
 		private final RabbitProperties properties;
 
-		public RabbitTemplateConfiguration(
-				ObjectProvider<MessageConverter> messageConverter,
+		public RabbitTemplateConfiguration(ObjectProvider<MessageConverter> messageConverter,
 				RabbitProperties properties) {
 			this.messageConverter = messageConverter;
 			this.properties = properties;
@@ -189,7 +197,7 @@ public class RabbitAutoConfiguration {
 
 		private boolean determineMandatoryFlag() {
 			Boolean mandatory = this.properties.getTemplate().getMandatory();
-			return (mandatory != null ? mandatory : this.properties.isPublisherReturns());
+			return (mandatory != null) ? mandatory : this.properties.isPublisherReturns();
 		}
 
 		private RetryTemplate createRetryTemplate(RabbitProperties.Retry properties) {
@@ -223,8 +231,7 @@ public class RabbitAutoConfiguration {
 
 		@Bean
 		@ConditionalOnSingleCandidate(RabbitTemplate.class)
-		public RabbitMessagingTemplate rabbitMessagingTemplate(
-				RabbitTemplate rabbitTemplate) {
+		public RabbitMessagingTemplate rabbitMessagingTemplate(RabbitTemplate rabbitTemplate) {
 			return new RabbitMessagingTemplate(rabbitTemplate);
 		}
 

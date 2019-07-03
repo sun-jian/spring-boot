@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.boot.system;
 
 import java.io.File;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,15 +40,13 @@ import org.springframework.util.StringUtils;
  * @author Andy Wilkinson
  * @since 1.4.0
  */
-public class EmbeddedServerPortFileWriter
-		implements ApplicationListener<EmbeddedServletContainerInitializedEvent> {
+public class EmbeddedServerPortFileWriter implements ApplicationListener<EmbeddedServletContainerInitializedEvent> {
 
 	private static final String DEFAULT_FILE_NAME = "application.port";
 
 	private static final String[] PROPERTY_VARIABLES = { "PORTFILE", "portfile" };
 
-	private static final Log logger = LogFactory
-			.getLog(EmbeddedServerPortFileWriter.class);
+	private static final Log logger = LogFactory.getLog(EmbeddedServerPortFileWriter.class);
 
 	private final File file;
 
@@ -113,10 +112,10 @@ public class EmbeddedServerPortFileWriter
 		String extension = StringUtils.getFilenameExtension(this.file.getName());
 		name = name.substring(0, name.length() - extension.length() - 1);
 		if (isUpperCase(name)) {
-			name = name + "-" + contextName.toUpperCase();
+			name = name + "-" + contextName.toUpperCase(Locale.ENGLISH);
 		}
 		else {
-			name = name + "-" + contextName.toLowerCase();
+			name = name + "-" + contextName.toLowerCase(Locale.ENGLISH);
 		}
 		if (StringUtils.hasLength(extension)) {
 			name = name + "." + extension;
@@ -126,8 +125,7 @@ public class EmbeddedServerPortFileWriter
 
 	private boolean isUpperCase(String name) {
 		for (int i = 0; i < name.length(); i++) {
-			if (Character.isLetter(name.charAt(i))
-					&& !Character.isUpperCase(name.charAt(i))) {
+			if (Character.isLetter(name.charAt(i)) && !Character.isUpperCase(name.charAt(i))) {
 				return false;
 			}
 		}

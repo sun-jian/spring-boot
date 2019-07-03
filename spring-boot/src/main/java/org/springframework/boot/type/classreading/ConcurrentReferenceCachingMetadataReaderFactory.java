@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,15 +29,14 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * Caching implementation of the {@link MetadataReaderFactory} interface backed by a
- * {@link ConcurrentReferenceHashMap} , caching {@link MetadataReader} per Spring
+ * {@link ConcurrentReferenceHashMap}, caching {@link MetadataReader} per Spring
  * {@link Resource} handle (i.e. per ".class" file).
  *
  * @author Phillip Webb
  * @since 1.4.0
  * @see CachingMetadataReaderFactory
  */
-public class ConcurrentReferenceCachingMetadataReaderFactory
-		extends SimpleMetadataReaderFactory {
+public class ConcurrentReferenceCachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
 	private final Map<Resource, MetadataReader> cache = new ConcurrentReferenceHashMap<Resource, MetadataReader>();
 
@@ -55,8 +54,7 @@ public class ConcurrentReferenceCachingMetadataReaderFactory
 	 * @param resourceLoader the Spring ResourceLoader to use (also determines the
 	 * ClassLoader to use)
 	 */
-	public ConcurrentReferenceCachingMetadataReaderFactory(
-			ResourceLoader resourceLoader) {
+	public ConcurrentReferenceCachingMetadataReaderFactory(ResourceLoader resourceLoader) {
 		super(resourceLoader);
 	}
 

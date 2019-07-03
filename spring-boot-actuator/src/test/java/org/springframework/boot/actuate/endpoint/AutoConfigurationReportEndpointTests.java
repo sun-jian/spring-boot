@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,12 +42,10 @@ import static org.mockito.Mockito.mock;
  * @author Phillip Webb
  * @author Andy Wilkinson
  */
-public class AutoConfigurationReportEndpointTests
-		extends AbstractEndpointTests<AutoConfigurationReportEndpoint> {
+public class AutoConfigurationReportEndpointTests extends AbstractEndpointTests<AutoConfigurationReportEndpoint> {
 
 	public AutoConfigurationReportEndpointTests() {
-		super(Config.class, AutoConfigurationReportEndpoint.class, "autoconfig", true,
-				"endpoints.autoconfig");
+		super(Config.class, AutoConfigurationReportEndpoint.class, "autoconfig", true, "endpoints.autoconfig");
 	}
 
 	@Test
@@ -73,10 +71,8 @@ public class AutoConfigurationReportEndpointTests
 
 		@PostConstruct
 		public void setupAutoConfigurationReport() {
-			ConditionEvaluationReport report = ConditionEvaluationReport
-					.get(this.context.getBeanFactory());
-			report.recordConditionEvaluation("a", mock(Condition.class),
-					mock(ConditionOutcome.class));
+			ConditionEvaluationReport report = ConditionEvaluationReport.get(this.context.getBeanFactory());
+			report.recordConditionEvaluation("a", mock(Condition.class), mock(ConditionOutcome.class));
 			report.recordExclusions(Arrays.asList("com.foo.Bar"));
 		}
 

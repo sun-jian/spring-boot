@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -64,13 +64,12 @@ public class StatsdMetricWriter implements MetricWriter, Closeable {
 	 * @param port the port for the statsd server
 	 */
 	public StatsdMetricWriter(String prefix, String host, int port) {
-		this(new NonBlockingStatsDClient(trimPrefix(prefix), host, port,
-				new LoggingStatsdErrorHandler()));
+		this(new NonBlockingStatsDClient(trimPrefix(prefix), host, port, new LoggingStatsdErrorHandler()));
 	}
 
 	/**
 	 * Create a new writer with the given client.
-	 * @param client StatsD client to write metrics with
+	 * @param client the StatsD client to write metrics with
 	 */
 	public StatsdMetricWriter(StatsDClient client) {
 		Assert.notNull(client, "client must not be null");
@@ -78,7 +77,7 @@ public class StatsdMetricWriter implements MetricWriter, Closeable {
 	}
 
 	private static String trimPrefix(String prefix) {
-		String trimmedPrefix = StringUtils.hasText(prefix) ? prefix : null;
+		String trimmedPrefix = (StringUtils.hasText(prefix) ? prefix : null);
 		while (trimmedPrefix != null && trimmedPrefix.endsWith(".")) {
 			trimmedPrefix = trimmedPrefix.substring(0, trimmedPrefix.length() - 1);
 		}
@@ -88,15 +87,13 @@ public class StatsdMetricWriter implements MetricWriter, Closeable {
 
 	@Override
 	public void increment(Delta<?> delta) {
-		this.client.count(sanitizeMetricName(delta.getName()),
-				delta.getValue().longValue());
+		this.client.count(sanitizeMetricName(delta.getName()), delta.getValue().longValue());
 	}
 
 	@Override
 	public void set(Metric<?> value) {
 		String name = sanitizeMetricName(value.getName());
-		if (name.contains("timer.") && !name.contains("gauge.")
-				&& !name.contains("counter.")) {
+		if (name.contains("timer.") && !name.contains("gauge.") && !name.contains("counter.")) {
 			this.client.recordExecutionTime(name, value.getValue().longValue());
 		}
 		else {
@@ -121,20 +118,18 @@ public class StatsdMetricWriter implements MetricWriter, Closeable {
 
 	/**
 	 * Sanitize the metric name if necessary.
-	 * @param name The metric name
-	 * @return The sanitized metric name
+	 * @param name the metric name
+	 * @return the sanitized metric name
 	 */
 	private String sanitizeMetricName(String name) {
 		return name.replace(":", "-");
 	}
 
-	private static final class LoggingStatsdErrorHandler
-			implements StatsDClientErrorHandler {
+	private static final class LoggingStatsdErrorHandler implements StatsDClientErrorHandler {
 
 		@Override
 		public void handle(Exception e) {
-			logger.debug("Failed to write metric. Exception: " + e.getClass()
-					+ ", message: " + e.getMessage());
+			logger.debug("Failed to write metric. Exception: " + e.getClass() + ", message: " + e.getMessage());
 		}
 
 	}

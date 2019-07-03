@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,19 +30,15 @@ import org.springframework.util.ClassUtils;
  * @author Dave Syer
  * @since 1.2.2
  */
-public class MustacheTemplateAvailabilityProvider
-		implements TemplateAvailabilityProvider {
+public class MustacheTemplateAvailabilityProvider implements TemplateAvailabilityProvider {
 
 	@Override
-	public boolean isTemplateAvailable(String view, Environment environment,
-			ClassLoader classLoader, ResourceLoader resourceLoader) {
+	public boolean isTemplateAvailable(String view, Environment environment, ClassLoader classLoader,
+			ResourceLoader resourceLoader) {
 		if (ClassUtils.isPresent("com.samskivert.mustache.Template", classLoader)) {
-			PropertyResolver resolver = new RelaxedPropertyResolver(environment,
-					"spring.mustache.");
-			String prefix = resolver.getProperty("prefix",
-					MustacheProperties.DEFAULT_PREFIX);
-			String suffix = resolver.getProperty("suffix",
-					MustacheProperties.DEFAULT_SUFFIX);
+			PropertyResolver resolver = new RelaxedPropertyResolver(environment, "spring.mustache.");
+			String prefix = resolver.getProperty("prefix", MustacheProperties.DEFAULT_PREFIX);
+			String suffix = resolver.getProperty("suffix", MustacheProperties.DEFAULT_SUFFIX);
 			return resourceLoader.getResource(prefix + view + suffix).exists();
 		}
 		return false;

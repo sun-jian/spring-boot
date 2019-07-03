@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,14 +26,12 @@ import org.springframework.web.filter.HiddenHttpMethodFilter;
  * @author Phillip Webb
  * @since 1.4.0
  */
-public class OrderedHiddenHttpMethodFilter extends HiddenHttpMethodFilter
-		implements Ordered {
+public class OrderedHiddenHttpMethodFilter extends HiddenHttpMethodFilter implements Ordered {
 
 	/**
 	 * The default order is high to ensure the filter is applied before Spring Security.
 	 */
-	public static final int DEFAULT_ORDER = FilterRegistrationBean.REQUEST_WRAPPER_FILTER_MAX_ORDER
-			- 10000;
+	public static final int DEFAULT_ORDER = FilterRegistrationBean.REQUEST_WRAPPER_FILTER_MAX_ORDER - 10000;
 
 	private int order = DEFAULT_ORDER;
 

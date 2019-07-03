@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,22 +39,19 @@ public class LocalHostWebConnectionHtmlUnitDriver extends WebConnectionHtmlUnitD
 		this.environment = environment;
 	}
 
-	public LocalHostWebConnectionHtmlUnitDriver(Environment environment,
-			boolean enableJavascript) {
+	public LocalHostWebConnectionHtmlUnitDriver(Environment environment, boolean enableJavascript) {
 		super(enableJavascript);
 		Assert.notNull(environment, "Environment must not be null");
 		this.environment = environment;
 	}
 
-	public LocalHostWebConnectionHtmlUnitDriver(Environment environment,
-			BrowserVersion browserVersion) {
+	public LocalHostWebConnectionHtmlUnitDriver(Environment environment, BrowserVersion browserVersion) {
 		super(browserVersion);
 		Assert.notNull(environment, "Environment must not be null");
 		this.environment = environment;
 	}
 
-	public LocalHostWebConnectionHtmlUnitDriver(Environment environment,
-			Capabilities capabilities) {
+	public LocalHostWebConnectionHtmlUnitDriver(Environment environment, Capabilities capabilities) {
 		super(capabilities);
 		Assert.notNull(environment, "Environment must not be null");
 		this.environment = environment;

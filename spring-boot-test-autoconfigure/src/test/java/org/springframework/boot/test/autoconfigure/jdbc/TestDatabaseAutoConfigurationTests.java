@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -60,8 +60,7 @@ public class TestDatabaseAutoConfigurationTests {
 		DataSource datasource = this.context.getBean(DataSource.class);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(datasource);
 		jdbcTemplate.execute("create table example (id int, name varchar);");
-		ConfigurableApplicationContext anotherContext = doLoad(
-				ExistingDataSourceConfiguration.class);
+		ConfigurableApplicationContext anotherContext = doLoad(ExistingDataSourceConfiguration.class);
 		try {
 			DataSource anotherDatasource = anotherContext.getBean(DataSource.class);
 			JdbcTemplate anotherJdbcTemplate = new JdbcTemplate(anotherDatasource);
@@ -92,8 +91,8 @@ public class TestDatabaseAutoConfigurationTests {
 
 		@Bean
 		public DataSource dataSource() {
-			EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder()
-					.generateUniqueName(true).setType(EmbeddedDatabaseType.HSQL);
+			EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder().generateUniqueName(true)
+					.setType(EmbeddedDatabaseType.HSQL);
 			return builder.build();
 		}
 

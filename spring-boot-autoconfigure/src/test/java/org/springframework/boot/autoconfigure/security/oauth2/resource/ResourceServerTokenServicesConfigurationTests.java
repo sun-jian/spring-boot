@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,7 +57,10 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.oauth2.provider.token.store.jwk.JwkTokenStore;
 import org.springframework.social.connect.ConnectionFactoryLocator;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -99,10 +102,9 @@ public class ResourceServerTokenServicesConfigurationTests {
 	@Test
 	public void useRemoteTokenServices() {
 		EnvironmentTestUtils.addEnvironment(this.environment,
-				"security.oauth2.resource.tokenInfoUri:http://example.com",
-				"security.oauth2.resource.clientId=acme");
-		this.context = new SpringApplicationBuilder(ResourceConfiguration.class)
-				.environment(this.environment).web(false).run();
+				"security.oauth2.resource.tokenInfoUri:https://example.com", "security.oauth2.resource.clientId=acme");
+		this.context = new SpringApplicationBuilder(ResourceConfiguration.class).environment(this.environment)
+				.web(false).run();
 		RemoteTokenServices services = this.context.getBean(RemoteTokenServices.class);
 		assertThat(services).isNotNull();
 	}
@@ -110,22 +112,20 @@ public class ResourceServerTokenServicesConfigurationTests {
 	@Test
 	public void switchToUserInfo() {
 		EnvironmentTestUtils.addEnvironment(this.environment,
-				"security.oauth2.resource.userInfoUri:http://example.com");
-		this.context = new SpringApplicationBuilder(ResourceConfiguration.class)
-				.environment(this.environment).web(false).run();
-		UserInfoTokenServices services = this.context
-				.getBean(UserInfoTokenServices.class);
+				"security.oauth2.resource.userInfoUri:https://example.com");
+		this.context = new SpringApplicationBuilder(ResourceConfiguration.class).environment(this.environment)
+				.web(false).run();
+		UserInfoTokenServices services = this.context.getBean(UserInfoTokenServices.class);
 		assertThat(services).isNotNull();
 	}
 
 	@Test
 	public void userInfoWithAuthorities() {
 		EnvironmentTestUtils.addEnvironment(this.environment,
-				"security.oauth2.resource.userInfoUri:http://example.com");
-		this.context = new SpringApplicationBuilder(AuthoritiesConfiguration.class)
-				.environment(this.environment).web(false).run();
-		UserInfoTokenServices services = this.context
-				.getBean(UserInfoTokenServices.class);
+				"security.oauth2.resource.userInfoUri:https://example.com");
+		this.context = new SpringApplicationBuilder(AuthoritiesConfiguration.class).environment(this.environment)
+				.web(false).run();
+		UserInfoTokenServices services = this.context.getBean(UserInfoTokenServices.class);
 		assertThat(services).isNotNull();
 		assertThat(services).extracting("authoritiesExtractor")
 				.containsExactly(this.context.getBean(AuthoritiesExtractor.class));
@@ -134,11 +134,10 @@ public class ResourceServerTokenServicesConfigurationTests {
 	@Test
 	public void userInfoWithPrincipal() {
 		EnvironmentTestUtils.addEnvironment(this.environment,
-				"security.oauth2.resource.userInfoUri:http://example.com");
-		this.context = new SpringApplicationBuilder(PrincipalConfiguration.class)
-				.environment(this.environment).web(false).run();
-		UserInfoTokenServices services = this.context
-				.getBean(UserInfoTokenServices.class);
+				"security.oauth2.resource.userInfoUri:https://example.com");
+		this.context = new SpringApplicationBuilder(PrincipalConfiguration.class).environment(this.environment)
+				.web(false).run();
+		UserInfoTokenServices services = this.context.getBean(UserInfoTokenServices.class);
 		assertThat(services).isNotNull();
 		assertThat(services).extracting("principalExtractor")
 				.containsExactly(this.context.getBean(PrincipalExtractor.class));
@@ -146,12 +145,10 @@ public class ResourceServerTokenServicesConfigurationTests {
 
 	@Test
 	public void userInfoWithClient() {
-		EnvironmentTestUtils.addEnvironment(this.environment,
-				"security.oauth2.client.client-id=acme",
-				"security.oauth2.resource.userInfoUri:http://example.com",
-				"server.port=-1", "debug=true");
-		this.context = new SpringApplicationBuilder(ResourceNoClientConfiguration.class)
-				.environment(this.environment).web(true).run();
+		EnvironmentTestUtils.addEnvironment(this.environment, "security.oauth2.client.client-id=acme",
+				"security.oauth2.resource.userInfoUri:https://example.com", "server.port=-1", "debug=true");
+		this.context = new SpringApplicationBuilder(ResourceNoClientConfiguration.class).environment(this.environment)
+				.web(true).run();
 		BeanDefinition bean = ((BeanDefinitionRegistry) this.context)
 				.getBeanDefinition("scopedTarget.oauth2ClientContext");
 		assertThat(bean.getScope()).isEqualTo("request");
@@ -160,35 +157,32 @@ public class ResourceServerTokenServicesConfigurationTests {
 	@Test
 	public void preferUserInfo() {
 		EnvironmentTestUtils.addEnvironment(this.environment,
-				"security.oauth2.resource.userInfoUri:http://example.com",
-				"security.oauth2.resource.tokenInfoUri:http://example.com",
+				"security.oauth2.resource.userInfoUri:https://example.com",
+				"security.oauth2.resource.tokenInfoUri:https://example.com",
 				"security.oauth2.resource.preferTokenInfo:false");
-		this.context = new SpringApplicationBuilder(ResourceConfiguration.class)
-				.environment(this.environment).web(false).run();
-		UserInfoTokenServices services = this.context
-				.getBean(UserInfoTokenServices.class);
+		this.context = new SpringApplicationBuilder(ResourceConfiguration.class).environment(this.environment)
+				.web(false).run();
+		UserInfoTokenServices services = this.context.getBean(UserInfoTokenServices.class);
 		assertThat(services).isNotNull();
 	}
 
 	@Test
 	public void userInfoWithCustomizer() {
 		EnvironmentTestUtils.addEnvironment(this.environment,
-				"security.oauth2.resource.userInfoUri:http://example.com",
-				"security.oauth2.resource.tokenInfoUri:http://example.com",
+				"security.oauth2.resource.userInfoUri:https://example.com",
+				"security.oauth2.resource.tokenInfoUri:https://example.com",
 				"security.oauth2.resource.preferTokenInfo:false");
-		this.context = new SpringApplicationBuilder(ResourceConfiguration.class,
-				Customizer.class).environment(this.environment).web(false).run();
-		UserInfoTokenServices services = this.context
-				.getBean(UserInfoTokenServices.class);
+		this.context = new SpringApplicationBuilder(ResourceConfiguration.class, Customizer.class)
+				.environment(this.environment).web(false).run();
+		UserInfoTokenServices services = this.context.getBean(UserInfoTokenServices.class);
 		assertThat(services).isNotNull();
 	}
 
 	@Test
 	public void switchToJwt() {
-		EnvironmentTestUtils.addEnvironment(this.environment,
-				"security.oauth2.resource.jwt.keyValue=FOOBAR");
-		this.context = new SpringApplicationBuilder(ResourceConfiguration.class)
-				.environment(this.environment).web(false).run();
+		EnvironmentTestUtils.addEnvironment(this.environment, "security.oauth2.resource.jwt.keyValue=FOOBAR");
+		this.context = new SpringApplicationBuilder(ResourceConfiguration.class).environment(this.environment)
+				.web(false).run();
 		DefaultTokenServices services = this.context.getBean(DefaultTokenServices.class);
 		assertThat(services).isNotNull();
 		this.thrown.expect(NoSuchBeanDefinitionException.class);
@@ -197,10 +191,9 @@ public class ResourceServerTokenServicesConfigurationTests {
 
 	@Test
 	public void asymmetricJwt() {
-		EnvironmentTestUtils.addEnvironment(this.environment,
-				"security.oauth2.resource.jwt.keyValue=" + PUBLIC_KEY);
-		this.context = new SpringApplicationBuilder(ResourceConfiguration.class)
-				.environment(this.environment).web(false).run();
+		EnvironmentTestUtils.addEnvironment(this.environment, "security.oauth2.resource.jwt.keyValue=" + PUBLIC_KEY);
+		this.context = new SpringApplicationBuilder(ResourceConfiguration.class).environment(this.environment)
+				.web(false).run();
 		DefaultTokenServices services = this.context.getBean(DefaultTokenServices.class);
 		assertThat(services).isNotNull();
 	}
@@ -209,8 +202,8 @@ public class ResourceServerTokenServicesConfigurationTests {
 	public void jwkConfiguration() throws Exception {
 		EnvironmentTestUtils.addEnvironment(this.environment,
 				"security.oauth2.resource.jwk.key-set-uri=http://my-auth-server/token_keys");
-		this.context = new SpringApplicationBuilder(ResourceConfiguration.class)
-				.environment(this.environment).web(false).run();
+		this.context = new SpringApplicationBuilder(ResourceConfiguration.class).environment(this.environment)
+				.web(false).run();
 		DefaultTokenServices services = this.context.getBean(DefaultTokenServices.class);
 		assertThat(services).isNotNull();
 		this.thrown.expect(NoSuchBeanDefinitionException.class);
@@ -220,28 +213,23 @@ public class ResourceServerTokenServicesConfigurationTests {
 	@Test
 	public void springSocialUserInfo() {
 		EnvironmentTestUtils.addEnvironment(this.environment,
-				"security.oauth2.resource.userInfoUri:http://example.com",
-				"spring.social.facebook.app-id=foo",
+				"security.oauth2.resource.userInfoUri:https://example.com", "spring.social.facebook.app-id=foo",
 				"spring.social.facebook.app-secret=bar");
-		this.context = new SpringApplicationBuilder(SocialResourceConfiguration.class)
-				.environment(this.environment).web(true).run();
-		ConnectionFactoryLocator connectionFactory = this.context
-				.getBean(ConnectionFactoryLocator.class);
+		this.context = new SpringApplicationBuilder(SocialResourceConfiguration.class).environment(this.environment)
+				.web(true).run();
+		ConnectionFactoryLocator connectionFactory = this.context.getBean(ConnectionFactoryLocator.class);
 		assertThat(connectionFactory).isNotNull();
-		SpringSocialTokenServices services = this.context
-				.getBean(SpringSocialTokenServices.class);
+		SpringSocialTokenServices services = this.context.getBean(SpringSocialTokenServices.class);
 		assertThat(services).isNotNull();
 	}
 
 	@Test
 	public void customUserInfoRestTemplateFactory() {
 		EnvironmentTestUtils.addEnvironment(this.environment,
-				"security.oauth2.resource.userInfoUri:http://example.com");
-		this.context = new SpringApplicationBuilder(
-				CustomUserInfoRestTemplateFactory.class, ResourceConfiguration.class)
-						.environment(this.environment).web(false).run();
-		assertThat(this.context.getBeansOfType(UserInfoRestTemplateFactory.class))
-				.hasSize(1);
+				"security.oauth2.resource.userInfoUri:https://example.com");
+		this.context = new SpringApplicationBuilder(CustomUserInfoRestTemplateFactory.class,
+				ResourceConfiguration.class).environment(this.environment).web(false).run();
+		assertThat(this.context.getBeansOfType(UserInfoRestTemplateFactory.class)).hasSize(1);
 		assertThat(this.context.getBean(UserInfoRestTemplateFactory.class))
 				.isInstanceOf(CustomUserInfoRestTemplateFactory.class);
 	}
@@ -251,14 +239,30 @@ public class ResourceServerTokenServicesConfigurationTests {
 		EnvironmentTestUtils.addEnvironment(this.environment,
 				"security.oauth2.resource.jwt.key-uri=http://localhost:12345/banana");
 		this.context = new SpringApplicationBuilder(ResourceConfiguration.class,
-				JwtAccessTokenConverterRestTemplateCustomizerConfiguration.class)
-						.environment(this.environment).web(false).run();
+				JwtAccessTokenConverterRestTemplateCustomizerConfiguration.class).environment(this.environment)
+						.web(false).run();
 		assertThat(this.context.getBeansOfType(JwtAccessTokenConverter.class)).hasSize(1);
 	}
 
+	@Test
+	public void jwkTokenStoreShouldBeConditionalOnMissingBean() throws Exception {
+		EnvironmentTestUtils.addEnvironment(this.environment,
+				"security.oauth2.resource.jwk.key-set-uri=http://my-auth-server/token_keys");
+		this.context = new SpringApplicationBuilder(JwkTokenStoreConfiguration.class, ResourceConfiguration.class)
+				.environment(this.environment).web(false).run();
+		assertThat(this.context.getBeansOfType(JwkTokenStore.class)).hasSize(1);
+	}
+
+	@Test
+	public void jwtTokenStoreShouldBeConditionalOnMissingBean() throws Exception {
+		EnvironmentTestUtils.addEnvironment(this.environment, "security.oauth2.resource.jwt.keyValue=" + PUBLIC_KEY);
+		this.context = new SpringApplicationBuilder(JwtTokenStoreConfiguration.class, ResourceConfiguration.class)
+				.environment(this.environment).web(false).run();
+		assertThat(this.context.getBeansOfType(JwtTokenStore.class)).hasSize(1);
+	}
+
 	@Configuration
-	@Import({ ResourceServerTokenServicesConfiguration.class,
-			ResourceServerPropertiesConfiguration.class,
+	@Import({ ResourceServerTokenServicesConfiguration.class, ResourceServerPropertiesConfiguration.class,
 			PropertyPlaceholderAutoConfiguration.class })
 	@EnableConfigurationProperties(OAuth2ClientProperties.class)
 	protected static class ResourceConfiguration {
@@ -273,10 +277,8 @@ public class ResourceServerTokenServicesConfigurationTests {
 			return new AuthoritiesExtractor() {
 
 				@Override
-				public List<GrantedAuthority> extractAuthorities(
-						Map<String, Object> map) {
-					return AuthorityUtils
-							.commaSeparatedStringToAuthorityList("ROLE_ADMIN");
+				public List<GrantedAuthority> extractAuthorities(Map<String, Object> map) {
+					return AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_ADMIN");
 				}
 
 			};
@@ -301,6 +303,7 @@ public class ResourceServerTokenServicesConfigurationTests {
 
 	}
 
+	@Configuration
 	@Import({ OAuth2RestOperationsConfiguration.class })
 	protected static class ResourceNoClientConfiguration extends ResourceConfiguration {
 
@@ -322,12 +325,12 @@ public class ResourceServerTokenServicesConfigurationTests {
 
 		@Bean
 		public ResourceServerProperties resourceServerProperties() {
-			return new ResourceServerProperties(this.credentials.getClientId(),
-					this.credentials.getClientSecret());
+			return new ResourceServerProperties(this.credentials.getClientId(), this.credentials.getClientSecret());
 		}
 
 	}
 
+	@Configuration
 	@Import({ FacebookAutoConfiguration.class, SocialWebAutoConfiguration.class })
 	protected static class SocialResourceConfiguration extends ResourceConfiguration {
 
@@ -357,11 +360,9 @@ public class ResourceServerTokenServicesConfigurationTests {
 	}
 
 	@Component
-	protected static class CustomUserInfoRestTemplateFactory
-			implements UserInfoRestTemplateFactory {
+	protected static class CustomUserInfoRestTemplateFactory implements UserInfoRestTemplateFactory {
 
-		private final OAuth2RestTemplate restTemplate = new OAuth2RestTemplate(
-				new AuthorizationCodeResourceDetails());
+		private final OAuth2RestTemplate restTemplate = new OAuth2RestTemplate(new AuthorizationCodeResourceDetails());
 
 		@Override
 		public OAuth2RestTemplate getUserInfoRestTemplate() {
@@ -380,8 +381,27 @@ public class ResourceServerTokenServicesConfigurationTests {
 
 	}
 
-	private static class MockRestCallCustomizer
-			implements JwtAccessTokenConverterRestTemplateCustomizer {
+	@Configuration
+	static class JwtTokenStoreConfiguration {
+
+		@Bean
+		public TokenStore tokenStore(JwtAccessTokenConverter jwtTokenEnhancer) {
+			return new JwtTokenStore(jwtTokenEnhancer);
+		}
+
+	}
+
+	@Configuration
+	static class JwkTokenStoreConfiguration {
+
+		@Bean
+		public TokenStore tokenStore() {
+			return new JwkTokenStore("https://my.key-set.uri");
+		}
+
+	}
+
+	private static class MockRestCallCustomizer implements JwtAccessTokenConverterRestTemplateCustomizer {
 
 		@Override
 		public void customize(RestTemplate template) {
@@ -391,8 +411,7 @@ public class ResourceServerTokenServicesConfigurationTests {
 				public ClientHttpResponse intercept(HttpRequest request, byte[] body,
 						ClientHttpRequestExecution execution) throws IOException {
 					String payload = "{\"value\":\"FOO\"}";
-					MockClientHttpResponse response = new MockClientHttpResponse(
-							payload.getBytes(), HttpStatus.OK);
+					MockClientHttpResponse response = new MockClientHttpResponse(payload.getBytes(), HttpStatus.OK);
 					response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 					return response;
 				}

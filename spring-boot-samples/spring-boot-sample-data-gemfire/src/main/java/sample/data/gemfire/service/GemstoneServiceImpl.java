@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package sample.data.gemfire.service;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import javax.annotation.PostConstruct;
 
@@ -41,9 +42,8 @@ public class GemstoneServiceImpl implements GemstoneService {
 	protected static final List<String> APPROVED_GEMS;
 
 	static {
-		APPROVED_GEMS = Collections.unmodifiableList(
-				Arrays.asList(("ALEXANDRITE,AQUAMARINE,DIAMOND,OPAL,PEARL,"
-						+ "RUBY,SAPPHIRE,SPINEL,TOPAZ").split(",")));
+		APPROVED_GEMS = Collections.unmodifiableList(Arrays
+				.asList(("ALEXANDRITE,AQUAMARINE,DIAMOND,OPAL,PEARL," + "RUBY,SAPPHIRE,SPINEL,TOPAZ").split(",")));
 	}
 
 	private final GemstoneRepository repository;
@@ -119,19 +119,17 @@ public class GemstoneServiceImpl implements GemstoneService {
 		// in GemFire rather than before to demonstrate transactions in GemFire.
 		Gemstone savedGemstone = validate(this.repository.save(gemstone));
 		Assert.state(savedGemstone.equals(get(gemstone.getId())),
-				String.format("Failed to find Gemstone (%1$s) in "
-						+ "GemFire's Cache Region 'Gemstones'!", gemstone));
+				String.format("Failed to find Gemstone (%1$s) in " + "GemFire's Cache Region 'Gemstones'!", gemstone));
 		System.out.printf("Saved Gemstone [%1$s]%n", savedGemstone.getName());
 		return gemstone;
 	}
 
 	Gemstone validate(Gemstone gemstone) {
-		if (!APPROVED_GEMS.contains(gemstone.getName().toUpperCase())) {
+		if (!APPROVED_GEMS.contains(gemstone.getName().toUpperCase(Locale.ENGLISH))) {
 			// NOTE if the Gemstone is not valid, throw error...
 			// Should cause transaction to rollback in GemFire!
 			System.err.printf("Illegal Gemstone [%1$s]!%n", gemstone.getName());
-			throw new IllegalGemstoneException(
-					String.format("[%1$s] is not a valid Gemstone!", gemstone.getName()));
+			throw new IllegalGemstoneException(String.format("[%1$s] is not a valid Gemstone!", gemstone.getName()));
 		}
 		return gemstone;
 	}

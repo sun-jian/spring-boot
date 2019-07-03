@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -59,39 +59,40 @@ public class Neo4jPropertiesTests {
 	public void defaultUseHttpDriverIfEmbeddedDriverIsNotAvailable() {
 		Neo4jProperties properties = load(false);
 		Configuration configuration = properties.createConfiguration();
-		assertDriver(configuration, Neo4jProperties.HTTP_DRIVER,
-				Neo4jProperties.DEFAULT_HTTP_URI);
+		assertDriver(configuration, Neo4jProperties.HTTP_DRIVER, Neo4jProperties.DEFAULT_HTTP_URI);
 	}
 
 	@Test
-	public void httpUriUseHttpServer() {
-		Neo4jProperties properties = load(true,
-				"spring.data.neo4j.uri=http://localhost:7474");
+	public void httpUriUseHttpDriver() {
+		Neo4jProperties properties = load(true, "spring.data.neo4j.uri=http://localhost:7474");
 		Configuration configuration = properties.createConfiguration();
 		assertDriver(configuration, Neo4jProperties.HTTP_DRIVER, "http://localhost:7474");
 	}
 
 	@Test
+	public void httpsUriUseHttpDriver() {
+		Neo4jProperties properties = load(true, "spring.data.neo4j.uri=https://localhost:7474");
+		Configuration configuration = properties.createConfiguration();
+		assertDriver(configuration, Neo4jProperties.HTTP_DRIVER, "https://localhost:7474");
+	}
+
+	@Test
 	public void boltUriUseBoltDriver() {
-		Neo4jProperties properties = load(true,
-				"spring.data.neo4j.uri=bolt://localhost:7687");
+		Neo4jProperties properties = load(true, "spring.data.neo4j.uri=bolt://localhost:7687");
 		Configuration configuration = properties.createConfiguration();
 		assertDriver(configuration, Neo4jProperties.BOLT_DRIVER, "bolt://localhost:7687");
 	}
 
 	@Test
 	public void fileUriUseEmbeddedServer() {
-		Neo4jProperties properties = load(true,
-				"spring.data.neo4j.uri=file://var/tmp/graph.db");
+		Neo4jProperties properties = load(true, "spring.data.neo4j.uri=file://var/tmp/graph.db");
 		Configuration configuration = properties.createConfiguration();
-		assertDriver(configuration, Neo4jProperties.EMBEDDED_DRIVER,
-				"file://var/tmp/graph.db");
+		assertDriver(configuration, Neo4jProperties.EMBEDDED_DRIVER, "file://var/tmp/graph.db");
 	}
 
 	@Test
 	public void credentialsAreSet() {
-		Neo4jProperties properties = load(true,
-				"spring.data.neo4j.uri=http://localhost:7474",
+		Neo4jProperties properties = load(true, "spring.data.neo4j.uri=http://localhost:7474",
 				"spring.data.neo4j.username=user", "spring.data.neo4j.password=secret");
 		Configuration configuration = properties.createConfiguration();
 		assertDriver(configuration, Neo4jProperties.HTTP_DRIVER, "http://localhost:7474");
@@ -100,30 +101,24 @@ public class Neo4jPropertiesTests {
 
 	@Test
 	public void credentialsAreSetFromUri() {
-		Neo4jProperties properties = load(true,
-				"spring.data.neo4j.uri=http://user:secret@my-server:7474");
+		Neo4jProperties properties = load(true, "spring.data.neo4j.uri=http://user:secret@my-server:7474");
 		Configuration configuration = properties.createConfiguration();
-		assertDriver(configuration, Neo4jProperties.HTTP_DRIVER,
-				"http://user:secret@my-server:7474");
+		assertDriver(configuration, Neo4jProperties.HTTP_DRIVER, "http://my-server:7474");
 		assertCredentials(configuration, "user", "secret");
 	}
 
 	@Test
 	public void embeddedModeDisabledUseHttpUri() {
-		Neo4jProperties properties = load(true,
-				"spring.data.neo4j.embedded.enabled=false");
+		Neo4jProperties properties = load(true, "spring.data.neo4j.embedded.enabled=false");
 		Configuration configuration = properties.createConfiguration();
-		assertDriver(configuration, Neo4jProperties.HTTP_DRIVER,
-				Neo4jProperties.DEFAULT_HTTP_URI);
+		assertDriver(configuration, Neo4jProperties.HTTP_DRIVER, Neo4jProperties.DEFAULT_HTTP_URI);
 	}
 
 	@Test
 	public void embeddedModeWithRelativeLocation() {
-		Neo4jProperties properties = load(true,
-				"spring.data.neo4j.uri=target/neo4j/my.db");
+		Neo4jProperties properties = load(true, "spring.data.neo4j.uri=target/neo4j/my.db");
 		Configuration configuration = properties.createConfiguration();
-		assertDriver(configuration, Neo4jProperties.EMBEDDED_DRIVER,
-				"target/neo4j/my.db");
+		assertDriver(configuration, Neo4jProperties.EMBEDDED_DRIVER, "target/neo4j/my.db");
 	}
 
 	private static void assertDriver(Configuration actual, String driver, String uri) {
@@ -133,8 +128,7 @@ public class Neo4jPropertiesTests {
 		assertThat(driverConfig.getURI()).isEqualTo(uri);
 	}
 
-	private static void assertCredentials(Configuration actual, String username,
-			String password) {
+	private static void assertCredentials(Configuration actual, String username, String password) {
 		Credentials<?> credentials = actual.driverConfiguration().getCredentials();
 		if (username == null & password == null) {
 			assertThat(credentials).isNull();
@@ -143,8 +137,7 @@ public class Neo4jPropertiesTests {
 			assertThat(credentials).isNotNull();
 			Object content = credentials.credentials();
 			assertThat(content).isInstanceOf(String.class);
-			String[] auth = new String(Base64.decode(((String) content).getBytes()))
-					.split(":");
+			String[] auth = new String(Base64.decode(((String) content).getBytes())).split(":");
 			assertThat(auth[0]).isEqualTo(username);
 			assertThat(auth[1]).isEqualTo(password);
 			assertThat(auth).hasSize(2);
@@ -156,8 +149,7 @@ public class Neo4jPropertiesTests {
 		ctx.setClassLoader(new URLClassLoader(new URL[0], getClass().getClassLoader()) {
 
 			@Override
-			protected Class<?> loadClass(String name, boolean resolve)
-					throws ClassNotFoundException {
+			protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 				if (name.equals(Neo4jProperties.EMBEDDED_DRIVER)) {
 					if (embeddedAvailable) {
 						return TestEmbeddedDriver.class;

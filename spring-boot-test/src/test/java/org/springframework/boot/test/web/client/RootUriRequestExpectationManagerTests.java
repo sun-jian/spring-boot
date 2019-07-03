@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -54,7 +54,7 @@ public class RootUriRequestExpectationManagerTests {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private String uri = "http://example.com";
+	private String uri = "https://example.com";
 
 	@Mock
 	private RequestExpectationManager delegate;
@@ -78,8 +78,7 @@ public class RootUriRequestExpectationManagerTests {
 	}
 
 	@Test
-	public void createWhenExpectationManagerIsNullShouldThrowException()
-			throws Exception {
+	public void createWhenExpectationManagerIsNullShouldThrowException() throws Exception {
 		this.thrown.expect(IllegalArgumentException.class);
 		this.thrown.expectMessage("ExpectationManager must not be null");
 		new RootUriRequestExpectationManager(this.uri, null);
@@ -94,17 +93,15 @@ public class RootUriRequestExpectationManagerTests {
 	}
 
 	@Test
-	public void validateRequestWhenUriDoesNotStartWithRootUriShouldDelegateToExpectationManager()
-			throws Exception {
+	public void validateRequestWhenUriDoesNotStartWithRootUriShouldDelegateToExpectationManager() throws Exception {
 		ClientHttpRequest request = mock(ClientHttpRequest.class);
-		given(request.getURI()).willReturn(new URI("http://spring.io/test"));
+		given(request.getURI()).willReturn(new URI("https://spring.io/test"));
 		this.manager.validateRequest(request);
 		verify(this.delegate).validateRequest(request);
 	}
 
 	@Test
-	public void validateRequestWhenUriStartsWithRootUriShouldReplaceUri()
-			throws Exception {
+	public void validateRequestWhenUriStartsWithRootUriShouldReplaceUri() throws Exception {
 		ClientHttpRequest request = mock(ClientHttpRequest.class);
 		given(request.getURI()).willReturn(new URI(this.uri + "/hello"));
 		this.manager.validateRequest(request);
@@ -115,15 +112,13 @@ public class RootUriRequestExpectationManagerTests {
 	}
 
 	@Test
-	public void validateRequestWhenRequestUriAssertionIsThrownShouldReplaceUriInMessage()
-			throws Exception {
+	public void validateRequestWhenRequestUriAssertionIsThrownShouldReplaceUriInMessage() throws Exception {
 		ClientHttpRequest request = mock(ClientHttpRequest.class);
 		given(request.getURI()).willReturn(new URI(this.uri + "/hello"));
 		given(this.delegate.validateRequest((ClientHttpRequest) any()))
-				.willThrow(new AssertionError(
-						"Request URI expected:</hello> was:<http://example.com/bad>"));
+				.willThrow(new AssertionError("Request URI expected:</hello> was:<https://example.com/bad>"));
 		this.thrown.expect(AssertionError.class);
-		this.thrown.expectMessage("Request URI expected:<http://example.com/hello>");
+		this.thrown.expectMessage("Request URI expected:<https://example.com/hello>");
 		this.manager.validateRequest(request);
 	}
 
@@ -136,17 +131,14 @@ public class RootUriRequestExpectationManagerTests {
 	@Test
 	public void bindToShouldReturnMockRestServiceServer() throws Exception {
 		RestTemplate restTemplate = new RestTemplateBuilder().build();
-		MockRestServiceServer bound = RootUriRequestExpectationManager
-				.bindTo(restTemplate);
+		MockRestServiceServer bound = RootUriRequestExpectationManager.bindTo(restTemplate);
 		assertThat(bound).isNotNull();
 	}
 
 	@Test
-	public void bindToWithExpectationManagerShouldReturnMockRestServiceServer()
-			throws Exception {
+	public void bindToWithExpectationManagerShouldReturnMockRestServiceServer() throws Exception {
 		RestTemplate restTemplate = new RestTemplateBuilder().build();
-		MockRestServiceServer bound = RootUriRequestExpectationManager
-				.bindTo(restTemplate, this.delegate);
+		MockRestServiceServer bound = RootUriRequestExpectationManager.bindTo(restTemplate, this.delegate);
 		assertThat(bound).isNotNull();
 	}
 
@@ -154,8 +146,8 @@ public class RootUriRequestExpectationManagerTests {
 	public void forRestTemplateWhenUsingRootUriTemplateHandlerShouldReturnRootUriRequestExpectationManager()
 			throws Exception {
 		RestTemplate restTemplate = new RestTemplateBuilder().rootUri(this.uri).build();
-		RequestExpectationManager actual = RootUriRequestExpectationManager
-				.forRestTemplate(restTemplate, this.delegate);
+		RequestExpectationManager actual = RootUriRequestExpectationManager.forRestTemplate(restTemplate,
+				this.delegate);
 		assertThat(actual).isInstanceOf(RootUriRequestExpectationManager.class);
 		assertThat(actual).extracting("rootUri").containsExactly(this.uri);
 	}
@@ -164,32 +156,27 @@ public class RootUriRequestExpectationManagerTests {
 	public void forRestTemplateWhenNotUsingRootUriTemplateHandlerShouldReturnOriginalRequestExpectationManager()
 			throws Exception {
 		RestTemplate restTemplate = new RestTemplateBuilder().build();
-		RequestExpectationManager actual = RootUriRequestExpectationManager
-				.forRestTemplate(restTemplate, this.delegate);
+		RequestExpectationManager actual = RootUriRequestExpectationManager.forRestTemplate(restTemplate,
+				this.delegate);
 		assertThat(actual).isSameAs(this.delegate);
 	}
 
 	@Test
 	public void boundRestTemplateShouldPrefixRootUri() {
-		RestTemplate restTemplate = new RestTemplateBuilder()
-				.rootUri("http://example.com").build();
-		MockRestServiceServer server = RootUriRequestExpectationManager
-				.bindTo(restTemplate);
+		RestTemplate restTemplate = new RestTemplateBuilder().rootUri("https://example.com").build();
+		MockRestServiceServer server = RootUriRequestExpectationManager.bindTo(restTemplate);
 		server.expect(requestTo("/hello")).andRespond(withSuccess());
 		restTemplate.getForEntity("/hello", String.class);
 	}
 
 	@Test
 	public void boundRestTemplateWhenUrlIncludesDomainShouldNotPrefixRootUri() {
-		RestTemplate restTemplate = new RestTemplateBuilder()
-				.rootUri("http://example.com").build();
-		MockRestServiceServer server = RootUriRequestExpectationManager
-				.bindTo(restTemplate);
+		RestTemplate restTemplate = new RestTemplateBuilder().rootUri("https://example.com").build();
+		MockRestServiceServer server = RootUriRequestExpectationManager.bindTo(restTemplate);
 		server.expect(requestTo("/hello")).andRespond(withSuccess());
 		this.thrown.expect(AssertionError.class);
-		this.thrown.expectMessage(
-				"expected:<http://example.com/hello> but was:<http://spring.io/hello>");
-		restTemplate.getForEntity("http://spring.io/hello", String.class);
+		this.thrown.expectMessage("expected:<https://example.com/hello> but was:<https://spring.io/hello>");
+		restTemplate.getForEntity("https://spring.io/hello", String.class);
 	}
 
 }

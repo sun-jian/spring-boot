@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -63,15 +63,14 @@ class SkipPatternJarScanner extends StandardJarScanner {
 	}
 
 	// For Tomcat 7 compatibility
-	public void scan(ServletContext context, ClassLoader classloader,
-			JarScannerCallback callback, Set<String> jarsToSkip) {
-		Method scanMethod = ReflectionUtils.findMethod(this.jarScanner.getClass(), "scan",
-				ServletContext.class, ClassLoader.class, JarScannerCallback.class,
-				Set.class);
+	public void scan(ServletContext context, ClassLoader classloader, JarScannerCallback callback,
+			Set<String> jarsToSkip) {
+		Method scanMethod = ReflectionUtils.findMethod(this.jarScanner.getClass(), "scan", ServletContext.class,
+				ClassLoader.class, JarScannerCallback.class, Set.class);
 		Assert.notNull(scanMethod, "Unable to find scan method");
 		try {
 			scanMethod.invoke(this.jarScanner, context, classloader, callback,
-					(jarsToSkip == null ? this.patterns : jarsToSkip));
+					(jarsToSkip != null) ? jarsToSkip : this.patterns);
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException("Tomcat 7 reflection failed", ex);
@@ -84,8 +83,7 @@ class SkipPatternJarScanner extends StandardJarScanner {
 	 * @param patterns the jar skip patterns or {@code null} for defaults
 	 */
 	static void apply(TomcatEmbeddedContext context, Set<String> patterns) {
-		SkipPatternJarScanner scanner = new SkipPatternJarScanner(context.getJarScanner(),
-				patterns);
+		SkipPatternJarScanner scanner = new SkipPatternJarScanner(context.getJarScanner(), patterns);
 		context.setJarScanner(scanner);
 	}
 

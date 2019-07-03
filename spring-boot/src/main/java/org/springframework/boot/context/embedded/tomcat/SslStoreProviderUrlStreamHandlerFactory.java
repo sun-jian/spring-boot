@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -62,13 +62,11 @@ class SslStoreProviderUrlStreamHandlerFactory implements URLStreamHandlerFactory
 					try {
 						if (KEY_STORE_PATH.equals(url.getPath())) {
 							return new KeyStoreUrlConnection(url,
-									SslStoreProviderUrlStreamHandlerFactory.this.sslStoreProvider
-											.getKeyStore());
+									SslStoreProviderUrlStreamHandlerFactory.this.sslStoreProvider.getKeyStore());
 						}
 						if (TRUST_STORE_PATH.equals(url.getPath())) {
 							return new KeyStoreUrlConnection(url,
-									SslStoreProviderUrlStreamHandlerFactory.this.sslStoreProvider
-											.getTrustStore());
+									SslStoreProviderUrlStreamHandlerFactory.this.sslStoreProvider.getTrustStore());
 						}
 					}
 					catch (Exception ex) {

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,8 +37,7 @@ public class AtomikosXADataSourceWrapperTests {
 		AtomikosXADataSourceWrapper wrapper = new AtomikosXADataSourceWrapper();
 		DataSource wrapped = wrapper.wrapDataSource(dataSource);
 		assertThat(wrapped).isInstanceOf(AtomikosDataSourceBean.class);
-		assertThat(((AtomikosDataSourceBean) wrapped).getXaDataSource())
-				.isSameAs(dataSource);
+		assertThat(((AtomikosDataSourceBean) wrapped).getXaDataSource()).isSameAs(dataSource);
 	}
 
 }

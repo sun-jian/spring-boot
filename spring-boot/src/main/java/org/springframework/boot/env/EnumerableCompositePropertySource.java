@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,11 +30,11 @@ import org.springframework.core.env.PropertySource;
  * hence resolved with lowest priority).
  *
  * @author Dave Syer
+ * @since 1.0.0
  * @see PropertySource
  * @see EnumerablePropertySource
  */
-public class EnumerableCompositePropertySource
-		extends EnumerablePropertySource<Collection<PropertySource<?>>> {
+public class EnumerableCompositePropertySource extends EnumerablePropertySource<Collection<PropertySource<?>>> {
 
 	private volatile String[] names;
 
@@ -58,11 +58,9 @@ public class EnumerableCompositePropertySource
 		String[] result = this.names;
 		if (result == null) {
 			List<String> names = new ArrayList<String>();
-			for (PropertySource<?> source : new ArrayList<PropertySource<?>>(
-					getSource())) {
+			for (PropertySource<?> source : new ArrayList<PropertySource<?>>(getSource())) {
 				if (source instanceof EnumerablePropertySource) {
-					names.addAll(Arrays.asList(
-							((EnumerablePropertySource<?>) source).getPropertyNames()));
+					names.addAll(Arrays.asList(((EnumerablePropertySource<?>) source).getPropertyNames()));
 				}
 			}
 			this.names = names.toArray(new String[0]);

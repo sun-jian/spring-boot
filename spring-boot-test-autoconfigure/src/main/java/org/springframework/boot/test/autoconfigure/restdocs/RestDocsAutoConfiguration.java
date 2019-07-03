@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,11 +57,9 @@ public class RestDocsAutoConfiguration {
 
 	@Bean
 	@ConfigurationProperties(prefix = "spring.test.restdocs")
-	public RestDocsMockMvcBuilderCustomizer restDocumentationConfigurer(
-			MockMvcRestDocumentationConfigurer configurer,
+	public RestDocsMockMvcBuilderCustomizer restDocumentationConfigurer(MockMvcRestDocumentationConfigurer configurer,
 			ObjectProvider<RestDocumentationResultHandler> resultHandler) {
-		return new RestDocsMockMvcBuilderCustomizer(configurer,
-				resultHandler.getIfAvailable());
+		return new RestDocsMockMvcBuilderCustomizer(configurer, resultHandler.getIfAvailable());
 	}
 
 }

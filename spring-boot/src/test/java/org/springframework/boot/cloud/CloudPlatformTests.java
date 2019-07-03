@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,10 +45,8 @@ public class CloudPlatformTests {
 	}
 
 	@Test
-	public void getActiveWhenHasVcapApplicationShouldReturnCloudFoundry()
-			throws Exception {
-		Environment environment = new MockEnvironment().withProperty("VCAP_APPLICATION",
-				"---");
+	public void getActiveWhenHasVcapApplicationShouldReturnCloudFoundry() throws Exception {
+		Environment environment = new MockEnvironment().withProperty("VCAP_APPLICATION", "---");
 		CloudPlatform platform = CloudPlatform.getActive(environment);
 		assertThat(platform).isEqualTo(CloudPlatform.CLOUD_FOUNDRY);
 		assertThat(platform.isActive(environment)).isTrue();
@@ -56,8 +54,7 @@ public class CloudPlatformTests {
 
 	@Test
 	public void getActiveWhenHasVcapServicesShouldReturnCloudFoundry() throws Exception {
-		Environment environment = new MockEnvironment().withProperty("VCAP_SERVICES",
-				"---");
+		Environment environment = new MockEnvironment().withProperty("VCAP_SERVICES", "---");
 		CloudPlatform platform = CloudPlatform.getActive(environment);
 		assertThat(platform).isEqualTo(CloudPlatform.CLOUD_FOUNDRY);
 		assertThat(platform.isActive(environment)).isTrue();

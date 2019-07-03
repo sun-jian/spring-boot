@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,7 @@
 
 package org.springframework.boot.autoconfigure.security.oauth2.client;
 
-import javax.annotation.Resource;
-
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionMessage;
@@ -30,7 +29,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.NoneNestedConditions;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2RestOperationsConfiguration.OAuth2ClientIdCondition;
 import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -66,7 +64,6 @@ import org.springframework.util.StringUtils;
  */
 @Configuration
 @ConditionalOnClass(EnableOAuth2Client.class)
-@Conditional(OAuth2ClientIdCondition.class)
 public class OAuth2RestOperationsConfiguration {
 
 	@Configuration
@@ -90,13 +87,13 @@ public class OAuth2RestOperationsConfiguration {
 
 	@Configuration
 	@ConditionalOnBean(OAuth2ClientConfiguration.class)
-	@Conditional(NoClientCredentialsCondition.class)
+	@Conditional({ OAuth2ClientIdCondition.class, NoClientCredentialsCondition.class })
 	@Import(OAuth2ProtectedResourceDetailsConfiguration.class)
 	protected static class SessionScopedConfiguration {
 
 		@Bean
-		public FilterRegistrationBean oauth2ClientFilterRegistration(
-				OAuth2ClientContextFilter filter, SecurityProperties security) {
+		public FilterRegistrationBean oauth2ClientFilterRegistration(OAuth2ClientContextFilter filter,
+				SecurityProperties security) {
 			FilterRegistrationBean registration = new FilterRegistrationBean();
 			registration.setFilter(filter);
 			registration.setOrder(security.getFilterOrder() - 10);
@@ -106,9 +103,12 @@ public class OAuth2RestOperationsConfiguration {
 		@Configuration
 		protected static class ClientContextConfiguration {
 
-			@Resource
-			@Qualifier("accessTokenRequest")
-			protected AccessTokenRequest accessTokenRequest;
+			private final AccessTokenRequest accessTokenRequest;
+
+			public ClientContextConfiguration(
+					@Qualifier("accessTokenRequest") ObjectProvider<AccessTokenRequest> accessTokenRequest) {
+				this.accessTokenRequest = accessTokenRequest.getIfAvailable();
+			}
 
 			@Bean
 			@Scope(value = "session", proxyMode = ScopedProxyMode.INTERFACES)
@@ -126,17 +126,15 @@ public class OAuth2RestOperationsConfiguration {
 	// refresh tokens you need to @EnableOAuth2Client
 	@Configuration
 	@ConditionalOnMissingBean(OAuth2ClientConfiguration.class)
-	@Conditional(NoClientCredentialsCondition.class)
+	@Conditional({ OAuth2ClientIdCondition.class, NoClientCredentialsCondition.class })
 	@Import(OAuth2ProtectedResourceDetailsConfiguration.class)
 	protected static class RequestScopedConfiguration {
 
 		@Bean
 		@Scope(value = "request", proxyMode = ScopedProxyMode.INTERFACES)
 		public DefaultOAuth2ClientContext oauth2ClientContext() {
-			DefaultOAuth2ClientContext context = new DefaultOAuth2ClientContext(
-					new DefaultAccessTokenRequest());
-			Authentication principal = SecurityContextHolder.getContext()
-					.getAuthentication();
+			DefaultOAuth2ClientContext context = new DefaultOAuth2ClientContext(new DefaultAccessTokenRequest());
+			Authentication principal = SecurityContextHolder.getContext().getAuthentication();
 			if (principal instanceof OAuth2Authentication) {
 				OAuth2Authentication authentication = (OAuth2Authentication) principal;
 				Object details = authentication.getDetails();
@@ -157,19 +155,15 @@ public class OAuth2RestOperationsConfiguration {
 	static class OAuth2ClientIdCondition extends SpringBootCondition {
 
 		@Override
-		public ConditionOutcome getMatchOutcome(ConditionContext context,
-				AnnotatedTypeMetadata metadata) {
-			PropertyResolver resolver = new RelaxedPropertyResolver(
-					context.getEnvironment(), "security.oauth2.client.");
+		public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			PropertyResolver resolver = new RelaxedPropertyResolver(context.getEnvironment(),
+					"security.oauth2.client.");
 			String clientId = resolver.getProperty("client-id");
-			ConditionMessage.Builder message = ConditionMessage
-					.forCondition("OAuth Client ID");
+			ConditionMessage.Builder message = ConditionMessage.forCondition("OAuth Client ID");
 			if (StringUtils.hasLength(clientId)) {
-				return ConditionOutcome.match(message
-						.foundExactly("security.oauth2.client.client-id property"));
+				return ConditionOutcome.match(message.foundExactly("security.oauth2.client.client-id property"));
 			}
-			return ConditionOutcome.match(message
-					.didNotFind("security.oauth2.client.client-id property").atAll());
+			return ConditionOutcome.noMatch(message.didNotFind("security.oauth2.client.client-id property").atAll());
 		}
 
 	}
@@ -185,6 +179,7 @@ public class OAuth2RestOperationsConfiguration {
 
 		@Conditional(ClientCredentialsCondition.class)
 		static class ClientCredentialsActivated {
+
 		}
 
 	}
@@ -198,12 +193,15 @@ public class OAuth2RestOperationsConfiguration {
 			super(ConfigurationPhase.PARSE_CONFIGURATION);
 		}
 
-		@ConditionalOnProperty(prefix = "security.oauth2.client", name = "grant-type", havingValue = "client_credentials", matchIfMissing = false)
+		@ConditionalOnProperty(prefix = "security.oauth2.client", name = "grant-type",
+				havingValue = "client_credentials", matchIfMissing = false)
 		static class ClientCredentialsConfigured {
+
 		}
 
 		@ConditionalOnNotWebApplication
 		static class NoWebApplication {
+
 		}
 
 	}

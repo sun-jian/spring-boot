@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -51,19 +51,18 @@ class LoggingSystemProperties {
 	public void apply(LogFile logFile) {
 		RelaxedPropertyResolver propertyResolver = RelaxedPropertyResolver
 				.ignoringUnresolvableNestedPlaceholders(this.environment, "logging.");
-		setSystemProperty(propertyResolver, EXCEPTION_CONVERSION_WORD,
-				"exception-conversion-word");
+		setSystemProperty(propertyResolver, EXCEPTION_CONVERSION_WORD, "exception-conversion-word");
+		setSystemProperty(PID_KEY, new ApplicationPid().toString());
 		setSystemProperty(propertyResolver, CONSOLE_LOG_PATTERN, "pattern.console");
 		setSystemProperty(propertyResolver, FILE_LOG_PATTERN, "pattern.file");
 		setSystemProperty(propertyResolver, LOG_LEVEL_PATTERN, "pattern.level");
-		setSystemProperty(PID_KEY, new ApplicationPid().toString());
 		if (logFile != null) {
 			logFile.applyToSystemProperties();
 		}
 	}
 
-	private void setSystemProperty(RelaxedPropertyResolver propertyResolver,
-			String systemPropertyName, String propertyName) {
+	private void setSystemProperty(RelaxedPropertyResolver propertyResolver, String systemPropertyName,
+			String propertyName) {
 		setSystemProperty(systemPropertyName, propertyResolver.getProperty(propertyName));
 	}
 

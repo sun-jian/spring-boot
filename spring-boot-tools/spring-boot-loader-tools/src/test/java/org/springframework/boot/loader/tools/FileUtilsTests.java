@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -60,8 +60,7 @@ public class FileUtilsTests {
 		File file = new File(this.outputDirectory, "logback.xml");
 		file.createNewFile();
 		new File(this.originDirectory, "logback.xml").createNewFile();
-		FileUtils.removeDuplicatesFromOutputDirectory(this.outputDirectory,
-				this.originDirectory);
+		FileUtils.removeDuplicatesFromOutputDirectory(this.outputDirectory, this.originDirectory);
 		assertThat(file.exists()).isFalse();
 	}
 
@@ -72,8 +71,7 @@ public class FileUtilsTests {
 		File file = new File(this.outputDirectory, "sub/logback.xml");
 		file.createNewFile();
 		new File(this.originDirectory, "sub/logback.xml").createNewFile();
-		FileUtils.removeDuplicatesFromOutputDirectory(this.outputDirectory,
-				this.originDirectory);
+		FileUtils.removeDuplicatesFromOutputDirectory(this.outputDirectory, this.originDirectory);
 		assertThat(file.exists()).isFalse();
 	}
 
@@ -84,8 +82,7 @@ public class FileUtilsTests {
 		File file = new File(this.outputDirectory, "sub/logback.xml");
 		file.createNewFile();
 		new File(this.originDirectory, "sub/different.xml").createNewFile();
-		FileUtils.removeDuplicatesFromOutputDirectory(this.outputDirectory,
-				this.originDirectory);
+		FileUtils.removeDuplicatesFromOutputDirectory(this.outputDirectory, this.originDirectory);
 		assertThat(file.exists()).isTrue();
 	}
 
@@ -94,8 +91,7 @@ public class FileUtilsTests {
 		File file = new File(this.outputDirectory, "logback.xml");
 		file.createNewFile();
 		new File(this.originDirectory, "different.xml").createNewFile();
-		FileUtils.removeDuplicatesFromOutputDirectory(this.outputDirectory,
-				this.originDirectory);
+		FileUtils.removeDuplicatesFromOutputDirectory(this.outputDirectory, this.originDirectory);
 		assertThat(file.exists()).isTrue();
 	}
 
@@ -109,8 +105,7 @@ public class FileUtilsTests {
 		finally {
 			outputStream.close();
 		}
-		assertThat(FileUtils.sha1Hash(file))
-				.isEqualTo("7037807198c22a7d2b0807371d763779a84fdfcf");
+		assertThat(FileUtils.sha1Hash(file)).isEqualTo("7037807198c22a7d2b0807371d763779a84fdfcf");
 	}
 
 }

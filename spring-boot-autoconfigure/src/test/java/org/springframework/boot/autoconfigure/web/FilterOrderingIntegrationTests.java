@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -66,9 +66,8 @@ public class FilterOrderingIntegrationTests {
 	@Test
 	public void testFilterOrdering() {
 		load();
-		List<RegisteredFilter> registeredFilters = this.context
-				.getBean(MockEmbeddedServletContainerFactory.class).getContainer()
-				.getRegisteredFilters();
+		List<RegisteredFilter> registeredFilters = this.context.getBean(MockEmbeddedServletContainerFactory.class)
+				.getContainer().getRegisteredFilters();
 		List<Filter> filters = new ArrayList<Filter>(registeredFilters.size());
 		for (RegisteredFilter registeredFilter : registeredFilters) {
 			filters.add(registeredFilter.getFilter());
@@ -84,15 +83,11 @@ public class FilterOrderingIntegrationTests {
 
 	private void load() {
 		this.context = new AnnotationConfigEmbeddedWebApplicationContext();
-		EnvironmentTestUtils.addEnvironment(this.context,
-				"spring.session.store-type=hash-map");
-		this.context.register(MockEmbeddedServletContainerConfiguration.class,
-				TestRedisConfiguration.class, WebMvcAutoConfiguration.class,
-				ServerPropertiesAutoConfiguration.class, SecurityAutoConfiguration.class,
-				SessionAutoConfiguration.class,
-				HttpMessageConvertersAutoConfiguration.class,
-				PropertyPlaceholderAutoConfiguration.class,
-				HttpEncodingAutoConfiguration.class);
+		EnvironmentTestUtils.addEnvironment(this.context, "spring.session.store-type=hash-map");
+		this.context.register(MockEmbeddedServletContainerConfiguration.class, TestRedisConfiguration.class,
+				WebMvcAutoConfiguration.class, ServerPropertiesAutoConfiguration.class, SecurityAutoConfiguration.class,
+				SessionAutoConfiguration.class, HttpMessageConvertersAutoConfiguration.class,
+				PropertyPlaceholderAutoConfiguration.class, HttpEncodingAutoConfiguration.class);
 		this.context.refresh();
 	}
 

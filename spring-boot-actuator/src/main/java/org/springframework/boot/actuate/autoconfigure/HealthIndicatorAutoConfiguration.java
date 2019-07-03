@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -66,6 +66,7 @@ import org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetada
 import org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProvider;
 import org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProviders;
 import org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration;
+import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQAutoConfiguration;
 import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
@@ -95,17 +96,14 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
  */
 @Configuration
 @AutoConfigureBefore({ EndpointAutoConfiguration.class })
-@AutoConfigureAfter({ CassandraAutoConfiguration.class,
-		CassandraDataAutoConfiguration.class, CouchbaseDataAutoConfiguration.class,
-		DataSourceAutoConfiguration.class, ElasticsearchAutoConfiguration.class,
-		JestAutoConfiguration.class, JmsAutoConfiguration.class,
-		LdapDataAutoConfiguration.class, MailSenderAutoConfiguration.class,
-		MongoAutoConfiguration.class, MongoDataAutoConfiguration.class,
-		RabbitAutoConfiguration.class, RedisAutoConfiguration.class,
+@AutoConfigureAfter({ ActiveMQAutoConfiguration.class, CassandraAutoConfiguration.class,
+		CassandraDataAutoConfiguration.class, CouchbaseDataAutoConfiguration.class, DataSourceAutoConfiguration.class,
+		ElasticsearchAutoConfiguration.class, JestAutoConfiguration.class, JmsAutoConfiguration.class,
+		LdapDataAutoConfiguration.class, MailSenderAutoConfiguration.class, MongoAutoConfiguration.class,
+		MongoDataAutoConfiguration.class, RabbitAutoConfiguration.class, RedisAutoConfiguration.class,
 		SolrAutoConfiguration.class })
 @EnableConfigurationProperties({ HealthIndicatorProperties.class })
-@Import({
-		ElasticsearchHealthIndicatorConfiguration.ElasticsearchClientHealthIndicatorConfiguration.class,
+@Import({ ElasticsearchHealthIndicatorConfiguration.ElasticsearchClientHealthIndicatorConfiguration.class,
 		ElasticsearchHealthIndicatorConfiguration.ElasticsearchJestHealthIndicatorConfiguration.class })
 public class HealthIndicatorAutoConfiguration {
 
@@ -135,13 +133,12 @@ public class HealthIndicatorAutoConfiguration {
 	@ConditionalOnClass({ CassandraOperations.class, Cluster.class })
 	@ConditionalOnBean(CassandraOperations.class)
 	@ConditionalOnEnabledHealthIndicator("cassandra")
-	public static class CassandraHealthIndicatorConfiguration extends
-			CompositeHealthIndicatorConfiguration<CassandraHealthIndicator, CassandraOperations> {
+	public static class CassandraHealthIndicatorConfiguration
+			extends CompositeHealthIndicatorConfiguration<CassandraHealthIndicator, CassandraOperations> {
 
 		private final Map<String, CassandraOperations> cassandraOperations;
 
-		public CassandraHealthIndicatorConfiguration(
-				Map<String, CassandraOperations> cassandraOperations) {
+		public CassandraHealthIndicatorConfiguration(Map<String, CassandraOperations> cassandraOperations) {
 			this.cassandraOperations = cassandraOperations;
 		}
 
@@ -157,13 +154,12 @@ public class HealthIndicatorAutoConfiguration {
 	@ConditionalOnClass({ CouchbaseOperations.class, Bucket.class })
 	@ConditionalOnBean(CouchbaseOperations.class)
 	@ConditionalOnEnabledHealthIndicator("couchbase")
-	public static class CouchbaseHealthIndicatorConfiguration extends
-			CompositeHealthIndicatorConfiguration<CouchbaseHealthIndicator, CouchbaseOperations> {
+	public static class CouchbaseHealthIndicatorConfiguration
+			extends CompositeHealthIndicatorConfiguration<CouchbaseHealthIndicator, CouchbaseOperations> {
 
 		private final Map<String, CouchbaseOperations> couchbaseOperations;
 
-		public CouchbaseHealthIndicatorConfiguration(
-				Map<String, CouchbaseOperations> couchbaseOperations) {
+		public CouchbaseHealthIndicatorConfiguration(Map<String, CouchbaseOperations> couchbaseOperations) {
 			this.couchbaseOperations = couchbaseOperations;
 		}
 
@@ -180,8 +176,7 @@ public class HealthIndicatorAutoConfiguration {
 	@ConditionalOnBean(DataSource.class)
 	@ConditionalOnEnabledHealthIndicator("db")
 	public static class DataSourcesHealthIndicatorConfiguration extends
-			CompositeHealthIndicatorConfiguration<DataSourceHealthIndicator, DataSource>
-			implements InitializingBean {
+			CompositeHealthIndicatorConfiguration<DataSourceHealthIndicator, DataSource> implements InitializingBean {
 
 		private final Map<String, DataSource> dataSources;
 
@@ -189,15 +184,13 @@ public class HealthIndicatorAutoConfiguration {
 
 		private DataSourcePoolMetadataProvider poolMetadataProvider;
 
-		public DataSourcesHealthIndicatorConfiguration(
-				ObjectProvider<Map<String, DataSource>> dataSources,
+		public DataSourcesHealthIndicatorConfiguration(ObjectProvider<Map<String, DataSource>> dataSources,
 				ObjectProvider<Collection<DataSourcePoolMetadataProvider>> metadataProviders) {
 			this.dataSources = filterDataSources(dataSources.getIfAvailable());
 			this.metadataProviders = metadataProviders.getIfAvailable();
 		}
 
-		private Map<String, DataSource> filterDataSources(
-				Map<String, DataSource> candidates) {
+		private Map<String, DataSource> filterDataSources(Map<String, DataSource> candidates) {
 			if (candidates == null) {
 				return null;
 			}
@@ -212,8 +205,7 @@ public class HealthIndicatorAutoConfiguration {
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
-			this.poolMetadataProvider = new DataSourcePoolMetadataProviders(
-					this.metadataProviders);
+			this.poolMetadataProvider = new DataSourcePoolMetadataProviders(this.metadataProviders);
 		}
 
 		@Bean
@@ -228,9 +220,8 @@ public class HealthIndicatorAutoConfiguration {
 		}
 
 		private String getValidationQuery(DataSource source) {
-			DataSourcePoolMetadata poolMetadata = this.poolMetadataProvider
-					.getDataSourcePoolMetadata(source);
-			return (poolMetadata == null ? null : poolMetadata.getValidationQuery());
+			DataSourcePoolMetadata poolMetadata = this.poolMetadataProvider.getDataSourcePoolMetadata(source);
+			return (poolMetadata != null) ? poolMetadata.getValidationQuery() : null;
 		}
 
 	}
@@ -239,13 +230,12 @@ public class HealthIndicatorAutoConfiguration {
 	@ConditionalOnClass(LdapOperations.class)
 	@ConditionalOnBean(LdapOperations.class)
 	@ConditionalOnEnabledHealthIndicator("ldap")
-	public static class LdapHealthIndicatorConfiguration extends
-			CompositeHealthIndicatorConfiguration<LdapHealthIndicator, LdapOperations> {
+	public static class LdapHealthIndicatorConfiguration
+			extends CompositeHealthIndicatorConfiguration<LdapHealthIndicator, LdapOperations> {
 
 		private final Map<String, LdapOperations> ldapOperations;
 
-		public LdapHealthIndicatorConfiguration(
-				Map<String, LdapOperations> ldapOperations) {
+		public LdapHealthIndicatorConfiguration(Map<String, LdapOperations> ldapOperations) {
 			this.ldapOperations = ldapOperations;
 		}
 
@@ -258,15 +248,15 @@ public class HealthIndicatorAutoConfiguration {
 	}
 
 	@Configuration
+	@ConditionalOnClass(MongoTemplate.class)
 	@ConditionalOnBean(MongoTemplate.class)
 	@ConditionalOnEnabledHealthIndicator("mongo")
-	public static class MongoHealthIndicatorConfiguration extends
-			CompositeHealthIndicatorConfiguration<MongoHealthIndicator, MongoTemplate> {
+	public static class MongoHealthIndicatorConfiguration
+			extends CompositeHealthIndicatorConfiguration<MongoHealthIndicator, MongoTemplate> {
 
 		private final Map<String, MongoTemplate> mongoTemplates;
 
-		public MongoHealthIndicatorConfiguration(
-				Map<String, MongoTemplate> mongoTemplates) {
+		public MongoHealthIndicatorConfiguration(Map<String, MongoTemplate> mongoTemplates) {
 			this.mongoTemplates = mongoTemplates;
 		}
 
@@ -279,15 +269,15 @@ public class HealthIndicatorAutoConfiguration {
 	}
 
 	@Configuration
+	@ConditionalOnClass(RedisConnectionFactory.class)
 	@ConditionalOnBean(RedisConnectionFactory.class)
 	@ConditionalOnEnabledHealthIndicator("redis")
-	public static class RedisHealthIndicatorConfiguration extends
-			CompositeHealthIndicatorConfiguration<RedisHealthIndicator, RedisConnectionFactory> {
+	public static class RedisHealthIndicatorConfiguration
+			extends CompositeHealthIndicatorConfiguration<RedisHealthIndicator, RedisConnectionFactory> {
 
 		private final Map<String, RedisConnectionFactory> redisConnectionFactories;
 
-		public RedisHealthIndicatorConfiguration(
-				Map<String, RedisConnectionFactory> redisConnectionFactories) {
+		public RedisHealthIndicatorConfiguration(Map<String, RedisConnectionFactory> redisConnectionFactories) {
 			this.redisConnectionFactories = redisConnectionFactories;
 		}
 
@@ -300,15 +290,15 @@ public class HealthIndicatorAutoConfiguration {
 	}
 
 	@Configuration
+	@ConditionalOnClass(RabbitTemplate.class)
 	@ConditionalOnBean(RabbitTemplate.class)
 	@ConditionalOnEnabledHealthIndicator("rabbit")
-	public static class RabbitHealthIndicatorConfiguration extends
-			CompositeHealthIndicatorConfiguration<RabbitHealthIndicator, RabbitTemplate> {
+	public static class RabbitHealthIndicatorConfiguration
+			extends CompositeHealthIndicatorConfiguration<RabbitHealthIndicator, RabbitTemplate> {
 
 		private final Map<String, RabbitTemplate> rabbitTemplates;
 
-		public RabbitHealthIndicatorConfiguration(
-				Map<String, RabbitTemplate> rabbitTemplates) {
+		public RabbitHealthIndicatorConfiguration(Map<String, RabbitTemplate> rabbitTemplates) {
 			this.rabbitTemplates = rabbitTemplates;
 		}
 
@@ -321,10 +311,11 @@ public class HealthIndicatorAutoConfiguration {
 	}
 
 	@Configuration
+	@ConditionalOnClass(SolrClient.class)
 	@ConditionalOnBean(SolrClient.class)
 	@ConditionalOnEnabledHealthIndicator("solr")
-	public static class SolrHealthIndicatorConfiguration extends
-			CompositeHealthIndicatorConfiguration<SolrHealthIndicator, SolrClient> {
+	public static class SolrHealthIndicatorConfiguration
+			extends CompositeHealthIndicatorConfiguration<SolrHealthIndicator, SolrClient> {
 
 		private final Map<String, SolrClient> solrClients;
 
@@ -346,8 +337,7 @@ public class HealthIndicatorAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean(name = "diskSpaceHealthIndicator")
-		public DiskSpaceHealthIndicator diskSpaceHealthIndicator(
-				DiskSpaceHealthIndicatorProperties properties) {
+		public DiskSpaceHealthIndicator diskSpaceHealthIndicator(DiskSpaceHealthIndicatorProperties properties) {
 			return new DiskSpaceHealthIndicator(properties);
 		}
 
@@ -359,15 +349,15 @@ public class HealthIndicatorAutoConfiguration {
 	}
 
 	@Configuration
+	@ConditionalOnClass(JavaMailSenderImpl.class)
 	@ConditionalOnBean(JavaMailSenderImpl.class)
 	@ConditionalOnEnabledHealthIndicator("mail")
-	public static class MailHealthIndicatorConfiguration extends
-			CompositeHealthIndicatorConfiguration<MailHealthIndicator, JavaMailSenderImpl> {
+	public static class MailHealthIndicatorConfiguration
+			extends CompositeHealthIndicatorConfiguration<MailHealthIndicator, JavaMailSenderImpl> {
 
 		private final Map<String, JavaMailSenderImpl> mailSenders;
 
-		public MailHealthIndicatorConfiguration(
-				ObjectProvider<Map<String, JavaMailSenderImpl>> mailSenders) {
+		public MailHealthIndicatorConfiguration(ObjectProvider<Map<String, JavaMailSenderImpl>> mailSenders) {
 			this.mailSenders = mailSenders.getIfAvailable();
 		}
 
@@ -380,15 +370,15 @@ public class HealthIndicatorAutoConfiguration {
 	}
 
 	@Configuration
+	@ConditionalOnClass(ConnectionFactory.class)
 	@ConditionalOnBean(ConnectionFactory.class)
 	@ConditionalOnEnabledHealthIndicator("jms")
-	public static class JmsHealthIndicatorConfiguration extends
-			CompositeHealthIndicatorConfiguration<JmsHealthIndicator, ConnectionFactory> {
+	public static class JmsHealthIndicatorConfiguration
+			extends CompositeHealthIndicatorConfiguration<JmsHealthIndicator, ConnectionFactory> {
 
 		private final Map<String, ConnectionFactory> connectionFactories;
 
-		public JmsHealthIndicatorConfiguration(
-				ObjectProvider<Map<String, ConnectionFactory>> connectionFactories) {
+		public JmsHealthIndicatorConfiguration(ObjectProvider<Map<String, ConnectionFactory>> connectionFactories) {
 			this.connectionFactories = connectionFactories.getIfAvailable();
 		}
 

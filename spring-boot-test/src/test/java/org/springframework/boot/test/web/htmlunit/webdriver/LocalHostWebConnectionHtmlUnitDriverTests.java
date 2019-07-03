@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -61,24 +61,21 @@ public class LocalHostWebConnectionHtmlUnitDriverTests {
 	}
 
 	@Test
-	public void createWithJavascriptFlagWhenEnvironmentIsNullWillThrowException()
-			throws Exception {
+	public void createWithJavascriptFlagWhenEnvironmentIsNullWillThrowException() throws Exception {
 		this.thrown.expect(IllegalArgumentException.class);
 		this.thrown.expectMessage("Environment must not be null");
 		new LocalHostWebConnectionHtmlUnitDriver(null, true);
 	}
 
 	@Test
-	public void createWithBrowserVersionWhenEnvironmentIsNullWillThrowException()
-			throws Exception {
+	public void createWithBrowserVersionWhenEnvironmentIsNullWillThrowException() throws Exception {
 		this.thrown.expect(IllegalArgumentException.class);
 		this.thrown.expectMessage("Environment must not be null");
 		new LocalHostWebConnectionHtmlUnitDriver(null, BrowserVersion.CHROME);
 	}
 
 	@Test
-	public void createWithCapabilitiesWhenEnvironmentIsNullWillThrowException()
-			throws Exception {
+	public void createWithCapabilitiesWhenEnvironmentIsNullWillThrowException() throws Exception {
 		this.thrown.expect(IllegalArgumentException.class);
 		this.thrown.expectMessage("Environment must not be null");
 		Capabilities capabilities = mock(Capabilities.class);
@@ -89,8 +86,7 @@ public class LocalHostWebConnectionHtmlUnitDriverTests {
 	@Test
 	public void getWhenUrlIsRelativeAndNoPortWillUseLocalhost8080() throws Exception {
 		MockEnvironment environment = new MockEnvironment();
-		LocalHostWebConnectionHtmlUnitDriver driver = new TestLocalHostWebConnectionHtmlUnitDriver(
-				environment);
+		LocalHostWebConnectionHtmlUnitDriver driver = new TestLocalHostWebConnectionHtmlUnitDriver(environment);
 		driver.get("/test");
 		verify(this.webClient).getPage(new URL("http://localhost:8080/test"));
 	}
@@ -99,14 +95,12 @@ public class LocalHostWebConnectionHtmlUnitDriverTests {
 	public void getWhenUrlIsRelativeAndHasPortWillUseLocalhostPort() throws Exception {
 		MockEnvironment environment = new MockEnvironment();
 		environment.setProperty("local.server.port", "8181");
-		LocalHostWebConnectionHtmlUnitDriver driver = new TestLocalHostWebConnectionHtmlUnitDriver(
-				environment);
+		LocalHostWebConnectionHtmlUnitDriver driver = new TestLocalHostWebConnectionHtmlUnitDriver(environment);
 		driver.get("/test");
 		verify(this.webClient).getPage(new URL("http://localhost:8181/test"));
 	}
 
-	public class TestLocalHostWebConnectionHtmlUnitDriver
-			extends LocalHostWebConnectionHtmlUnitDriver {
+	public class TestLocalHostWebConnectionHtmlUnitDriver extends LocalHostWebConnectionHtmlUnitDriver {
 
 		public TestLocalHostWebConnectionHtmlUnitDriver(Environment environment) {
 			super(environment);
